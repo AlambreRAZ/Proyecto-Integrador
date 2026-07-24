@@ -42,7 +42,14 @@ public class FiltroAutenticacion extends HttpFilter {
                         requestURI.endsWith("historial_evento_co.jsp") ||
                         requestURI.endsWith("mi_cuenta_co.jsp") ||
                         requestURI.endsWith("mi_evento_co.jsp") ||
-                        requestURI.endsWith("ver_mas_evento_co.jsp")
+                        requestURI.endsWith("ver_mas_evento_co.jsp") ||
+                        requestURI.endsWith("vista_general_docente_do.jsp") ||
+                        requestURI.endsWith("mis_eventos_do.jsp") ||
+                        requestURI.endsWith("historial_evento_do.jsp") ||
+                        requestURI.endsWith("cargar_archivo_do.jsp") ||
+                        requestURI.endsWith("archivo_subido_do.jsp") ||
+                        requestURI.endsWith("mi_cuenta_do.jsp") ||
+                        requestURI.endsWith("ver_mas_evento_do.jsp")
                 ;
         boolean isResource = requestURI.contains("/assets/") || requestURI.contains("/layout/");
 
