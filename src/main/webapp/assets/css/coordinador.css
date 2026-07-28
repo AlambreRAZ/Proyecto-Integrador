@@ -528,3 +528,48 @@ body {
     background-color: var(--teal-main);
 }
 
+/* ===== Submenú en el Sidebar ===== */
+.sidebar-item-container {
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-submenu {
+    display: none;
+    flex-direction: column;
+    padding-left: 70px;
+    margin-bottom: 10px;
+}
+
+/* Solo mostrar el submenú cuando el sidebar está expandido Y se hace hover en el contenedor */
+.sidebar-hover:hover .sidebar-item-container:hover .sidebar-submenu,
+.sidebar-hover.locked .sidebar-item-container:hover .sidebar-submenu {
+    display: flex;
+}
+
+.submenu-item {
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 20px;
+    margin-bottom: 5px;
+    margin-right: 20px;
+    transition: all 0.2s;
+    background-color: transparent;
+}
+
+/* Ajustes de color para cuando el sidebar es blanco en hover */
+.sidebar-hover:hover .submenu-item,
+.sidebar-hover.locked .submenu-item {
+    color: var(--teal-main);
+}
+
+.sidebar-hover:hover .submenu-item:hover,
+.sidebar-hover.locked .submenu-item:hover,
+.submenu-item.active {
+    background-color: var(--teal-active);
+    color: white;
+}

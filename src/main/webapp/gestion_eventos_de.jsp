@@ -4,19 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Eventos</title>
+    <title>Gestión de Eventos</title>
     <link rel="stylesheet" href="assets/css/bootstrap.css">
     <link rel="stylesheet" href="assets/css/bi/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/coordinador.css">
 </head>
 <body>
 
-<jsp:include page="sidebar.jsp">
-    <jsp:param name="active" value="gestion_evento" />
+<jsp:include page="sidebar_de.jsp">
+    <jsp:param name="active" value="gestion_eventos" />
 </jsp:include>
 
 <main class="main-content">
-    <h3 class="page-title mb-4">HISTORIAL EVENTOS</h3>
+    <h3 class="page-title mb-4">GESTION DE EVENTOS</h3>
 
     <div class="d-flex flex-wrap gap-2 mb-4">
         <a href="#" class="nav-pill active">Todos</a>
@@ -27,34 +27,37 @@
         <a href="#" class="nav-pill">Certificacion</a>
     </div>
 
-    <div class="search-box mb-4">
-        <i class="bi bi-search"></i>
-        <input type="text" placeholder="Buscar Evento por nombre ...">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1; margin-right: 20px;">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar Evento por nombre ...">
+        </div>
+        <a href="agregar_evento_de.jsp" class="btn-teal">
+            <i class="bi bi-calendar-plus"></i> Agregar Evento
+        </a>
     </div>
 
     <div class="data-card p-0 mb-4" style="overflow: hidden;">
-        <table class="table-custom mb-0">
+        <table class="table-custom mb-0 text-center">
             <colgroup>
-                <col style="width: 26%;">
-                <col style="width: 13%;">
+                <col style="width: 30%;">
+                <col style="width: 14%;">
+                <col style="width: 22%;">
                 <col style="width: 20%;">
-                <col style="width: 12%;">
-                <col style="width: 20%;">
-                <col style="width: 9%;">
+                <col style="width: 14%;">
             </colgroup>
             <thead>
                 <tr>
-                    <th>Titulo</th>
+                    <th class="text-start">Titulo</th>
                     <th>Tipo</th>
                     <th>Institución</th>
-                    <th>Modalidad</th>
                     <th>Fecha</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>
+                    <td class="text-start">
                         <div class="fw-semibold">Fundamentos de redes</div>
                         <div class="small text-muted">cisco paket tracer</div>
                     </td>
@@ -63,14 +66,15 @@
                         <div>Centro de</div>
                         <div class="small text-muted">Capacitacion</div>
                     </td>
-                    <td>Virtual</td>
                     <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_co.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                    <td style="white-space: nowrap;">
+                        <a href="editar_evento_de.jsp" class="action-btn"><i class="bi bi-pencil"></i></a>
+                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                        <a href="#" class="action-btn delete"><i class="bi bi-trash"></i></a>
                     </td>
                 </tr>
                 <tr>
-                    <td>
+                    <td class="text-start">
                         <div class="fw-semibold">Fundamentos de redes</div>
                         <div class="small text-muted">cisco paket tracer</div>
                     </td>
@@ -79,14 +83,15 @@
                         <div>Centro de</div>
                         <div class="small text-muted">Capacitacion</div>
                     </td>
-                    <td>Virtual</td>
                     <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                    <td style="white-space: nowrap;">
+                        <a href="editar_evento_de.jsp" class="action-btn"><i class="bi bi-pencil"></i></a>
+                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                        <a href="#" class="action-btn delete"><i class="bi bi-trash"></i></a>
                     </td>
                 </tr>
                 <tr>
-                    <td>
+                    <td class="text-start">
                         <div class="fw-semibold">Fundamentos de redes</div>
                         <div class="small text-muted">cisco paket tracer</div>
                     </td>
@@ -95,14 +100,15 @@
                         <div>Centro de</div>
                         <div class="small text-muted">Capacitacion</div>
                     </td>
-                    <td>Virtual</td>
                     <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                    <td style="white-space: nowrap;">
+                        <a href="editar_evento_de.jsp" class="action-btn"><i class="bi bi-pencil"></i></a>
+                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                        <a href="#" class="action-btn delete"><i class="bi bi-trash"></i></a>
                     </td>
                 </tr>
                 <tr>
-                    <td>
+                    <td class="text-start">
                         <div class="fw-semibold">Fundamentos de redes</div>
                         <div class="small text-muted">cisco paket tracer</div>
                     </td>
@@ -111,26 +117,11 @@
                         <div>Centro de</div>
                         <div class="small text-muted">Capacitacion</div>
                     </td>
-                    <td>Virtual</td>
                     <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>Virtual</td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                    <td style="white-space: nowrap;">
+                        <a href="editar_evento_de.jsp" class="action-btn"><i class="bi bi-pencil"></i></a>
+                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                        <a href="#" class="action-btn delete"><i class="bi bi-trash"></i></a>
                     </td>
                 </tr>
             </tbody>

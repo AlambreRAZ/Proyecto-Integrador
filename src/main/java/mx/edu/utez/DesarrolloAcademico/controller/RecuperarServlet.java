@@ -42,19 +42,19 @@ public class RecuperarServlet extends HttpServlet {
     private void solicitarCodigo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String dato = request.getParameter("dato");
 
-        Usuario usuario = usuarioDao.buscarPorEmailOUsername(dato);
+        Usuario usuario = usuarioDao.buscarPorEmailOEmpleado(dato);
 
         if (usuario != null) {
             String codigo = generarCodigo(6);
             
-            boolean guardado = usuarioDao.guardarCodigoRecuperacion(usuario.getId(), codigo);
+            boolean guardado = usuarioDao.guardarCodigoRecuperacion(usuario.getIdUsuario(), codigo);
             
             if (guardado) {
-                emailService.enviarCodigoRecuperacion(usuario.getEmail(), codigo);
+                emailService.enviarCodigoRecuperacion(usuario.getCorreoInstitucional(), codigo);
             }
         }
         
-        request.setAttribute("mensajeInfo", "Si el email o UN se encuentra registrado, te llegará un correo electrónico con instrucciones.");
+        request.setAttribute("mensajeInfo", "Si el correo o número de empleado se encuentra registrado, te llegará un correo electrónico con instrucciones.");
         request.setAttribute("step", "verificar");
         request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
     }
@@ -66,8 +66,8 @@ public class RecuperarServlet extends HttpServlet {
         
         if (usuario != null) {
             HttpSession session = request.getSession();
-            session.setAttribute("idUsuarioRecuperacion", usuario.getId());
-            session.setAttribute("emailUsuarioRecuperacion", usuario.getEmail());
+            session.setAttribute("idUsuarioRecuperacion", usuario.getIdUsuario());
+            session.setAttribute("emailUsuarioRecuperacion", usuario.getCorreoInstitucional());
             
             request.setAttribute("step", "cambiar");
             request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);

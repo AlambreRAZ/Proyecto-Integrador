@@ -10,23 +10,70 @@ import java.sql.SQLException;
 
 public class UsuarioDao {
 
-    public Usuario buscarPorEmailOUsername(String dato) {
+    // Método auxiliar para mapear el ResultSet al objeto Usuario
+    private Usuario mapearUsuario(ResultSet rs) throws SQLException {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(rs.getInt("id_usuario"));
+        usuario.setNombre(rs.getString("nombre"));
+        usuario.setApellidoPaterno(rs.getString("apellido_paterno"));
+        usuario.setApellidoMaterno(rs.getString("apellido_materno"));
+        usuario.setRol(rs.getString("rol"));
+        
+        int idDivision = rs.getInt("id_division");
+        if (!rs.wasNull()) {
+            usuario.setIdDivision(idDivision);
+        }
+        
+        usuario.setNumeroEmpleado(rs.getString("numero_empleado"));
+        usuario.setTelefono(rs.getString("telefono"));
+        usuario.setCorreoInstitucional(rs.getString("correo_institucional"));
+        usuario.setContrasena(rs.getString("contrasena"));
+        usuario.setFechaRegistro(rs.getTimestamp("fecha_registro"));
+        usuario.setActivo(rs.getInt("activo"));
+        
+        int creadoPor = rs.getInt("creado_por");
+        if (!rs.wasNull()) {
+            usuario.setCreadoPor(creadoPor);
+        }
+        
+        return usuario;
+    }
+
+    public Usuario login(String credencial, String contrasena) {
         Usuario usuario = null;
-        String query = "SELECT * FROM Usuario WHERE email = ? OR username = ?";
+        // Permite loguearse con correo o con número de empleado
+        String query = "SELECT * FROM usuarios WHERE (correo_institucional = ? OR numero_empleado = ?) AND contrasena = ? AND activo = 1";
+        
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
              
-            ps.setString(1, dato);
-            ps.setString(2, dato);
+            ps.setString(1, credencial);
+            ps.setString(2, credencial);
+            ps.setString(3, contrasena); // TODO: A futuro, aquí se consultaría por usuario y luego se usaría BCrypt.checkpw
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    usuario = new Usuario();
-                    usuario.setId(rs.getInt("id_usuario"));
-                    usuario.setUsername(rs.getString("username"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setPassword(rs.getString("pass"));
-                    usuario.setCodigoRecuperacion(rs.getString("codigo_recuperacion"));
+                    usuario = mapearUsuario(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return usuario;
+    }
+
+    public Usuario buscarPorEmailOEmpleado(String credencial) {
+        Usuario usuario = null;
+        String query = "SELECT * FROM usuarios WHERE correo_institucional = ? OR numero_empleado = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+             
+            ps.setString(1, credencial);
+            ps.setString(2, credencial);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    usuario = mapearUsuario(rs);
                 }
             }
         } catch (SQLException e) {
@@ -36,12 +83,13 @@ public class UsuarioDao {
     }
 
     public boolean guardarCodigoRecuperacion(int idUsuario, String codigo) {
-        String query = "UPDATE Usuario SET codigo_recuperacion = ? WHERE id_usuario = ?";
+        // En Oracle, sumar 15 minutos se hace con INTERVAL
+        String query = "INSERT INTO tokens_recuperacion (id_usuario, codigo_token, fecha_expiracion) VALUES (?, ?, CURRENT_TIMESTAMP + INTERVAL '15' MINUTE)";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
              
-            ps.setString(1, codigo);
-            ps.setInt(2, idUsuario);
+            ps.setInt(1, idUsuario);
+            ps.setString(2, codigo);
             
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -52,7 +100,10 @@ public class UsuarioDao {
 
     public Usuario verificarCodigo(String codigo) {
         Usuario usuario = null;
-        String query = "SELECT * FROM Usuario WHERE codigo_recuperacion = ?";
+        String query = "SELECT u.* FROM usuarios u " +
+                       "JOIN tokens_recuperacion t ON u.id_usuario = t.id_usuario " +
+                       "WHERE t.codigo_token = ? AND t.utilizado = 0 AND t.fecha_expiracion > CURRENT_TIMESTAMP";
+                       
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
              
@@ -60,12 +111,7 @@ public class UsuarioDao {
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    usuario = new Usuario();
-                    usuario.setId(rs.getInt("id_usuario"));
-                    usuario.setUsername(rs.getString("username"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setPassword(rs.getString("pass"));
-                    usuario.setCodigoRecuperacion(rs.getString("codigo_recuperacion"));
+                    usuario = mapearUsuario(rs);
                 }
             }
         } catch (SQLException e) {
@@ -75,17 +121,47 @@ public class UsuarioDao {
     }
 
     public boolean actualizarPasswordLimpiaCodigo(int idUsuario, String nuevaPassword) {
-        String query = "UPDATE Usuario SET pass = ?, codigo_recuperacion = NULL WHERE id_usuario = ?";
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(query)) {
-             
-            ps.setString(1, nuevaPassword);
-            ps.setInt(2, idUsuario);
-            
-            return ps.executeUpdate() > 0;
+        Connection con = null;
+        boolean exitoso = false;
+        try {
+            con = DatabaseConnection.getConnection();
+            con.setAutoCommit(false); // Iniciar transacción
+
+            // 1. Actualizar contraseña
+            String queryUpdatePass = "UPDATE usuarios SET contrasena = ? WHERE id_usuario = ?";
+            try (PreparedStatement ps1 = con.prepareStatement(queryUpdatePass)) {
+                ps1.setString(1, nuevaPassword);
+                ps1.setInt(2, idUsuario);
+                ps1.executeUpdate();
+            }
+
+            // 2. Marcar todos los tokens de ese usuario como utilizados
+            String queryUpdateToken = "UPDATE tokens_recuperacion SET utilizado = 1 WHERE id_usuario = ?";
+            try (PreparedStatement ps2 = con.prepareStatement(queryUpdateToken)) {
+                ps2.setInt(1, idUsuario);
+                ps2.executeUpdate();
+            }
+
+            con.commit();
+            exitoso = true;
         } catch (SQLException e) {
+            if (con != null) {
+                try {
+                    con.rollback(); // Deshacer cambios si hay error
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
+        } finally {
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
-        return false;
+        return exitoso;
     }
 }

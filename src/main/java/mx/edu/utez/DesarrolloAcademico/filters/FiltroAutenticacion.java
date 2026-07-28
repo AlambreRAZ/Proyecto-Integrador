@@ -49,7 +49,25 @@ public class FiltroAutenticacion extends HttpFilter {
                         requestURI.endsWith("cargar_archivo_do.jsp") ||
                         requestURI.endsWith("archivo_subido_do.jsp") ||
                         requestURI.endsWith("mi_cuenta_do.jsp") ||
-                        requestURI.endsWith("ver_mas_evento_do.jsp")
+                        requestURI.endsWith("ver_mas_evento_do.jsp") ||
+                        requestURI.endsWith("vista_general_desarrollador_de.jsp") ||
+                        requestURI.endsWith("mi_cuenta_de.jsp") ||
+                        requestURI.endsWith("gestion_periodos_carga_de.jsp") ||
+                        requestURI.endsWith("agregar_periodos_cargar_de.jsp") ||
+                        requestURI.endsWith("editar_periodo_carga_de.jsp") ||
+                        requestURI.endsWith("gestion_docente_de.jsp") ||
+                        requestURI.endsWith("agregar_docente_de.jsp") ||
+                        requestURI.endsWith("editar_docente_de.jsp") ||
+                        requestURI.endsWith("gestion_desarrolladores_de.jsp") ||
+                        requestURI.endsWith("agregar_desarrollador_de.jsp") ||
+                        requestURI.endsWith("editar_desarrollador_de.jsp") ||
+                        requestURI.endsWith("gestion_eventos_de.jsp") ||
+                        requestURI.endsWith("agregar_evento_de.jsp") ||
+                        requestURI.endsWith("editar_evento_de.jsp") ||
+                        requestURI.endsWith("ver_mas_evento_de.jsp") ||
+                        requestURI.endsWith("historial_eventos_de.jsp") ||
+                        requestURI.endsWith("cargar_archivo_de.jsp") ||
+                        requestURI.endsWith("archivo_subido_de.jsp")
                 ;
         boolean isResource = requestURI.contains("/assets/") || requestURI.contains("/layout/");
 
