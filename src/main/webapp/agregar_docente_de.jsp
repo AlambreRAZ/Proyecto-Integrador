@@ -18,7 +18,7 @@
 
 <main class="main-content">
     <h3 class="page-title">AGREGAR DOCENTE</h3>
-    
+
     <div class="d-flex align-items-center mb-4 mt-4" style="color: var(--teal-main);">
         <i class="bi bi-info-circle me-2 fs-5"></i>
         <h5 class="mb-0 fw-bold">DATOS DEL DOCENTE</h5>

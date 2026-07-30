@@ -18,19 +18,26 @@ public class FiltroAutenticacion extends HttpFilter {
             throws IOException, ServletException {
 
         String requestURI = request.getRequestURI();
+        System.out.println("[FILTRO] URI=" + requestURI);
+
         HttpSession session = request.getSession(false);
 
         boolean loggedIn = (session != null && session.getAttribute("usuario") != null);
 
-        boolean loginRequest =
+        // Páginas de login/registro/recuperación: si ya hay sesión, no tiene sentido volver a mostrarlas.
+        boolean authPage =
                 requestURI.endsWith("login.jsp") ||
                         requestURI.endsWith("/login") ||
                         requestURI.endsWith("registro.jsp") ||
                         requestURI.endsWith("/register") ||
                         requestURI.endsWith("recuperar-contra.jsp") ||
                         requestURI.endsWith("/recuperar") ||
-                        requestURI.endsWith("/reset") ||
-                        requestURI.endsWith("vista_general_coordinador_co.jsp") ||
+                        requestURI.endsWith("/reset");
+
+        // Páginas y servlets que, mientras el módulo de login no esté terminado por todo el equipo,
+        // deben poder usarse aunque todavía no exista una sesión iniciada.
+        boolean publicPage =
+                requestURI.endsWith("vista_general_coordinador_co.jsp") ||
                         requestURI.endsWith("gestion_evento_co.jsp") ||
                         requestURI.endsWith("agregar_docente_co.jsp") ||
                         requestURI.endsWith("agregar_evento_co.jsp") ||
@@ -67,20 +74,27 @@ public class FiltroAutenticacion extends HttpFilter {
                         requestURI.endsWith("ver_mas_evento_de.jsp") ||
                         requestURI.endsWith("historial_eventos_de.jsp") ||
                         requestURI.endsWith("cargar_archivo_de.jsp") ||
-                        requestURI.endsWith("archivo_subido_de.jsp")
-                ;
+                        requestURI.endsWith("archivo_subido_de.jsp") ||
+                        requestURI.endsWith("/EventoServlet") ||
+                        requestURI.endsWith("/ListarEventosServlet") ||
+                        requestURI.endsWith("/EliminarEventoServlet");
+
         boolean isResource = requestURI.contains("/assets/") || requestURI.contains("/layout/");
 
+        System.out.println("[FILTRO] loggedIn=" + loggedIn + " authPage=" + authPage + " publicPage=" + publicPage + " isResource=" + isResource);
+
         if (loggedIn) {
-            if (loginRequest) {
+            if (authPage) {
+                System.out.println("[FILTRO] -> redirige a registro.jsp (logueado intentando entrar a authPage)");
                 response.sendRedirect(request.getContextPath() + "/registro.jsp");
             } else {
                 chain.doFilter(request, response);
             }
         } else {
-            if (loginRequest || isResource) {
+            if (authPage || publicPage || isResource) {
                 chain.doFilter(request, response);
             } else {
+                System.out.println("[FILTRO] -> redirige a registro.jsp (no logueado y no es authPage/publicPage/isResource)");
                 response.sendRedirect(request.getContextPath() + "/registro.jsp");
             }
         }

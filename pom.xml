@@ -12,18 +12,21 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>21</maven.compiler.target>
-        <maven.compiler.source>21</maven.compiler.source>
-        <junit.version>5.13.2</junit.version>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <junit.version>5.10.2</junit.version>
     </properties>
 
     <dependencies>
+        <!-- API de Servlets -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.1.0</version>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Pruebas Unitarias -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -36,27 +39,29 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Oracle JDBC Driver -->
+
+        <!-- Oracle JDBC Driver (Versión Estable 21.11.0.0) -->
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
-            <version>23.3.0.23.09</version>
+            <version>21.11.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.oracle.database.security</groupId>
             <artifactId>oraclepki</artifactId>
-            <version>23.3.0.23.09</version>
+            <version>21.11.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.oracle.database.security</groupId>
             <artifactId>osdt_core</artifactId>
-            <version>23.3.0.23.09</version>
+            <version>21.11.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.oracle.database.security</groupId>
             <artifactId>osdt_cert</artifactId>
-            <version>23.3.0.23.09</version>
+            <version>21.11.0.0</version>
         </dependency>
+
         <!-- JavaMail API -->
         <dependency>
             <groupId>jakarta.mail</groupId>
