@@ -17,51 +17,51 @@
 </head>
 <body>
 
-<jsp:include page="sidebar_de.jsp">
-    <jsp:param name="active" value="gestion_eventos" />
+<jsp:include page="sidebar.jsp">
+    <jsp:param name="active" value="gestion_evento" />
 </jsp:include>
 
 <main class="main-content">
-    <h3 class="page-title mb-4">TALLER DE INNOVACION</h3>
+    <h3 class="page-title mb-4" id="tituloEvento">EVENTO</h3>
 
     <div class="row mb-3">
         <div class="col-md-4">
             <label class="form-label text-muted">Nombre del evento:</label>
-            <input type="text" class="form-control" value="Taller de innovacion" readonly>
+            <input type="text" class="form-control" id="campoNombre" value="" readonly>
         </div>
         <div class="col-md-4">
             <label class="form-label text-muted">Lugar:</label>
-            <input type="text" class="form-control" value="CDMX" readonly>
+            <input type="text" class="form-control" id="campoLugar" value="" readonly>
         </div>
         <div class="col-md-4">
             <label class="form-label text-muted">Institución / Empresa:</label>
-            <input type="text" class="form-control" value="Academia de formacion profesional del estado" readonly>
+            <input type="text" class="form-control" id="campoInstitucion" value="" readonly>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-4">
             <label class="form-label text-muted">Tipo de evento:</label>
-            <input type="text" class="form-control" value="Taller" readonly>
+            <input type="text" class="form-control" id="campoTipo" value="" readonly>
         </div>
         <div class="col-md-8">
             <label class="form-label text-muted">Descripción del evento:</label>
-            <input type="text" class="form-control" value="Gran evento de introducion a redes para los futuros rederos" readonly>
+            <input type="text" class="form-control" id="campoDescripcion" value="" readonly>
         </div>
     </div>
 
     <div class="row mb-4">
         <div class="col-md-2">
             <label class="form-label text-muted">Fecha de inicio:</label>
-            <input type="text" class="form-control" value="05/05/26" readonly>
+            <input type="text" class="form-control" id="campoFechaInicio" value="" readonly>
         </div>
         <div class="col-md-2">
             <label class="form-label text-muted">Fecha de fin:</label>
-            <input type="text" class="form-control" value="22/05/26" readonly>
+            <input type="text" class="form-control" id="campoFechaFin" value="" readonly>
         </div>
         <div class="col-md-2 mt-3 mt-md-0 d-flex flex-column justify-content-center">
             <div class="modalidad-label mb-1">Modalidad</div>
-            <div class="fs-6 text-dark">Presencial</div>
+            <div class="fs-6 text-dark" id="campoModalidad">-</div>
         </div>
         <div class="col-md-3 mt-3 mt-md-0">
             <div class="info-card-outline h-100 d-flex flex-column justify-content-center align-items-center text-center">
@@ -95,71 +95,145 @@
     <div class="data-card p-0 mb-4" style="overflow: hidden;">
         <table class="table-custom mb-0 text-center">
             <thead>
-                <tr>
-                    <th class="text-start">Nombre</th>
-                    <th>Correo</th>
-                    <th>Estado</th>
-                    <th>Entregado</th>
-                </tr>
+            <tr>
+                <th class="text-start">Nombre</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Entregado</th>
+            </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle"></div>
-                            <div class="docente-name">
-                                Luis Gerardo<br>Barron Flores
-                            </div>
+            <tr>
+                <td class="text-start">
+                    <div class="docente-name-container">
+                        <div class="avatar-circle"></div>
+                        <div class="docente-name">
+                            Luis Gerardo<br>Barron Flores
                         </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td><i class="bi bi-toggle-on text-success fs-4"></i></td>
-                    <td>
-                        <a href="archivo_subido_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle"></div>
-                            <div class="docente-name">
-                                Luis Gerardo<br>Barron Flores
-                            </div>
+                    </div>
+                </td>
+                <td>ejemplo@gmail.com</td>
+                <td class="status-active">Activo</td>
+                <td>
+                    <a href="archivo_subido.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">
+                    <div class="docente-name-container">
+                        <div class="avatar-circle"></div>
+                        <div class="docente-name">
+                            Luis Gerardo<br>Barron Flores
                         </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td><i class="bi bi-toggle-on text-success fs-4"></i></td>
-                    <td>
-                        <a href="archivo_subido_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle"></div>
-                            <div class="docente-name">
-                                Luis Gerardo<br>Barron Flores
-                            </div>
+                    </div>
+                </td>
+                <td>ejemplo@gmail.com</td>
+                <td class="status-active">Activo</td>
+                <td>
+                    <a href="archivo_subido.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">
+                    <div class="docente-name-container">
+                        <div class="avatar-circle"></div>
+                        <div class="docente-name">
+                            Luis Gerardo<br>Barron Flores
                         </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td><i class="bi bi-toggle-off text-danger fs-4"></i></td>
-                    <td>
-                        <a href="archivo_subido_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
+                    </div>
+                </td>
+                <td>ejemplo@gmail.com</td>
+                <td class="status-active">Activo</td>
+                <td>
+                    <a href="archivo_subido.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="d-flex justify-content-end mb-4">
-        <a href="gestion_eventos_de.jsp" class="btn btn-outline-teal px-4 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
-            <i class="bi bi-chevron-left me-2"></i> Volver
-        </a>
+    <div class="d-flex justify-content-end">
+        <a href="gestion_evento_co.jsp" class="btn-teal">Volver</a>
     </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="assets/js/coordinador.js"></script>
+<script>
+    const contextPath = '<%= request.getContextPath() %>';
+    const params = new URLSearchParams(window.location.search);
+    const idEvento = params.get('id');
+
+    const tituloEvento = document.getElementById('tituloEvento');
+    const campoNombre = document.getElementById('campoNombre');
+    const campoLugar = document.getElementById('campoLugar');
+    const campoInstitucion = document.getElementById('campoInstitucion');
+    const campoTipo = document.getElementById('campoTipo');
+    const campoDescripcion = document.getElementById('campoDescripcion');
+    const campoFechaInicio = document.getElementById('campoFechaInicio');
+    const campoFechaFin = document.getElementById('campoFechaFin');
+    const campoModalidad = document.getElementById('campoModalidad');
+
+    // Convierte "yyyy-MM-dd" (formato que maneja el servidor) a "dd/mm/yy" (formato que usa esta vista)
+    function aFechaVisible(iso) {
+        if (!iso) return '';
+        const partes = iso.split('-');
+        if (partes.length !== 3) return iso;
+        return partes[2] + '/' + partes[1] + '/' + partes[0].slice(2);
+    }
+
+    function capitalizar(texto) {
+        if (!texto) return '';
+        return texto.charAt(0).toUpperCase() + texto.slice(1);
+    }
+
+    function cargarEvento() {
+        if (!idEvento) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Falta el id del evento',
+                text: 'Entra a esta página desde "Gestión de Eventos" para poder ver el detalle.',
+                confirmButtonColor: '#00847b'
+            });
+            return;
+        }
+
+        fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento))
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (!data.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'No se pudo cargar el evento',
+                        text: data.message || 'Ocurrió un error al obtener los datos.',
+                        confirmButtonColor: '#00847b'
+                    });
+                    return;
+                }
+
+                tituloEvento.textContent = (data.nombre || '').toUpperCase();
+                campoNombre.value = data.nombre || '';
+                campoLugar.value = data.lugar || '';
+                campoInstitucion.value = data.institucion || '';
+                campoTipo.value = capitalizar(data.tipo);
+                campoDescripcion.value = data.descripcion || '';
+                campoFechaInicio.value = aFechaVisible(data.fechaInicio);
+                campoFechaFin.value = aFechaVisible(data.fechaFin);
+                campoModalidad.textContent = capitalizar(data.modalidad);
+            })
+            .catch(function (error) {
+                console.error('Error al cargar el evento:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No fue posible comunicarse con el servidor.',
+                    confirmButtonColor: '#00847b'
+                });
+            });
+    }
+
+    cargarEvento();
+</script>
 </body>
 </html>
