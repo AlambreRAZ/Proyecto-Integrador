@@ -73,7 +73,7 @@
                     <option value="" disabled selected>Selecciona una opción</option>
                     <option value="presencial">Presencial</option>
                     <option value="virtual">Virtual</option>
-                    <option value="mixta">Mixta</option>
+                    <option value="mixta">Mixto</option>
                 </select>
             </div>
         </div>
@@ -144,7 +144,20 @@
                 });
                 btnGuardar.disabled = false;
             });
+        const fechaInicioVal = form.querySelector('[name="fechaInicio"]').value;
+        const fechaFinVal = form.querySelector('[name="fechaFin"]').value;
+
+        if (fechaInicioVal && fechaFinVal && fechaFinVal <= fechaInicioVal) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Fechas inválidas',
+                text: 'La fecha de fin debe ser posterior a la fecha de inicio.',
+                confirmButtonColor: '#00847b'
+            });
+            return;
+        }
     });
+
 </script>
 </body>
 </html>

@@ -117,17 +117,14 @@ public class AgregarEvento_Co {
     public boolean eliminarEvento(int idEvento) {
         boolean estado = false;
         Connection con = null;
-        PreparedStatement psDocentes = null;
         PreparedStatement psEvento = null;
 
         try {
             con = DatabaseConnection.getConnection();
+            if (con == null) {
+                throw new SQLException("No se pudo obtener conexión a la base de datos.");
+            }
             con.setAutoCommit(false);
-
-            // Primero se eliminan las relaciones con docentes (llave foránea)
-            psDocentes = con.prepareStatement("DELETE FROM evento_docente WHERE id_evento = ?");
-            psDocentes.setInt(1, idEvento);
-            psDocentes.executeUpdate();
 
             psEvento = con.prepareStatement("DELETE FROM eventos WHERE id_evento = ?");
             psEvento.setInt(1, idEvento);
@@ -135,7 +132,7 @@ public class AgregarEvento_Co {
 
             con.commit();
             estado = filasAfectadas > 0;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.err.println("Error al eliminar el evento: " + e.getMessage());
             e.printStackTrace();
             try {
@@ -145,7 +142,89 @@ public class AgregarEvento_Co {
             }
         } finally {
             try {
-                if (psDocentes != null) psDocentes.close();
+                if (psEvento != null) psEvento.close();
+                if (con != null) con.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return estado;
+    }
+    public agregarEvento_co obtenerPorId(int idEvento) {
+        String query = "SELECT id_evento, nombre, lugar, institucion, tipo_evento, descripcion, fecha_inicio, fecha_fin, modalidad, id_division, creado_por FROM eventos WHERE id_evento = ?";
+
+        Connection con = DatabaseConnection.getConnection();
+        if (con == null) {
+            System.err.println("Error al obtener el evento: no se pudo obtener conexión a la base de datos.");
+            return null;
+        }
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idEvento);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    agregarEvento_co evento = new agregarEvento_co();
+                    evento.setId(rs.getInt("id_evento"));
+                    evento.setNombre(rs.getString("nombre"));
+                    evento.setLugar(rs.getString("lugar"));
+                    evento.setInstitucion(rs.getString("institucion"));
+                    evento.setTipo(rs.getString("tipo_evento"));
+                    evento.setDescripcion(rs.getString("descripcion"));
+                    java.sql.Timestamp tsInicio = rs.getTimestamp("fecha_inicio");
+                    java.sql.Timestamp tsFin = rs.getTimestamp("fecha_fin");
+                    evento.setFechaInicio(tsInicio != null ? tsInicio.toLocalDateTime().toLocalDate().toString() : "");
+                    evento.setFechaFin(tsFin != null ? tsFin.toLocalDateTime().toLocalDate().toString() : "");
+                    evento.setModalidad(rs.getString("modalidad"));
+                    evento.setIdDivision(rs.getInt("id_division"));
+                    evento.setCreadoPor(rs.getInt("creado_por"));
+                    return evento;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener el evento: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean actualizarEvento(agregarEvento_co evento) {
+        boolean estado = false;
+        Connection con = null;
+        PreparedStatement psEvento = null;
+
+        try {
+            con = DatabaseConnection.getConnection();
+            if (con == null) {
+                throw new SQLException("No se pudo obtener conexión a la base de datos.");
+            }
+            con.setAutoCommit(false);
+
+            String query = "UPDATE eventos SET nombre = ?, lugar = ?, institucion = ?, tipo_evento = ?, descripcion = ?, fecha_inicio = ?, fecha_fin = ?, modalidad = ? WHERE id_evento = ?";
+            psEvento = con.prepareStatement(query);
+
+            psEvento.setString(1, evento.getNombre());
+            psEvento.setString(2, evento.getLugar());
+            psEvento.setString(3, evento.getInstitucion());
+            psEvento.setString(4, evento.getTipo());
+            psEvento.setString(5, evento.getDescripcion());
+            psEvento.setTimestamp(6, java.sql.Timestamp.valueOf(evento.getFechaInicio() + " 00:00:00"));
+            psEvento.setTimestamp(7, java.sql.Timestamp.valueOf(evento.getFechaFin() + " 00:00:00"));
+            psEvento.setString(8, evento.getModalidad());
+            psEvento.setInt(9, evento.getId());
+
+            int filasAfectadas = psEvento.executeUpdate();
+
+            con.commit();
+            estado = filasAfectadas > 0;
+        } catch (Exception e) {
+            System.err.println("Error al actualizar el evento: " + e.getMessage());
+            e.printStackTrace();
+            try {
+                if (con != null) con.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
                 if (psEvento != null) psEvento.close();
                 if (con != null) con.setAutoCommit(true);
             } catch (SQLException e) {
