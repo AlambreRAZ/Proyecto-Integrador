@@ -90,74 +90,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>window.contextPath = '<%= request.getContextPath() %>';</script>
 <script src="assets/js/coordinador.js"></script>
-<script>
-    const form = document.getElementById('formAgregarEvento');
-    const btnGuardar = document.getElementById('btnGuardar');
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        btnGuardar.disabled = true;
-
-        const datosForm = new FormData(form);
-
-        fetch('<%= request.getContextPath() %>/EventoServlet', {
-            method: 'POST',
-            body: datosForm
-        })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    return { ok: response.ok, data: data };
-                });
-            })
-            .then(function (resultado) {
-                if (resultado.ok && resultado.data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Evento Registrado con Éxito!',
-                        text: 'El evento se ha guardado correctamente en la base de datos.',
-                        confirmButtonColor: '#00847b',
-                        confirmButtonText: 'Aceptar'
-                    }).then(function (result) {
-                        if (result.isConfirmed) {
-                            window.location.href = 'gestion_evento_co.jsp';
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'No se pudo guardar el evento',
-                        text: resultado.data.message || 'Ocurrió un error al conectar con la base de datos.',
-                        confirmButtonColor: '#00847b'
-                    });
-                    btnGuardar.disabled = false;
-                }
-            })
-            .catch(function (error) {
-                console.error('Error al registrar el evento:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de conexión',
-                    text: 'No fue posible comunicarse con el servidor.',
-                    confirmButtonColor: '#00847b'
-                });
-                btnGuardar.disabled = false;
-            });
-        const fechaInicioVal = form.querySelector('[name="fechaInicio"]').value;
-        const fechaFinVal = form.querySelector('[name="fechaFin"]').value;
-
-        if (fechaInicioVal && fechaFinVal && fechaFinVal <= fechaInicioVal) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Fechas inválidas',
-                text: 'La fecha de fin debe ser posterior a la fecha de inicio.',
-                confirmButtonColor: '#00847b'
-            });
-            return;
-        }
-    });
-
-</script>
+<script src="assets/js/agregarEvento.js">  </script>
 </body>
 </html>
