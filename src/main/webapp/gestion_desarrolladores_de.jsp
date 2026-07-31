@@ -22,127 +22,56 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1; margin-right: 20px;">
             <i class="bi bi-search"></i>
-            <input type="text" placeholder="Buscar Docente por nombre, correo ...">
+            <input type="text" id="buscarDesarrollador" placeholder="Buscar Docente por nombre, correo ...">
         </div>
         <a href="agregar_desarrollador_de.jsp" class="btn-teal">
             <i class="bi bi-person-plus"></i> Agregar Desarrollador
         </a>
     </div>
 
+    <style>
+        /* La celda de Acciones tiene varios botones; no debe recortarse con "..." como el resto de la tabla. */
+        .table-custom td.acciones-cell {
+            overflow: visible;
+            text-overflow: clip;
+            max-width: none;
+        }
+    </style>
+
     <div class="data-card p-0 mb-4" style="overflow: hidden;">
         <table class="table-custom mb-0 text-center">
             <colgroup>
-                <col style="width: 25%;">
-                <col style="width: 25%;">
-                <col style="width: 15%;">
-                <col style="width: 15%;">
+                <col style="width: 24%;">
+                <col style="width: 22%;">
+                <col style="width: 13%;">
+                <col style="width: 13%;">
                 <col style="width: 10%;">
-                <col style="width: 10%;">
+                <col style="width: 18%;">
             </colgroup>
             <thead>
-                <tr>
-                    <th class="text-start">Nombre</th>
-                    <th>Correo</th>
-                    <th>Division</th>
-                    <th>Num. Empleado</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
+            <tr>
+                <th class="text-start">Nombre</th>
+                <th>Correo</th>
+                <th>Division</th>
+                <th>Num. Empleado</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>Datid</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-off text-danger fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_desarrollador_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>Datid</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-on text-success fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_desarrollador_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>Datid</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-off text-danger fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_desarrollador_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>Datid</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-on text-success fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_desarrollador_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
-                </tr>
+            <tbody id="tablaDesarrolladoresBody">
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">Cargando...</td>
+            </tr>
             </tbody>
         </table>
-    </div>
-
-    <div class="pagination-container">
-        <a href="#" class="page-btn"><i class="bi bi-chevron-left"></i></a>
-        <a href="#" class="page-btn active">1</a>
-        <a href="#" class="page-btn">2</a>
-        <a href="#" class="page-btn">3</a>
-        <span class="page-btn dots">...</span>
-        <a href="#" class="page-btn">10</a>
-        <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
     </div>
 
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>window.contextPath = '<%= request.getContextPath() %>';</script>
 <script src="assets/js/coordinador.js"></script>
+<script src="assets/js/GestionDesarrolladores.js"></script>
 </body>
 </html>

@@ -18,13 +18,13 @@
 
 <main class="main-content">
     <h3 class="page-title">AGREGAR DESARROLLADOR</h3>
-    
+
     <div class="d-flex align-items-center mb-4 mt-4" style="color: var(--teal-main);">
         <i class="bi bi-info-circle me-2 fs-5"></i>
         <h5 class="mb-0 fw-bold">DATOS DEL DESARROLLADOR</h5>
     </div>
 
-    <form action="gestion_desarrolladores_de.jsp" method="POST">
+    <form id="formAgregarDesarrollador" action="#" method="POST">
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label">Nombre del Docente <span class="text-danger">*</span> :</label>
@@ -45,11 +45,11 @@
                 <label class="form-label">Division Academica <span class="text-danger">*</span> :</label>
                 <select class="form-select" name="division" required>
                     <option value="" disabled selected></option>
-                    <option value="DACEA">DACEA</option>
-                    <option value="DAMI">DAMI</option>
-                    <option value="DATID">DATID</option>
-                    <option value="DATEFI">DATEFI</option>
-                    <option value="GENERAL">GENERAL</option>
+                    <option value="2">DACEA</option>
+                    <option value="4">DAMI</option>
+                    <option value="1">DATID</option>
+                    <option value="3">DATEFI</option>
+                    <option value="5">GENERAL</option>
                 </select>
             </div>
             <div class="col-md-4">
@@ -87,13 +87,16 @@
             <a href="gestion_desarrolladores_de.jsp" class="btn btn-outline-teal px-4 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
                 <i class="bi bi-chevron-left me-2"></i> Volver
             </a>
-            <button type="submit" class="btn-teal px-5 py-2" style="border-radius: 6px;">Agregar</button>
+            <button type="submit" id="btnGuardar" class="btn-teal px-5 py-2" style="border-radius: 6px;">Agregar</button>
         </div>
     </form>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>window.contextPath = '<%= request.getContextPath() %>';</script>
 <script src="assets/js/coordinador.js"></script>
+<script src="assets/js/AgregarDesarrollador.js"></script>
 <script>
     function togglePassword(inputId) {
         const input = document.getElementById(inputId);
@@ -111,3 +114,4 @@
 </script>
 </body>
 </html>
+
