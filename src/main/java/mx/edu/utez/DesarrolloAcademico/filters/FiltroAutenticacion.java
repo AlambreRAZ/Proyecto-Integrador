@@ -79,7 +79,12 @@ public class FiltroAutenticacion extends HttpFilter {
                         requestURI.endsWith("/ListarEventosServlet") ||
                         requestURI.endsWith("/EliminarEventoServlet") ||
                         requestURI.endsWith("/EditarEventoServlet") ||
-                        requestURI.endsWith("/AgregarDesarrolladorServlet");
+                        requestURI.endsWith("/AgregarEventoCO") ||
+                      requestURI.endsWith("/AgregarDesarrolladorServlet") ||
+                        requestURI.endsWith("/EditarDesarrollador") ||
+                     requestURI.endsWith("/EliminarDesarrollador") ||
+                        requestURI.endsWith("/ListarDesarrollador");
+
 
         boolean isResource = requestURI.contains("/assets/") || requestURI.contains("/layout/");
 

@@ -13,7 +13,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet(name = "EventoServlet", value = "/EventoServlet")
+@WebServlet(name = "AgregarEventoCO", value = "/AgregarEventoCO")
 @MultipartConfig
 public class AgregarEventoCO extends HttpServlet {
 

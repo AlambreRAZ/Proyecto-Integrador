@@ -1,12 +1,10 @@
+// 1. CORREGIDO: "const" en lugar de "onst"
 const contextPath = window.contextPath || '';
 const tbody = document.getElementById('tablaEventosBody');
 const inputBuscar = document.getElementById('buscarEvento');
 const filtrosTipo = document.getElementById('filtrosTipo');
 
-// "Lista maestra" con todos los eventos que trae el servidor (equivalente a la ObservableList base).
 let eventosOriginales = [];
-
-// Estado actual del filtro (equivalente al Predicate que usaría un FilteredList).
 let filtroTexto = '';
 let filtroTipo = 'todos';
 
@@ -22,7 +20,7 @@ function normalizar(texto) {
     return String(texto || '')
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, ''); // quita acentos para que "búsqueda" == "busqueda"
+        .replace(/[\u0300-\u036f]/g, '');
 }
 
 function formatearFecha(fechaIso) {
@@ -32,8 +30,6 @@ function formatearFecha(fechaIso) {
     return partes[2] + '/' + partes[1] + '/' + partes[0].slice(2);
 }
 
-// Aplica el predicado (texto + tipo) y regresa la lista ordenada alfabéticamente por nombre.
-// Esto es el equivalente manual de encadenar FilteredList -> SortedList.
 function obtenerEventosFiltrados() {
     const texto = normalizar(filtroTexto);
 
@@ -86,14 +82,22 @@ function aplicarFiltros() {
 
 function cargarEventos() {
     fetch(contextPath + '/ListarEventosServlet')
-        .then(function (response) { return response.json(); })
+        .then(function (response) {
+            // 3. MEJORA: Validar si la respuesta es JSON
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                return response.json();
+            } else {
+                throw new Error("El servidor no devolvió un JSON.");
+            }
+        })
         .then(function (eventos) {
             eventosOriginales = eventos || [];
             aplicarFiltros();
         })
         .catch(function (error) {
             console.error('Error al cargar eventos:', error);
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">No se pudieron cargar los eventos.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">No se pudieron cargar los eventos. Revisa tu servidor.</td></tr>';
         });
 }
 
@@ -120,66 +124,75 @@ if (filtrosTipo) {
     });
 }
 
-tbody.addEventListener('click', function (e) {
-    const boton = e.target.closest('.action-btn.delete');
-    if (!boton) return;
-    e.preventDefault();
+// 2. CORREGIDO: Validamos que tbody exista antes de meterle eventos y cargar la data
+if (tbody) {
+    tbody.addEventListener('click', function (e) {
+        const boton = e.target.closest('.action-btn.delete');
+        if (!boton) return;
+        e.preventDefault();
 
-    const id = boton.getAttribute('data-id');
+        const id = boton.getAttribute('data-id');
 
-    Swal.fire({
-        icon: 'warning',
-        title: '¿Deseas eliminar este evento?',
-        text: 'Esta acción no se puede deshacer.',
-        showCancelButton: true,
-        confirmButtonColor: '#00847b',
-        cancelButtonColor: '#aaaaaa',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then(function (result) {
-        // Si cancela, simplemente se cierra la alerta y no pasa nada más.
-        if (!result.isConfirmed) return;
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Deseas eliminar este evento?',
+            text: 'Esta acción no se puede deshacer.',
+            showCancelButton: true,
+            confirmButtonColor: '#00847b',
+            cancelButtonColor: '#aaaaaa',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
 
-        const datos = new FormData();
-        datos.append('id', id);
+            const datos = new FormData();
+            datos.append('id', id);
 
-        fetch(contextPath + '/EliminarEventoServlet', {
-            method: 'POST',
-            body: datos
-        })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    return { ok: response.ok, data: data };
-                });
+            fetch(contextPath + '/EliminarEventoServlet', {
+                method: 'POST',
+                body: datos
             })
-            .then(function (resultado) {
-                if (resultado.ok && resultado.data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Evento eliminado',
-                        text: 'El evento se eliminó correctamente.',
-                        confirmButtonColor: '#00847b'
-                    });
-                    cargarEventos();
-                } else {
+                .then(function (response) {
+                    // 4. MEJORA: Validamos si la respuesta es JSON al eliminar
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        return response.json().then(function (data) {
+                            return { ok: response.ok, data: data };
+                        });
+                    } else {
+                        throw new Error("El servidor devolvió un error HTML al intentar eliminar.");
+                    }
+                })
+                .then(function (resultado) {
+                    if (resultado.ok && resultado.data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Evento eliminado',
+                            text: 'El evento se eliminó correctamente.',
+                            confirmButtonColor: '#00847b'
+                        });
+                        cargarEventos();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'No se pudo eliminar',
+                            text: resultado.data.message || 'Ocurrió un error al eliminar el evento.',
+                            confirmButtonColor: '#00847b'
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error al eliminar el evento:', error);
                     Swal.fire({
                         icon: 'error',
-                        title: 'No se pudo eliminar',
-                        text: resultado.data.message || 'Ocurrió un error al eliminar el evento.',
+                        title: 'Error de conexión',
+                        text: 'No fue posible comunicarse con el servidor.',
                         confirmButtonColor: '#00847b'
                     });
-                }
-            })
-            .catch(function (error) {
-                console.error('Error al eliminar el evento:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de conexión',
-                    text: 'No fue posible comunicarse con el servidor.',
-                    confirmButtonColor: '#00847b'
                 });
-            });
+        });
     });
-});
 
-cargarEventos();
+    // Solo cargamos los eventos si existe la tabla
+    cargarEventos();
+}

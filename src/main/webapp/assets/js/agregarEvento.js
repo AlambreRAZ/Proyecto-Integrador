@@ -9,7 +9,7 @@ form.addEventListener('submit', function (e) {
 
     const datosForm = new FormData(form);
 
-    fetch(contextPath + '/EventoServlet', {
+    fetch(contextPath + '/AgregarEventoCO', {
         method: 'POST',
         body: datosForm
     })
