@@ -23,7 +23,7 @@
         <h5 class="mb-0 fw-bold">DATOS DEL DOCENTE</h5>
     </div>
 
-    <form action="#" method="POST">
+    <form id="formAgregarDocente" action="#" method="POST">
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label">Nombre del Docente <span class="text-danger">*</span> :</label>
@@ -87,12 +87,12 @@
                 <div class="rol-option-card" id="cardDocente" onclick="toggleRol('docente')" style="border: 2px solid var(--teal-main); border-radius: 10px; padding: 15px 30px; cursor: pointer; background: white; text-align: center; min-width: 130px;">
                     <i class="bi bi-person-fill fs-3 d-block mb-2" style="color: var(--teal-main);"></i>
                     <div class="fw-semibold" style="color: var(--teal-main);">Docente</div>
-                    <input type="checkbox" name="rol" value="docente" id="checkDocente" checked style="display:none;">
+                    <input type="radio" name="rol" value="docente" id="checkDocente" checked style="display:none;">
                 </div>
                 <div class="rol-option-card" id="cardCoordinador" onclick="toggleRol('coordinador')" style="border: 2px solid #ccc; border-radius: 10px; padding: 15px 30px; cursor: pointer; background: white; text-align: center; min-width: 130px;">
                     <i class="bi bi-person-workspace fs-3 d-block mb-2" style="color: #aaa;"></i>
                     <div class="fw-semibold" style="color: #aaa;">Coordinador</div>
-                    <input type="checkbox" name="rol" value="coordinador" id="checkCoordinador" style="display:none;">
+                    <input type="radio" name="rol" value="coordinador" id="checkCoordinador" style="display:none;">
                 </div>
             </div>
         </div>
@@ -130,20 +130,27 @@
         const icon = card.querySelector('i');
         const label = card.querySelector('div');
 
-        // Toggle el estado del checkbox
-        checkbox.checked = !checkbox.checked;
+        // Deseleccionar ambos
+        document.getElementById('checkDocente').checked = false;
+        document.getElementById('checkCoordinador').checked = false;
+        
+        // Reset styles
+        document.getElementById('cardDocente').style.border = '2px solid #ccc';
+        document.getElementById('cardDocente').querySelector('i').style.color = '#aaa';
+        document.getElementById('cardDocente').querySelector('div').style.color = '#aaa';
+        document.getElementById('cardCoordinador').style.border = '2px solid #ccc';
+        document.getElementById('cardCoordinador').querySelector('i').style.color = '#aaa';
+        document.getElementById('cardCoordinador').querySelector('div').style.color = '#aaa';
 
-        // Actualizar UI
-        if (checkbox.checked) {
-            card.style.border = '2px solid var(--teal-main)';
-            icon.style.color = 'var(--teal-main)';
-            label.style.color = 'var(--teal-main)';
-        } else {
-            card.style.border = '2px solid #ccc';
-            icon.style.color = '#aaa';
-            label.style.color = '#aaa';
-        }
+        // Set selected
+        checkbox.checked = true;
+        card.style.border = '2px solid var(--teal-main)';
+        icon.style.color = 'var(--teal-main)';
+        label.style.color = 'var(--teal-main)';
     }
 </script>
+<script>window.contextPath = '<%= request.getContextPath() %>';</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="assets/js/AgregarDocente.js"></script>
 </body>
 </html>

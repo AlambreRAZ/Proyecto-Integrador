@@ -73,7 +73,7 @@
                     <option value="" disabled selected>Selecciona una opción</option>
                     <option value="presencial">Presencial</option>
                     <option value="virtual">Virtual</option>
-                    <option value="mixta">Mixto</option>
+                    <option value="mixto">Mixto</option>
                 </select>
             </div>
         </div>

@@ -5,13 +5,32 @@ const btnGuardar = document.getElementById('btnGuardar');
 form.addEventListener('submit', function (e) {
     e.preventDefault();
 
+    const fechaInicioVal = form.querySelector('[name="fechaInicio"]').value;
+    const fechaFinVal = form.querySelector('[name="fechaFin"]').value;
+
+    if (fechaInicioVal && fechaFinVal && fechaFinVal <= fechaInicioVal) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Fechas inválidas',
+            text: 'La fecha de fin debe ser posterior a la fecha de inicio.',
+            confirmButtonColor: '#00847b'
+        });
+        return;
+    }
+
     btnGuardar.disabled = true;
 
-    const datosForm = new FormData(form);
+    // Convertir FormData a URLSearchParams para evitar problemas de Multipart
+    const formData = new FormData(form);
+    const datos = new URLSearchParams();
+    for (const pair of formData) {
+        datos.append(pair[0], pair[1]);
+    }
 
     fetch(contextPath + '/AgregarEventoCO', {
         method: 'POST',
-        body: datosForm
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: datos.toString()
     })
         .then(function (response) {
             return response.json().then(function (data) {
@@ -51,16 +70,4 @@ form.addEventListener('submit', function (e) {
             });
             btnGuardar.disabled = false;
         });
-    const fechaInicioVal = form.querySelector('[name="fechaInicio"]').value;
-    const fechaFinVal = form.querySelector('[name="fechaFin"]').value;
-
-    if (fechaInicioVal && fechaFinVal && fechaFinVal <= fechaInicioVal) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Fechas inválidas',
-            text: 'La fecha de fin debe ser posterior a la fecha de inicio.',
-            confirmButtonColor: '#00847b'
-        });
-        return;
-    }
 });

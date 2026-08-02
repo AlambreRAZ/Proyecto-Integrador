@@ -1,67 +1,77 @@
 const contextPath = window.contextPath || '';
-const form = document.getElementById('formAgregarDesarrollador');
-const btnGuardar = document.getElementById('btnGuardar');
+const form = document.getElementById('formAgregarDocente');
 
-form.addEventListener('submit', function (e) {
-    e.preventDefault();
+if (form) {
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    const contrasenaVal = form.querySelector('[name="contrasena"]').value;
-    const confirmarVal = form.querySelector('[name="confirmar_contrasena"]').value;
+        const btnGuardar = form.querySelector('button[type="submit"]');
+        if (btnGuardar) btnGuardar.disabled = true;
 
-    if (contrasenaVal !== confirmarVal) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Las contraseñas no coinciden',
-            text: 'Verifica que ambas contraseñas sean iguales.',
-            confirmButtonColor: '#00847b'
+        const formData = new URLSearchParams();
+        const inputs = form.querySelectorAll('input, select');
+        
+        // Form validations
+        let valid = true;
+        let pass1 = '', pass2 = '';
+        inputs.forEach(input => {
+            if (input.type === 'radio' && !input.checked) return;
+            if (input.name) {
+                formData.append(input.name, input.value);
+            }
+            if (input.name === 'contrasena') pass1 = input.value;
+            if (input.name === 'confirmar_contrasena') pass2 = input.value;
         });
-        return;
-    }
 
-    btnGuardar.disabled = true;
-
-    const datosForm = new FormData(form);
-
-    fetch(contextPath + '/AgregarDesarrolladorServlet', {
-        method: 'POST',
-        body: datosForm
-    })
-        .then(function (response) {
-            return response.json().then(function (data) {
-                return { ok: response.ok, data: data };
+        if (pass1 !== pass2) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Contraseñas no coinciden',
+                text: 'Por favor verifica que la contraseña y la confirmación sean iguales.',
+                confirmButtonColor: '#00847b'
             });
+            if (btnGuardar) btnGuardar.disabled = false;
+            return;
+        }
+
+        fetch(contextPath + '/AgregarUsuarioServlet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
         })
-        .then(function (resultado) {
+        .then(res => res.json().then(data => ({ ok: res.ok, data: data })))
+        .then(resultado => {
             if (resultado.ok && resultado.data.success) {
                 Swal.fire({
                     icon: 'success',
-                    title: '¡Desarrollador Registrado con Éxito!',
-                    text: 'El desarrollador se ha guardado correctamente en la base de datos.',
+                    title: '¡Registrado con Éxito!',
+                    text: resultado.data.message || 'El usuario se ha guardado correctamente en la base de datos.',
                     confirmButtonColor: '#00847b',
                     confirmButtonText: 'Aceptar'
                 }).then(function (result) {
                     if (result.isConfirmed) {
-                        window.location.href = 'gestion_desarrolladores_de.jsp';
+                        window.location.href = 'gestion_docente_co.jsp';
                     }
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'No se pudo guardar el Docente',
-                    text: resultado.data.message || 'Ocurrió un error al conectar con la base de datos.',
+                    title: 'No se pudo guardar',
+                    text: resultado.data.message || 'Ocurrió un error al guardar.',
                     confirmButtonColor: '#00847b'
                 });
-                btnGuardar.disabled = false;
+                if (btnGuardar) btnGuardar.disabled = false;
             }
         })
-        .catch(function (error) {
-            console.error('Error al registrar el desarrollador:', error);
+        .catch(err => {
+            console.error('Error:', err);
             Swal.fire({
                 icon: 'error',
                 title: 'Error de conexión',
                 text: 'No fue posible comunicarse con el servidor.',
                 confirmButtonColor: '#00847b'
             });
-            btnGuardar.disabled = false;
+            if (btnGuardar) btnGuardar.disabled = false;
         });
-});
+    });
+}

@@ -12,7 +12,7 @@
 <body>
 
 <jsp:include page="sidebar.jsp">
-    <jsp:param name="active" value="eventos_proximo" />
+    <jsp:param name="active" value="mi_evento" />
 </jsp:include>
 
 <main class="main-content">
@@ -21,7 +21,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1;">
             <i class="bi bi-search"></i>
-            <input type="text" placeholder="Buscar Evento por nombre ...">
+            <input type="text" id="buscarMisEventos" placeholder="Buscar Evento por nombre ...">
         </div>
     </div>
 
@@ -36,95 +36,30 @@
             </colgroup>
             <thead>
                 <tr>
-                    <th>Titulo</th>
+                    <th>Título</th>
                     <th>Tipo</th>
                     <th>Institución</th>
                     <th>Fecha</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tablaMisEventosBody">
                 <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                        <a href="cargar_archivo.jsp" class="action-btn"><i class="bi bi-cloud-upload"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                        <a href="cargar_archivo.jsp" class="action-btn"><i class="bi bi-cloud-upload"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                        <a href="cargar_archivo.jsp" class="action-btn"><i class="bi bi-cloud-upload"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                        <a href="cargar_archivo.jsp" class="action-btn"><i class="bi bi-cloud-upload"></i></a>
-                    </td>
+                    <td colspan="5" class="text-center text-muted py-4">Cargando eventos...</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="pagination-container">
-        <a href="#" class="page-btn"><i class="bi bi-chevron-left"></i></a>
-        <a href="#" class="page-btn active">1</a>
-        <a href="#" class="page-btn">2</a>
-        <a href="#" class="page-btn">3</a>
-        <span class="page-btn dots">...</span>
-        <a href="#" class="page-btn">10</a>
-        <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
-    </div>
-
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    window.contextPath = '<%= request.getContextPath() %>';
+    window.urlVerEvento = 'ver_mas_evento_co.jsp';
+    window.urlCargarArchivo = 'cargar_archivo_co.jsp';
+</script>
 <script src="assets/js/coordinador.js"></script>
+<script src="assets/js/MisEventos.js"></script>
 </body>
 </html>

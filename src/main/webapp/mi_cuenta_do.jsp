@@ -1,4 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
+<%
+    Usuario u = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+    if (u == null) { response.sendRedirect("login.jsp"); return; }
+    String divisionStr = (u.getIdDivision() != null) ? String.valueOf(u.getIdDivision()) : "N/A";
+%>
 <!doctype html>
 <html lang="es">
 <head>
@@ -27,41 +33,41 @@
         <h3 class="page-title mb-0">DOCENTE</h3>
     </div>
 
-    <form>
+    <form id="formMiCuenta">
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label text-muted">Nombre(s):</label>
-                <input type="text" class="form-control" value="Elias" readonly>
+                <input type="text" class="form-control" value="<%= u.getNombre() %>" readonly>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Apellido Paterno :</label>
-                <input type="text" class="form-control" value="Aguilar" readonly>
+                <input type="text" class="form-control" value="<%= u.getApellidoPaterno() %>" readonly>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Apellido Materno :</label>
-                <input type="text" class="form-control" value="Sanchez" readonly>
+                <input type="text" class="form-control" value="<%= u.getApellidoMaterno() %>" readonly>
             </div>
         </div>
 
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label text-muted">Division Academica :</label>
-                <input type="text" class="form-control" value="DATID" readonly>
+                <input type="text" class="form-control" value="División <%= divisionStr %>" readonly>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Número de Empleado:</label>
-                <input type="text" class="form-control" value="123456" readonly>
+                <input type="text" class="form-control" value="<%= u.getNumeroEmpleado() %>" readonly>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Teléfono:</label>
-                <input type="text" class="form-control" value="7771234512" readonly>
+                <input type="text" class="form-control" value="<%= u.getTelefono() %>" readonly>
             </div>
         </div>
 
         <div class="row mb-5">
             <div class="col-md-4">
                 <label class="form-label text-muted">Correo Institucional :</label>
-                <input type="text" class="form-control" value="elias@gmail.com" readonly>
+                <input type="text" class="form-control" value="<%= u.getCorreoInstitucional() %>" readonly>
             </div>
         </div>
 
@@ -72,22 +78,40 @@
         <div class="row mb-5">
             <div class="col-md-4">
                 <label class="form-label text-muted">Contraseña Actual:</label>
-                <input type="password" class="form-control bg-white">
+                <div class="input-group">
+                    <input type="password" id="passActual" class="form-control bg-white">
+                    <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passActual')" style="cursor: pointer;">
+                        <i class="bi bi-eye-fill text-muted"></i>
+                    </span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Nueva Contraseña:</label>
-                <input type="password" class="form-control bg-white">
+                <div class="input-group">
+                    <input type="password" id="passNueva" class="form-control bg-white">
+                    <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passNueva')" style="cursor: pointer;">
+                        <i class="bi bi-eye-fill text-muted"></i>
+                    </span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Confirmar Contraseña:</label>
-                <input type="password" class="form-control bg-white">
+                <div class="input-group">
+                    <input type="password" id="passConfirm" class="form-control bg-white">
+                    <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passConfirm')" style="cursor: pointer;">
+                        <i class="bi bi-eye-fill text-muted"></i>
+                    </span>
+                </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-end">
+        <div class="d-flex justify-content-end gap-3">
             <a href="vista_general_docente_do.jsp" class="btn btn-outline-teal px-4 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
                 <i class="bi bi-chevron-left me-2"></i> Volver
             </a>
+            <button type="submit" class="btn-teal px-4 py-2" style="border-radius: 6px;">
+                <i class="bi bi-save me-2"></i> Actualizar Contraseña
+            </button>
         </div>
     </form>
 </main>
@@ -109,5 +133,8 @@
         }
     }
 </script>
+<script>window.contextPath = '<%= request.getContextPath() %>';</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="assets/js/MiCuenta.js"></script>
 </body>
 </html>

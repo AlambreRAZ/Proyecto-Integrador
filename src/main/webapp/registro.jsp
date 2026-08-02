@@ -25,27 +25,36 @@
                 </div>
 
                 <%-- Alertas de error --%>
-                <c:if test="${not empty error}">
+                <% String error = (String) request.getAttribute("error");
+                   if (error != null && !error.isEmpty()) { %>
                     <div class="alert alert-danger py-2 rounded-3" role="alert">
-                        <div class="small"><i class="bi bi-exclamation-triangle-fill me-2"></i>${error}</div>
+                        <div class="small"><i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %></div>
                     </div>
-                </c:if>
+                <% } %>
 
                 <form action="registro" method="post">
 
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label label-custom">Nombre(s):</label>
+                        <div class="input-group">
+                            <span class="input-group-text icon-prepend"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control input-custom" id="nombre" name="nombre" placeholder="Nombre(s)" value="${nombre}" required>
+                        </div>
+                    </div>
+
                     <div class="row g-2 mb-3">
                         <div class="col-6">
-                            <label for="nombre" class="form-label label-custom">Nombre(s):</label>
+                            <label for="apellidoPaterno" class="form-label label-custom">Apellido Paterno:</label>
                             <div class="input-group">
-                                <span class="input-group-text icon-prepend"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control input-custom" id="nombre" name="nombre" placeholder="Nombre(s)" required>
+                                <span class="input-group-text icon-prepend"><i class="bi bi-person-vcard"></i></span>
+                                <input type="text" class="form-control input-custom" id="apellidoPaterno" name="apellidoPaterno" placeholder="Paterno" value="${apellidoPaterno}" required>
                             </div>
                         </div>
                         <div class="col-6">
-                            <label for="apellidos" class="form-label label-custom">Apellidos:</label>
+                            <label for="apellidoMaterno" class="form-label label-custom">Apellido Materno:</label>
                             <div class="input-group">
                                 <span class="input-group-text icon-prepend"><i class="bi bi-person-vcard"></i></span>
-                                <input type="text" class="form-control input-custom" id="apellidos" name="apellidos" placeholder="Apellidos" required>
+                                <input type="text" class="form-control input-custom" id="apellidoMaterno" name="apellidoMaterno" placeholder="Materno" value="${apellidoMaterno}" required>
                             </div>
                         </div>
                     </div>
@@ -59,7 +68,7 @@
                                     <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h1A1.5 1.5 0 0 1 7 6.5v1A1.5 1.5 0 0 1 5.5 9h-1A1.5 1.5 0 0 1 3 7.5v-1zM9 6.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5A.75.75 0 0 1 9 6.25zM9 9.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5A.75.75 0 0 1 9 9.25zM3.75 11a.75.75 0 0 0 0 1.5h3.5a.75.75 0 0 0 0-1.5h-3.5z"/>
                                 </svg>
                             </span>
-                            <input type="text" class="form-control input-custom" id="NumeroEmpleado" name="numeroEmpleado" placeholder="Número de Empleado" required>
+                            <input type="text" class="form-control input-custom" id="NumeroEmpleado" name="numeroEmpleado" placeholder="Número de Empleado" value="${numeroEmpleado}" required>
                         </div>
                     </div>
 
@@ -67,7 +76,7 @@
                         <label for="correoInstitucional" class="form-label label-custom">Correo institucional:</label>
                         <div class="input-group">
                             <span class="input-group-text icon-prepend"><i class="bi bi-envelope"></i></span>
-                            <input type="email" class="form-control input-custom" id="correoInstitucional" name="correoInstitucional" placeholder="Correo institucional" required>
+                            <input type="email" class="form-control input-custom" id="correoInstitucional" name="correoInstitucional" placeholder="Correo institucional" value="${correoInstitucional}" required>
                         </div>
                     </div>
 
@@ -75,53 +84,47 @@
                         <label for="telefono" class="form-label label-custom">Teléfono:</label>
                         <div class="input-group">
                             <span class="input-group-text icon-prepend"><i class="bi bi-telephone"></i></span>
-                            <input type="tel" class="form-control input-custom" id="telefono" name="telefono" placeholder="Teléfono" required>
+                            <input type="tel" class="form-control input-custom" id="telefono" name="telefono" placeholder="Teléfono" value="${telefono}" required>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="division" class="form-label label-custom">División:</label>
                         <select class="form-select select-custom text-muted" id="division" name="division" required>
-                            <option value="" disabled selected hidden>División</option>
-                            <option value="1">DATID</option>
-                            <option value="2">DATEFI</option>
-                            <option value="2">DACEA</option>
-                            <option value="2">DAMI</option>
-
-
+                            <option value="" disabled ${empty division ? 'selected' : ''} hidden>División</option>
+                            <option value="1" ${division == '1' ? 'selected' : ''}>DATID</option>
+                            <option value="2" ${division == '2' ? 'selected' : ''}>DACEA</option>
+                            <option value="3" ${division == '3' ? 'selected' : ''}>DATEFI</option>
+                            <option value="4" ${division == '4' ? 'selected' : ''}>DAMI</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <label for="txtPassword" class="form-label label-custom mb-1">Contraseña:</label>
-                            <i class="bi bi-eye toggle-password-icon" id="togglePassword"></i>
-                        </div>
+                        <label for="txtPassword" class="form-label label-custom">Contraseña:</label>
                         <div class="input-group">
                             <span class="input-group-text icon-prepend"><i class="bi bi-lock"></i></span>
                             <input type="password" class="form-control input-custom" id="txtPassword" name="contra" placeholder="Contraseña" required>
+                            <i class="bi bi-eye toggle-password-icon" id="togglePassword"></i>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <label for="txtConfirmPassword" class="form-label label-custom mb-1">Confirmar contraseña:</label>
-                            <i class="bi bi-eye toggle-password-icon" id="toggleConfirmPassword"></i>
-                        </div>
+                        <label for="txtConfirmPassword" class="form-label label-custom">Confirmar contraseña:</label>
                         <div class="input-group">
                             <span class="input-group-text icon-prepend"><i class="bi bi-lock"></i></span>
                             <input type="password" class="form-control input-custom" id="txtConfirmPassword" name="confirmContra" placeholder="Confirmar contraseña" required>
+                            <i class="bi bi-eye toggle-password-icon" id="toggleConfirmPassword"></i>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-center gap-4 mb-4">
                         <div class="form-check">
-                            <input class="form-check-input checkbox-border" type="checkbox" value="coordinador" id="chkCordinador" name="roles" checked>
-                            <label class="form-check-label fw-bold text-dark small" for="chkCordinador">Cordinador</label>
+                            <input class="form-check-input checkbox-border" type="radio" value="docente" id="roleDocente" name="rol" ${rol == 'coordinador' ? '' : 'checked'}>
+                            <label class="form-check-label fw-bold text-dark small" for="roleDocente">Docente</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input checkbox-border" type="checkbox" value="desarrollo" id="chkDesarrollo" name="roles">
-                            <label class="form-check-label fw-bold text-dark small" for="chkDesarrollo">Desarrollo Academico</label>
+                            <input class="form-check-input checkbox-border" type="radio" value="coordinador" id="roleCoordinador" name="rol" ${rol == 'coordinador' ? 'checked' : ''}>
+                            <label class="form-check-label fw-bold text-dark small" for="roleCoordinador">Coordinador</label>
                         </div>
                     </div>
 

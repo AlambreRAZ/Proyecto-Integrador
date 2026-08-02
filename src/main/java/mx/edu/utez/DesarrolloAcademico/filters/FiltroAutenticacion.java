@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import mx.edu.utez.DesarrolloAcademico.model.Usuario;
 
 import java.io.IOException;
 
@@ -30,6 +31,7 @@ public class FiltroAutenticacion extends HttpFilter {
                         requestURI.endsWith("/login") ||
                         requestURI.endsWith("registro.jsp") ||
                         requestURI.endsWith("/register") ||
+                        requestURI.endsWith("/registro") ||
                         requestURI.endsWith("recuperar-contra.jsp") ||
                         requestURI.endsWith("/recuperar") ||
                         requestURI.endsWith("/reset");
@@ -80,10 +82,18 @@ public class FiltroAutenticacion extends HttpFilter {
                         requestURI.endsWith("/EliminarEventoServlet") ||
                         requestURI.endsWith("/EditarEventoServlet") ||
                         requestURI.endsWith("/AgregarEventoCO") ||
-                      requestURI.endsWith("/AgregarDesarrolladorServlet") ||
+                        requestURI.endsWith("/AgregarDesarrolladorServlet") ||
                         requestURI.endsWith("/EditarDesarrollador") ||
-                     requestURI.endsWith("/EliminarDesarrollador") ||
-                        requestURI.endsWith("/ListarDesarrollador");
+                        requestURI.endsWith("/EliminarDesarrollador") ||
+                        requestURI.endsWith("/ListarDesarrollador") ||
+                        requestURI.endsWith("/ListarUsuariosServlet") ||
+                        requestURI.endsWith("/ListarMisEventosServlet") ||
+                        requestURI.endsWith("/ListarParticipantesEventoServlet") ||
+                        requestURI.endsWith("/AsignarDocenteEventoServlet") ||
+                        requestURI.endsWith("/RemoverDocenteEventoServlet") ||
+                        requestURI.endsWith("/EditarUsuarioServlet") ||
+                        requestURI.endsWith("/AgregarUsuarioServlet") ||
+                        requestURI.endsWith("/CambiarPasswordServlet");
 
 
         boolean isResource = requestURI.contains("/assets/") || requestURI.contains("/layout/");
@@ -92,8 +102,18 @@ public class FiltroAutenticacion extends HttpFilter {
 
         if (loggedIn) {
             if (authPage) {
-                System.out.println("[FILTRO] -> redirige a registro.jsp (logueado intentando entrar a authPage)");
-                response.sendRedirect(request.getContextPath() + "/registro.jsp");
+                Usuario user = (Usuario) session.getAttribute("usuario");
+                String rol = user.getRol();
+                if ("desarrollo".equalsIgnoreCase(rol)) {
+                    response.sendRedirect(request.getContextPath() + "/vista_general_desarrollador_de.jsp");
+                } else if ("coordinador".equalsIgnoreCase(rol)) {
+                    response.sendRedirect(request.getContextPath() + "/vista_general_coordinador_co.jsp");
+                } else if ("docente".equalsIgnoreCase(rol)) {
+                    response.sendRedirect(request.getContextPath() + "/vista_general_docente_do.jsp");
+                } else {
+                    session.invalidate();
+                    response.sendRedirect(request.getContextPath() + "/login.jsp");
+                }
             } else {
                 chain.doFilter(request, response);
             }
@@ -102,7 +122,7 @@ public class FiltroAutenticacion extends HttpFilter {
                 chain.doFilter(request, response);
             } else {
                 System.out.println("[FILTRO] -> redirige a registro.jsp (no logueado y no es authPage/publicPage/isResource)");
-                response.sendRedirect(request.getContextPath() + "/registro.jsp");
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
             }
         }
     }

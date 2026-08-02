@@ -164,4 +164,57 @@ public class UsuarioDao {
         }
         return exitoso;
     }
+
+    public boolean registrarUsuario(Usuario usuario) {
+        boolean estado = false;
+        String query = "INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, rol, id_division, numero_empleado, telefono, correo_institucional, contrasena, fecha_registro, activo, creado_por) " +
+                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 1, ?)";
+        
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+             
+            ps.setString(1, usuario.getNombre());
+            ps.setString(2, usuario.getApellidoPaterno());
+            ps.setString(3, usuario.getApellidoMaterno());
+            ps.setString(4, usuario.getRol());
+            
+            if (usuario.getIdDivision() != null) {
+                ps.setInt(5, usuario.getIdDivision());
+            } else {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            }
+            
+            ps.setString(6, usuario.getNumeroEmpleado());
+            ps.setString(7, usuario.getTelefono());
+            ps.setString(8, usuario.getCorreoInstitucional());
+            ps.setString(9, usuario.getContrasena());
+            
+            if (usuario.getCreadoPor() != null) {
+                ps.setInt(10, usuario.getCreadoPor());
+            } else {
+                ps.setNull(10, java.sql.Types.INTEGER);
+            }
+            
+            estado = ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return estado;
+    }
+
+    public boolean actualizarPasswordEnCuenta(int idUsuario, String actualPassword, String nuevaPassword) {
+        String query = "UPDATE usuarios SET contrasena = ? WHERE id_usuario = ? AND contrasena = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+             
+            ps.setString(1, nuevaPassword);
+            ps.setInt(2, idUsuario);
+            ps.setString(3, actualPassword);
+            
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

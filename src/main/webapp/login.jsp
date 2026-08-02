@@ -23,19 +23,21 @@
                     <h2 class="fw-bold fs-1" style="color: #49B2B0;">Bienvenido</h2>
                 </div>
 
-                <c:if test="${not empty error}">
+                <% String error = (String) request.getAttribute("error");
+                   if (error != null && !error.isEmpty()) { %>
                     <div class="alert alert-danger d-flex align-items-center py-2 rounded-3" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <div class="small">${error}</div>
+                        <div class="small"><%= error %></div>
                     </div>
-                </c:if>
+                <% } %>
 
-                <c:if test="${not empty mensaje}">
+                <% String mensaje = (String) request.getAttribute("mensaje");
+                   if (mensaje != null && !mensaje.isEmpty()) { %>
                     <div class="alert alert-info d-flex align-items-center py-2 rounded-3" role="alert">
                         <i class="bi bi-info-circle-fill me-2"></i>
-                        <div class="small">${mensaje}</div>
+                        <div class="small"><%= mensaje %></div>
                     </div>
-                </c:if>
+                <% } %>
 
                 <form action="login" method="post">
 
@@ -52,9 +54,9 @@
                         <label for="txtPassword" class="form-label fw-bold mb-1 small" style="color: #2B1818;">Contraseña:</label>
                         <div class="position-relative">
                             <i class="bi bi-lock-fill position-absolute text-secondary fs-5" style="left: 15px; top: 50%; transform: translateY(-50%);"></i>
-
                             <input type="password" class="form-control rounded-3" id="txtPassword" name="contra" placeholder="Contraseña" required
-                                   style="padding: 0.6rem 1rem 0.6rem 2.8rem; border: 1.5px solid #6C5555; background-color: rgba(255, 255, 255, 0.6);">
+                                   style="padding: 0.6rem 2.8rem 0.6rem 2.8rem; border: 1.5px solid #6C5555; background-color: rgba(255, 255, 255, 0.6);">
+                            <i class="bi bi-eye position-absolute text-secondary fs-5" id="togglePassword" style="right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
                         </div>
                     </div>
 
@@ -89,6 +91,7 @@
 </div>
 
 <script src="assets/js/bootstrap.js"></script>
+<script src="assets/js/login.js"></script>
 
 </body>
 </html>

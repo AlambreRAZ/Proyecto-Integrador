@@ -102,8 +102,10 @@ public class AgregarEvento_Co {
                 evento.setInstitucion(rs.getString("institucion"));
                 evento.setTipo(rs.getString("tipo_evento"));
                 evento.setDescripcion(rs.getString("descripcion"));
-                evento.setFechaInicio(rs.getString("fecha_inicio"));
-                evento.setFechaFin(rs.getString("fecha_fin"));
+                java.sql.Timestamp tsInicio = rs.getTimestamp("fecha_inicio");
+                java.sql.Timestamp tsFin = rs.getTimestamp("fecha_fin");
+                evento.setFechaInicio(tsInicio != null ? tsInicio.toLocalDateTime().toLocalDate().toString() : "");
+                evento.setFechaFin(tsFin != null ? tsFin.toLocalDateTime().toLocalDate().toString() : "");
                 evento.setModalidad(rs.getString("modalidad"));
                 eventos.add(evento);
             }

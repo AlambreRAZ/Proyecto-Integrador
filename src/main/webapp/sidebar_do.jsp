@@ -1,9 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
+<%
+    Usuario usuarioSidebar = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+    String nombreSidebar = (usuarioSidebar != null) ? usuarioSidebar.getNombre() + " " + usuarioSidebar.getApellidoPaterno() : "Usuario";
+%>
 <nav class="sidebar-hover">
     <div class="sidebar-avatar-container">
         <div class="sidebar-avatar"></div>
         <div class="sidebar-info text-white">
-            <div class="fw-semibold mb-1">Elias Aguilar</div>
+            <div class="fw-semibold mb-1"><%= nombreSidebar %></div>
             <div class="small" style="color: rgba(255,255,255,0.85);">Docente Académico</div>
         </div>
     </div>
@@ -29,7 +34,7 @@
         <span class="sidebar-text">Mi cuenta</span>
     </a>
 
-    <a href="login.jsp" class="sidebar-item ${param.active == 'cerrar_sesion' ? 'active' : ''}">
+    <a href="logout" class="sidebar-item ${param.active == 'cerrar_sesion' ? 'active' : ''}">
         <div class="sidebar-icon">
             <i class="bi bi-box-arrow-left"></i>
         </div>

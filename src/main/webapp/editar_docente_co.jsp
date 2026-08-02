@@ -24,46 +24,47 @@
     </div>
 
     <form action="#" method="POST">
+        <input type="hidden" name="id_usuario" id="campoIdUsuario">
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label">Nombre del Docente <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="nombre" value="Mariano" required>
+                <input type="text" class="form-control" name="nombre" id="campoNombre" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Apellido Paterno <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="apellido_paterno" value="Fernández" required>
+                <input type="text" class="form-control" name="apellido_paterno" id="campoApellidoP" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Apellido Materno <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="apellido_materno" value="Gutierrez" required>
+                <input type="text" class="form-control" name="apellido_materno" id="campoApellidoM" required>
             </div>
         </div>
 
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label">Division Academica <span class="text-danger">*</span> :</label>
-                <select class="form-select" name="division" required>
+                <select class="form-select" name="division" id="campoDivision" required>
                     <option value="" disabled selected></option>
-                    <option value="DACEA">DACEA</option>
-                    <option value="DAMI">DAMI</option>
-                    <option value="DATID" selected>DATID</option>
-                    <option value="DATEFI">DATEFI</option>
+                    <option value="2">DACEA</option>
+                    <option value="4">DAMI</option>
+                    <option value="1">DATID</option>
+                    <option value="3">DATEFI</option>
                 </select>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Numero de Empleado <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="numero_empleado" value="67" required>
+                <input type="text" class="form-control" name="numero_empleado" id="campoNumEmpleado" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Numero de Telefono <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="telefono" value="7771234567" required>
+                <input type="text" class="form-control" name="telefono" id="campoTelefono" required>
             </div>
         </div>
 
         <div class="row mb-5">
             <div class="col-md-4">
                 <label class="form-label">Correo Institucional<span class="text-danger">*</span> :</label>
-                <input type="email" class="form-control" name="correo" value="20206ds045@utez.edu.mx" required>
+                <input type="email" class="form-control" name="correo" id="campoCorreo" required>
             </div>
         </div>
 
@@ -74,15 +75,30 @@
         <div class="row mb-5">
             <div class="col-md-4">
                 <label class="form-label text-muted">Contraseña Actual:</label>
-                <input type="password" class="form-control bg-white">
+                <div class="input-group">
+                    <input type="password" id="passActual" class="form-control bg-white">
+                    <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passActual')" style="cursor: pointer;">
+                        <i class="bi bi-eye-fill text-muted"></i>
+                    </span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Nueva Contraseña:</label>
-                <input type="password" class="form-control bg-white">
+                <div class="input-group">
+                    <input type="password" id="passNueva" class="form-control bg-white">
+                    <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passNueva')" style="cursor: pointer;">
+                        <i class="bi bi-eye-fill text-muted"></i>
+                    </span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Confirmar Contraseña:</label>
-                <input type="password" class="form-control bg-white">
+                <div class="input-group">
+                    <input type="password" id="passConfirm" class="form-control bg-white">
+                    <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passConfirm')" style="cursor: pointer;">
+                        <i class="bi bi-eye-fill text-muted"></i>
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -112,5 +128,8 @@
         }
     }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>window.contextPath = '<%= request.getContextPath() %>';</script>
+<script src="assets/js/EditarDocente.js?v=2"></script>
 </body>
 </html>
