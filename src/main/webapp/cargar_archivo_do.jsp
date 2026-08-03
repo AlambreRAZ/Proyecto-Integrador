@@ -116,8 +116,8 @@
         </div>
     </div>
 
-    <!-- Formulario de carga (visible solo si no hay constancia) -->
-    <form id="formCargaArchivo">
+    <!-- Formulario de carga (OCULTO por defecto, JS decide cuál mostrar) -->
+    <form id="formCargaArchivo" style="display:none;">
         <input type="hidden" name="idEvento" id="hiddenIdEvento" value="">
         
         <div class="data-card mb-5" style="padding: 25px;">
@@ -127,7 +127,7 @@
                 <div class="d-flex align-items-center gap-3">
                     <span class="fw-medium">¿Tiene vigencia?:</span>
                     <div class="form-check mb-0">
-                        <input class="form-check-input" type="radio" name="vigencia" id="vigenciaNo" value="no" checked style="accent-color: black; background-color: black; border-color: black;">
+                        <input class="form-check-input" type="radio" name="vigencia" id="vigenciaNo" value="no" checked>
                         <label class="form-check-label" for="vigenciaNo">No</label>
                     </div>
                     <div class="form-check mb-0">
@@ -155,7 +155,7 @@
             </div>
 
             <!-- Vista del archivo seleccionado -->
-            <div id="archivoSeleccionadoInfo" style="display:none;" class="d-flex align-items-center gap-3 mt-4 p-3">
+            <div id="archivoSeleccionadoInfo" style="display:none; border-radius: 10px; background: #f0fdfb;" class="d-flex align-items-center gap-3 mt-4 p-3">
                 <i class="bi bi-file-earmark-pdf-fill text-danger fs-2"></i>
                 <div>
                     <div class="fw-bold" id="archivoSeleccionadoNombre"></div>
@@ -232,33 +232,36 @@
         }
     }
 
-    fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now())
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('tituloEvento').textContent = (data.nombre || '').toUpperCase();
-                document.getElementById('campoTipo').textContent = capitalizar(data.tipo);
-                document.getElementById('campoLugar').textContent = data.lugar || '';
-                document.getElementById('campoInstitucion').textContent = data.institucion || '';
-                document.getElementById('campoDescripcion').textContent = data.descripcion || '';
-                document.getElementById('campoFechaInicio').textContent = aFechaVisible(data.fechaInicio);
-                document.getElementById('campoFechaFin').textContent = aFechaVisible(data.fechaFin);
-                document.getElementById('campoModalidad').textContent = capitalizar(data.modalidad);
+    async function inicializarPagina() {
+        try {
+            const resEvento = await fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now());
+            const dataEvento = await resEvento.json();
+            if (dataEvento.success) {
+                document.getElementById('tituloEvento').textContent = (dataEvento.nombre || '').toUpperCase();
+                document.getElementById('campoTipo').textContent = capitalizar(dataEvento.tipo);
+                document.getElementById('campoLugar').textContent = dataEvento.lugar || '';
+                document.getElementById('campoInstitucion').textContent = dataEvento.institucion || '';
+                document.getElementById('campoDescripcion').textContent = dataEvento.descripcion || '';
+                document.getElementById('campoFechaInicio').textContent = aFechaVisible(dataEvento.fechaInicio);
+                document.getElementById('campoFechaFin').textContent = aFechaVisible(dataEvento.fechaFin);
+                document.getElementById('campoModalidad').textContent = capitalizar(dataEvento.modalidad);
 
-                if (data.fechaFin) {
-                    const p = data.fechaFin.split('-');
+                if (dataEvento.fechaFin) {
+                    const p = dataEvento.fechaFin.split('-');
                     eventoFechaFin = new Date(p[0], p[1] - 1, p[2]);
                     eventoFechaFin.setHours(23, 59, 59);
                 }
-
-                return fetch(contextPath + '/ObtenerConstanciaServlet?idEvento=' + encodeURIComponent(idEvento) + '&t=' + Date.now());
             }
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (!result || !result.success) return;
+        } catch (err) {
+            console.error('Error al cargar evento:', err);
+        }
+
+        try {
+            const resConst = await fetch(contextPath + '/ObtenerConstanciaServlet?idEvento=' + encodeURIComponent(idEvento) + '&t=' + Date.now());
+            const result = await resConst.json();
             const estaVencido = eventoFechaFin ? new Date() > eventoFechaFin : false;
-            if (result.constancia) {
+
+            if (result && result.success && result.constancia) {
                 mostrarConstancia(result.constancia, estaVencido);
             } else {
                 mostrarFormulario();
@@ -272,8 +275,13 @@
                     document.getElementById('formCargaArchivo').querySelector('.data-card').appendChild(warn);
                 }
             }
-        })
-        .catch(err => console.error('Error al inicializar página:', err));
+        } catch (err) {
+            console.error('Error al verificar constancia:', err);
+            mostrarFormulario();
+        }
+    }
+
+    inicializarPagina();
 
     document.getElementById('btnCancelarEntrega').addEventListener('click', () => {
         if (!constanciaIdActual) return;

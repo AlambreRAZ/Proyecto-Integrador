@@ -533,6 +533,7 @@ body {
     position: relative;
     margin: 0;
     padding: 0;
+    overflow: hidden; /* Oculta submenú cuando sidebar está colapsado */
 }
 
 .sidebar-submenu {
@@ -542,14 +543,20 @@ body {
     margin-bottom: 10px;
 }
 
-/* Solo mostrar el submenú cuando el sidebar está expandido Y se hace hover en el contenedor */
-.sidebar-hover:hover .sidebar-item-container:hover .sidebar-submenu,
-.sidebar-hover.locked .sidebar-item-container:hover .sidebar-submenu {
+/* Mostrar submenú cuando el sidebar está expandido */
+.sidebar-hover:hover .sidebar-item-container .sidebar-submenu,
+.sidebar-hover.locked .sidebar-item-container .sidebar-submenu {
     display: flex;
 }
 
+/* Permitir overflow cuando el sidebar está expandido para que se vea el submenú */
+.sidebar-hover:hover .sidebar-item-container,
+.sidebar-hover.locked .sidebar-item-container {
+    overflow: visible;
+}
+
 .submenu-item {
-    color: white;
+    color: var(--teal-main); /* Color visible por defecto */
     text-decoration: none;
     padding: 8px 15px;
     font-size: 0.85rem;
@@ -561,14 +568,7 @@ body {
     background-color: transparent;
 }
 
-/* Ajustes de color para cuando el sidebar es blanco en hover */
-.sidebar-hover:hover .submenu-item,
-.sidebar-hover.locked .submenu-item {
-    color: var(--teal-main);
-}
-
-.sidebar-hover:hover .submenu-item:hover,
-.sidebar-hover.locked .submenu-item:hover,
+.submenu-item:hover,
 .submenu-item.active {
     background-color: var(--teal-active);
     color: white;
