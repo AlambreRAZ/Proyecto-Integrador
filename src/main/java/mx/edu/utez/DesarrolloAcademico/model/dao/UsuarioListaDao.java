@@ -82,9 +82,11 @@ public class UsuarioListaDao {
 
     public List<Usuario> listarParticipantesPorEvento(int idEvento) {
         List<Usuario> lista = new ArrayList<>();
-        String query = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo_institucional, u.numero_empleado, u.activo, u.rol " +
+        String query = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo_institucional, u.numero_empleado, u.activo, u.rol, " +
+                "CASE WHEN c.id_constancia IS NOT NULL THEN 1 ELSE 0 END as entregado " +
                 "FROM usuarios u " +
                 "JOIN participantes_eventos pe ON u.id_usuario = pe.id_usuario " +
+                "LEFT JOIN constancias c ON c.id_participante = pe.id_participante " +
                 "WHERE pe.id_evento = ? ORDER BY u.nombre";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
@@ -100,6 +102,7 @@ public class UsuarioListaDao {
                     u.setNumeroEmpleado(rs.getString("numero_empleado"));
                     u.setActivo(rs.getInt("activo"));
                     u.setRol(rs.getString("rol"));
+                    u.setEntregado(rs.getInt("entregado") == 1);
                     lista.add(u);
                 }
             }

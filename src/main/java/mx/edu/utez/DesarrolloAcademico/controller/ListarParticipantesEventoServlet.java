@@ -43,7 +43,8 @@ public class ListarParticipantesEventoServlet extends HttpServlet {
                     .append("\"apellidoPaterno\":\"").append(esc(u.getApellidoPaterno())).append("\",")
                     .append("\"apellidoMaterno\":\"").append(esc(u.getApellidoMaterno())).append("\",")
                     .append("\"correo\":\"").append(esc(u.getCorreoInstitucional())).append("\",")
-                    .append("\"activo\":").append(u.getActivo())
+                    .append("\"activo\":").append(u.getActivo()).append(",")
+                    .append("\"entregado\":").append(u.isEntregado())
                     .append("}");
             }
             json.append("]");

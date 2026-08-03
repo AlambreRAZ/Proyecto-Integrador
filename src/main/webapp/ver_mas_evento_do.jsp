@@ -22,46 +22,46 @@
 </jsp:include>
 
 <main class="main-content">
-    <h3 class="page-title mb-4">INTRODUCCION A REDES</h3>
+    <h3 class="page-title mb-4" id="tituloEvento">EVENTO</h3>
 
     <div class="row mb-3">
         <div class="col-md-4">
             <label class="form-label text-muted">Nombre del evento:</label>
-            <input type="text" class="form-control" value="Introducion a redes" readonly>
+            <input type="text" class="form-control" id="campoNombre" value="" readonly>
         </div>
         <div class="col-md-4">
             <label class="form-label text-muted">Lugar:</label>
-            <input type="text" class="form-control" value="CDMX" readonly>
+            <input type="text" class="form-control" id="campoLugar" value="" readonly>
         </div>
         <div class="col-md-4">
             <label class="form-label text-muted">Institución / Empresa:</label>
-            <input type="text" class="form-control" value="Academia de formacion profesional del estado" readonly>
+            <input type="text" class="form-control" id="campoInstitucion" value="" readonly>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-4">
             <label class="form-label text-muted">Tipo de evento:</label>
-            <input type="text" class="form-control" value="Diplomado" readonly>
+            <input type="text" class="form-control" id="campoTipo" value="" readonly>
         </div>
         <div class="col-md-8">
             <label class="form-label text-muted">Descripción del evento:</label>
-            <input type="text" class="form-control" value="Gran evento de introducion a redes para los futuros rederos" readonly>
+            <input type="text" class="form-control" id="campoDescripcion" value="" readonly>
         </div>
     </div>
 
     <div class="row mb-5">
         <div class="col-md-3">
             <label class="form-label text-muted">Fecha de inicio:</label>
-            <input type="text" class="form-control" value="05/05/26" readonly>
+            <input type="text" class="form-control" id="campoFechaInicio" value="" readonly>
         </div>
         <div class="col-md-3">
             <label class="form-label text-muted">Fecha de fin:</label>
-            <input type="text" class="form-control" value="22/05/26" readonly>
+            <input type="text" class="form-control" id="campoFechaFin" value="" readonly>
         </div>
         <div class="col-md-2 mt-3 mt-md-0 d-flex flex-column justify-content-center">
             <div class="modalidad-label mb-1">Modalidad</div>
-            <div class="fs-6 text-dark">Presencial</div>
+            <div class="fs-6 text-dark" id="campoModalidad">-</div>
         </div>
         <div class="col-md-4 mt-3 mt-md-0">
             <div class="info-card-outline h-100 d-flex flex-column justify-content-center align-items-center text-center">
@@ -69,8 +69,8 @@
                     <div class="info-card-icon"><i class="bi bi-clock"></i></div>
                     <span class="fw-bold text-teal" style="color: var(--teal-main);">Fecha limite de entrega</span>
                 </div>
-                <div class="text-dark fw-semibold">31 Jul - 23:56</div>
-                <div class="badge-light-green">Faltan 18 dias</div>
+                <div class="text-dark fw-semibold" id="fechaLimiteTexto">-</div>
+                <div class="badge-light-green" id="diasRestantesBadge">Calculando...</div>
             </div>
         </div>
     </div>
@@ -81,6 +81,106 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="assets/js/coordinador.js"></script>
+<script>
+    const contextPath = '<%= request.getContextPath() %>';
+    const params = new URLSearchParams(window.location.search);
+    const idEvento = params.get('id');
+
+    const tituloEvento = document.getElementById('tituloEvento');
+    const campoNombre = document.getElementById('campoNombre');
+    const campoLugar = document.getElementById('campoLugar');
+    const campoInstitucion = document.getElementById('campoInstitucion');
+    const campoTipo = document.getElementById('campoTipo');
+    const campoDescripcion = document.getElementById('campoDescripcion');
+    const campoFechaInicio = document.getElementById('campoFechaInicio');
+    const campoFechaFin = document.getElementById('campoFechaFin');
+    const campoModalidad = document.getElementById('campoModalidad');
+
+    function aFechaVisible(iso) {
+        if (!iso) return '';
+        const partes = iso.split('-');
+        if (partes.length !== 3) return iso;
+        return partes[2] + '/' + partes[1] + '/' + partes[0].slice(2);
+    }
+
+    function capitalizar(texto) {
+        if (!texto) return '';
+        return texto.charAt(0).toUpperCase() + texto.slice(1);
+    }
+
+    function cargarEvento() {
+        if (!idEvento) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Falta el id del evento',
+                text: 'Entra a esta página desde la vista general para poder ver el detalle.',
+                confirmButtonColor: '#00847b'
+            });
+            return;
+        }
+
+        fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now())
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (!data.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'No se pudo cargar el evento',
+                        text: data.message || 'Ocurrió un error al obtener los datos.',
+                        confirmButtonColor: '#00847b'
+                    });
+                    return;
+                }
+
+                tituloEvento.textContent = (data.nombre || '').toUpperCase();
+                campoNombre.value = data.nombre || '';
+                campoLugar.value = data.lugar || '';
+                campoInstitucion.value = data.institucion || '';
+                campoTipo.value = capitalizar(data.tipo);
+                campoDescripcion.value = data.descripcion || '';
+                campoFechaInicio.value = aFechaVisible(data.fechaInicio);
+                campoFechaFin.value = aFechaVisible(data.fechaFin);
+                campoModalidad.textContent = capitalizar(data.modalidad);
+
+                // Calcular fecha límite
+                if (data.fechaFin) {
+                    const hoy = new Date();
+                    hoy.setHours(0,0,0,0);
+                    const partes = data.fechaFin.split('-');
+                    const limite = new Date(partes[0], partes[1] - 1, partes[2]);
+                    
+                    const difTiempo = limite.getTime() - hoy.getTime();
+                    const difDias = Math.ceil(difTiempo / (1000 * 3600 * 24));
+                    
+                    document.getElementById('fechaLimiteTexto').textContent = aFechaVisible(data.fechaFin);
+                    const badge = document.getElementById('diasRestantesBadge');
+                    
+                    if (difDias > 0) {
+                        badge.textContent = 'Faltan ' + difDias + ' días';
+                        badge.className = 'badge-light-green';
+                    } else if (difDias === 0) {
+                        badge.textContent = 'Vence hoy';
+                        badge.className = 'badge text-bg-warning';
+                    } else {
+                        badge.textContent = 'Vencido hace ' + Math.abs(difDias) + ' días';
+                        badge.className = 'badge text-bg-danger';
+                    }
+                }
+            })
+            .catch(function (error) {
+                console.error('Error al cargar el evento:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No fue posible comunicarse con el servidor.',
+                    confirmButtonColor: '#00847b'
+                });
+            });
+    }
+
+    cargarEvento();
+</script>
 </body>
 </html>

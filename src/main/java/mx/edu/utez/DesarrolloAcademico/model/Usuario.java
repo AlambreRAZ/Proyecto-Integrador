@@ -16,6 +16,7 @@ public class Usuario {
     private Timestamp fechaRegistro;
     private int activo;
     private Integer creadoPor; // Puede ser null
+    private boolean entregado;
 
     public Usuario() {}
 
@@ -75,4 +76,7 @@ public class Usuario {
 
     public Integer getCreadoPor() { return creadoPor; }
     public void setCreadoPor(Integer creadoPor) { this.creadoPor = creadoPor; }
+
+    public boolean isEntregado() { return entregado; }
+    public void setEntregado(boolean entregado) { this.entregado = entregado; }
 }
