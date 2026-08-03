@@ -301,17 +301,13 @@ body {
     font-size: 0.85rem;
     color: #333;
     border-bottom: 1px solid #eee;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 0;
     text-align: left;
 }
 .table-custom td > div,
 .table-custom td > span {
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal; /* Cambiado a normal para evitar cortes raros */
 }
 
 .action-btn {
@@ -473,8 +469,13 @@ body {
     height: 35px;
     background-color: #4cd137;
     border-radius: 50%;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
     margin-right: 10px;
+    flex-shrink: 0;
 }
 .docente-name-container {
     display: flex;
@@ -556,7 +557,8 @@ body {
 }
 
 .submenu-item {
-    color: var(--teal-main); /* Color visible por defecto */
+    color: var(--teal-main); /* Letra verde */
+    background-color: white; /* Fondo blanco */
     text-decoration: none;
     padding: 8px 15px;
     font-size: 0.85rem;
@@ -565,7 +567,6 @@ body {
     margin-bottom: 5px;
     margin-right: 20px;
     transition: all 0.2s;
-    background-color: transparent;
 }
 
 .submenu-item:hover,

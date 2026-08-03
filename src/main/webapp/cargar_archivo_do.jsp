@@ -18,7 +18,6 @@
             border-radius: 16px;
             padding: 30px;
             background: linear-gradient(135deg, #f0fdfb 0%, #e6f7f5 100%);
-            display: none;
         }
         .constancia-file-icon {
             font-size: 3rem;
@@ -90,7 +89,7 @@
     </div>
 
     <!-- Panel cuando YA EXISTE una constancia (oculto por defecto) -->
-    <div class="constancia-card mb-5" id="constanciaCard">
+    <div class="constancia-card mb-5" id="constanciaCard" style="display:none;">
         <h4 class="fw-bold mb-4" style="color: var(--teal-main);">Archivo cargado</h4>
         <div class="d-flex align-items-center gap-4 flex-wrap">
             <div class="constancia-file-icon">
@@ -155,7 +154,7 @@
             </div>
 
             <!-- Vista del archivo seleccionado -->
-            <div id="archivoSeleccionadoInfo" style="display:none; border-radius: 10px; background: #f0fdfb;" class="d-flex align-items-center gap-3 mt-4 p-3">
+            <div id="archivoSeleccionadoInfo" style="display:none; border-radius: 10px; background: #f0fdfb; align-items: center; gap: 1rem;" class="mt-4 p-3">
                 <i class="bi bi-file-earmark-pdf-fill text-danger fs-2"></i>
                 <div>
                     <div class="fw-bold" id="archivoSeleccionadoNombre"></div>
