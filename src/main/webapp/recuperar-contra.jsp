@@ -113,7 +113,7 @@
 
         <div class="text-center small mt-3">
           <span class="text-dark">¿Ya te acordaste de tu cuenta? </span>
-          <a href="login.jsp" class="text-decoration-none fw-semibold" style="color: #4ea9e6;">
+          <a href="index.jsp" class="text-decoration-none fw-semibold" style="color: #4ea9e6;">
             Inicia sesión aquí
           </a>
         </div>

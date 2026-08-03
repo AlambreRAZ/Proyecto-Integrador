@@ -2,7 +2,7 @@
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
 <%
     Usuario u = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-    if (u == null) { response.sendRedirect("login.jsp"); return; }
+    if (u == null) { response.sendRedirect("index.jsp"); return; }
     String divisionStr = (u.getIdDivision() != null) ? String.valueOf(u.getIdDivision()) : "N/A";
 %>
 <!doctype html>

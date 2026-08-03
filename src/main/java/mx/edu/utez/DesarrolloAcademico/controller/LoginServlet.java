@@ -19,7 +19,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Si intenta acceder a /login por GET, lo mandamos al jsp
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        request.getRequestDispatcher("index.jsp").forward(request, response);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class LoginServlet extends HttpServlet {
 
         if (credencial == null || credencial.trim().isEmpty() || contra == null || contra.trim().isEmpty()) {
             request.setAttribute("error", "Por favor ingresa tus credenciales.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("index.jsp").forward(request, response);
             return;
         }
 
@@ -51,12 +51,12 @@ public class LoginServlet extends HttpServlet {
             } else {
                 // Rol desconocido (no debería pasar por el CHECK de la BD)
                 request.setAttribute("error", "El rol de este usuario no es válido.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("index.jsp").forward(request, response);
             }
         } else {
             // Credenciales incorrectas o usuario inactivo
             request.setAttribute("error", "Correo/Número de empleado o contraseña incorrectos.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("index.jsp").forward(request, response);
         }
     }
 }
