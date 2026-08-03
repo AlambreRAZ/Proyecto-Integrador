@@ -75,10 +75,7 @@
                     </div>
                     <% } %>
                     <div class="text-center small">
-                        <div class="mb-1">
-                            <span class="text-dark">¿No tienes cuenta?</span>
-                            <a href="registro.jsp" class="fw-semibold text-decoration-none" style="color: #5B7FFF;" onmouseover="this.className='fw-semibold text-decoration-underline'" onmouseout="this.className='fw-semibold text-decoration-none'">Regístrate</a>
-                        </div>
+
                         <div>
                             <a href="recuperar-contra.jsp" class="text-decoration-none" style="color: #5B7FFF;" onmouseover="this.className='text-decoration-underline'" onmouseout="this.className='text-decoration-none'">Olvidé mi contraseña</a>
                         </div>
