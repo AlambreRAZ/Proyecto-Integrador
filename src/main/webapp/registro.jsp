@@ -134,7 +134,7 @@
 
                     <div class="text-center small">
                         <span class="text-dark">¿Ya te acordaste de tu cuenta? </span>
-                        <a href="index.jsp" class="text-decoration-none enlace-login">Inicia sesión aquí</a>
+                        <a href="login.jsp" class="text-decoration-none enlace-login">Inicia sesión aquí</a>
                     </div>
                 </form>
 

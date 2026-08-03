@@ -139,7 +139,7 @@ public class RegistroServlet extends HttpServlet {
 
         if (registrado) {
             request.setAttribute("mensajeExito", "Tu cuenta se ha creado exitosamente. Ya puedes iniciar sesión.");
-            request.getRequestDispatcher("index.jsp").forward(request, response);
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         } else {
             errorResponse(request, response, "Ocurrió un error al guardar tu cuenta en la base de datos. Intenta más tarde.");
         }

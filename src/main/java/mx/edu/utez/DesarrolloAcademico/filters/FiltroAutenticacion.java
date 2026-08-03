@@ -27,7 +27,7 @@ public class FiltroAutenticacion extends HttpFilter {
 
         // Páginas de login/registro/recuperación: si ya hay sesión, no tiene sentido volver a mostrarlas.
         boolean authPage =
-                requestURI.endsWith("index.jsp") ||
+                requestURI.endsWith("login.jsp") ||
                         requestURI.endsWith("/login") ||
                         requestURI.endsWith("registro.jsp") ||
                         requestURI.endsWith("/register") ||
@@ -112,7 +112,7 @@ public class FiltroAutenticacion extends HttpFilter {
                     response.sendRedirect(request.getContextPath() + "/vista_general_docente_do.jsp");
                 } else {
                     session.invalidate();
-                    response.sendRedirect(request.getContextPath() + "/index.jsp");
+                    response.sendRedirect(request.getContextPath() + "/login.jsp");
                 }
             } else {
                 chain.doFilter(request, response);
@@ -122,7 +122,7 @@ public class FiltroAutenticacion extends HttpFilter {
                 chain.doFilter(request, response);
             } else {
                 System.out.println("[FILTRO] -> redirige a registro.jsp (no logueado y no es authPage/publicPage/isResource)");
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
             }
         }
     }

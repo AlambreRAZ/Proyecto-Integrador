@@ -101,7 +101,7 @@ public class RecuperarServlet extends HttpServlet {
                 session.removeAttribute("emailUsuarioRecuperacion");
                 
                 request.setAttribute("mensajeExito", "Tu contraseña ha sido cambiada exitosamente. Ya puedes iniciar sesión.");
-                request.getRequestDispatcher("index.jsp").forward(request, response);
+                request.getRequestDispatcher("login.jsp").forward(request, response);
             } else {
                 request.setAttribute("mensajeError", "Error al actualizar la contraseña en la BD.");
                 request.setAttribute("step", "cambiar");
