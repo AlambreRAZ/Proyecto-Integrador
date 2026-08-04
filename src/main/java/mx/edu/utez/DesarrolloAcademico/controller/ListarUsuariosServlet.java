@@ -24,12 +24,21 @@ public class ListarUsuariosServlet extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        Integer idDivision = null;
+        if (session != null) {
+            mx.edu.utez.DesarrolloAcademico.model.Usuario sessionUser = (mx.edu.utez.DesarrolloAcademico.model.Usuario) session.getAttribute("usuario");
+            if (sessionUser != null && "coordinador".equalsIgnoreCase(sessionUser.getRol())) {
+                idDivision = sessionUser.getIdDivision();
+            }
+        }
+
         String rol = request.getParameter("rol");
         List<Usuario> usuarios;
         if (rol != null && !rol.isEmpty()) {
-            usuarios = dao.listarPorRoles(rol);
+            usuarios = dao.listarPorRoles(idDivision, rol);
         } else {
-            usuarios = dao.listarPorRoles("docente", "coordinador");
+            usuarios = dao.listarPorRoles(idDivision, "docente", "coordinador");
         }
 
         StringBuilder json = new StringBuilder("[");

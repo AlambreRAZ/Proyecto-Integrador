@@ -86,28 +86,38 @@ public class AgregarEvento_Co {
         return estado;
     }
 
-    public List<agregarEvento_co> listarEventos() {
+    public List<agregarEvento_co> listarEventos(Integer idDivision) {
         List<agregarEvento_co> eventos = new ArrayList<>();
-        String query = "SELECT id_evento, nombre, lugar, institucion, tipo_evento, descripcion, fecha_inicio, fecha_fin, modalidad FROM eventos ORDER BY id_evento DESC";
+        StringBuilder query = new StringBuilder("SELECT e.id_evento, e.nombre, e.lugar, e.institucion, e.tipo_evento, e.descripcion, e.fecha_inicio, e.fecha_fin, e.modalidad, d.nombre AS nombre_division ");
+        query.append("FROM eventos e LEFT JOIN divisiones d ON e.id_division = d.id_division ");
+        
+        if (idDivision != null) {
+            query.append("WHERE e.id_division = ? ");
+        }
+        query.append("ORDER BY e.id_evento DESC");
 
         Connection con = DatabaseConnection.getConnection();
-        try (PreparedStatement ps = con.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                agregarEvento_co evento = new agregarEvento_co();
-                evento.setId(rs.getInt("id_evento"));
-                evento.setNombre(rs.getString("nombre"));
-                evento.setLugar(rs.getString("lugar"));
-                evento.setInstitucion(rs.getString("institucion"));
-                evento.setTipo(rs.getString("tipo_evento"));
-                evento.setDescripcion(rs.getString("descripcion"));
-                java.sql.Timestamp tsInicio = rs.getTimestamp("fecha_inicio");
-                java.sql.Timestamp tsFin = rs.getTimestamp("fecha_fin");
-                evento.setFechaInicio(tsInicio != null ? tsInicio.toLocalDateTime().toLocalDate().toString() : "");
-                evento.setFechaFin(tsFin != null ? tsFin.toLocalDateTime().toLocalDate().toString() : "");
-                evento.setModalidad(rs.getString("modalidad"));
-                eventos.add(evento);
+        try (PreparedStatement ps = con.prepareStatement(query.toString())) {
+            if (idDivision != null) {
+                ps.setInt(1, idDivision);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    agregarEvento_co evento = new agregarEvento_co();
+                    evento.setId(rs.getInt("id_evento"));
+                    evento.setNombre(rs.getString("nombre"));
+                    evento.setLugar(rs.getString("lugar"));
+                    evento.setInstitucion(rs.getString("institucion"));
+                    evento.setTipo(rs.getString("tipo_evento"));
+                    evento.setDescripcion(rs.getString("descripcion"));
+                    java.sql.Timestamp tsInicio = rs.getTimestamp("fecha_inicio");
+                    java.sql.Timestamp tsFin = rs.getTimestamp("fecha_fin");
+                    evento.setFechaInicio(tsInicio != null ? tsInicio.toLocalDateTime().toLocalDate().toString() : "");
+                    evento.setFechaFin(tsFin != null ? tsFin.toLocalDateTime().toLocalDate().toString() : "");
+                    evento.setModalidad(rs.getString("modalidad"));
+                    evento.setNombreDivision(rs.getString("nombre_division"));
+                    eventos.add(evento);
+                }
             }
         } catch (SQLException e) {
             System.err.println("Error al listar eventos: " + e.getMessage());

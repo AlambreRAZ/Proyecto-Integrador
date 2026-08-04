@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<jsp:include page="sidebar.jsp">
+<jsp:include page="sidebar_co.jsp">
     <jsp:param name="active" value="mi_cuenta" />
 </jsp:include>
 

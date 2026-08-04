@@ -56,6 +56,9 @@ function renderEventos(eventos) {
     eventos.forEach(function (ev) {
         const fila = document.createElement('tr');
         fila.setAttribute('data-id', ev.id);
+        const isDesarrollador = window.location.pathname.includes('_de.jsp');
+        const colDivision = isDesarrollador ? '<td><span class="badge bg-secondary">' + escapeHtml(ev.nombreDivision) + '</span></td>' : '';
+        
         fila.innerHTML =
             '<td>' +
             '<div class="fw-semibold">' + escapeHtml(ev.nombre) + '</div>' +
@@ -67,6 +70,7 @@ function renderEventos(eventos) {
             '<div class="small text-muted">' + escapeHtml(ev.lugar) + '</div>' +
             '</td>' +
             '<td>' + formatearFecha(ev.fechaInicio) + ' - ' + formatearFecha(ev.fechaFin) + '</td>' +
+            colDivision +
             '<td>' +
             '<a href="editar_evento_co.jsp?id=' + ev.id + '" class="action-btn"><i class="bi bi-pencil"></i></a>' +
             '<a href="ver_mas_evento_co.jsp?id=' + ev.id + '" class="action-btn"><i class="bi bi-eye"></i></a>' +

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class UsuarioListaDao {
 
-    public List<Usuario> listarPorRoles(String... roles) {
+    public List<Usuario> listarPorRoles(Integer idDivision, String... roles) {
         List<Usuario> lista = new ArrayList<>();
         if (roles == null || roles.length == 0) return lista;
 
@@ -18,12 +18,23 @@ public class UsuarioListaDao {
         for (int i = 0; i < roles.length; i++) {
             sb.append(i == 0 ? "?" : ",?");
         }
-        sb.append(") ORDER BY nombre");
+        sb.append(")");
+        
+        if (idDivision != null) {
+            sb.append(" AND id_division = ?");
+        }
+        
+        sb.append(" ORDER BY nombre");
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sb.toString())) {
+             
+            int paramIndex = 1;
             for (int i = 0; i < roles.length; i++) {
-                ps.setString(i + 1, roles[i]);
+                ps.setString(paramIndex++, roles[i]);
+            }
+            if (idDivision != null) {
+                ps.setInt(paramIndex++, idDivision);
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

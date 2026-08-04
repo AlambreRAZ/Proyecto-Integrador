@@ -98,6 +98,7 @@ public class agregarEvento_co {
         return nombre;
     }
     private Integer idDivision;
+    private String nombreDivision;
     private Integer creadoPor;
 
     public void setNombre(String nombre) {
@@ -123,6 +124,14 @@ public class agregarEvento_co {
 
     public void setIdDivision(Integer idDivision) {
         this.idDivision = idDivision;
+    }
+
+    public String getNombreDivision() {
+        return nombreDivision;
+    }
+
+    public void setNombreDivision(String nombreDivision) {
+        this.nombreDivision = nombreDivision;
     }
 
     public Integer getCreadoPor() {

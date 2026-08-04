@@ -22,7 +22,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1; margin-right: 20px;">
             <i class="bi bi-search"></i>
-            <input type="text" placeholder="Buscar Docente por nombre, correo ...">
+            <input type="text" id="buscarUsuario" placeholder="Buscar Docente por nombre, correo ...">
         </div>
         <a href="agregar_docente_de.jsp" class="btn-teal">
             <i class="bi bi-person-plus"></i> Agregar Docente
@@ -49,82 +49,9 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tablaUsuariosBody">
                 <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>DATID</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-on text-success fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_docente_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>DATID</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-on text-success fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_docente_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>DATID</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-off text-danger fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_docente_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="docente-name-container">
-                            <div class="avatar-circle" style="flex-shrink:0;"></div>
-                            <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                Luis Gerardo Barron Flores
-                            </div>
-                        </div>
-                    </td>
-                    <td>ejemplo@gmail.com</td>
-                    <td>DATID</td>
-                    <td>67</td>
-                    <td><i class="bi bi-toggle-on text-success fs-4"></i></td>
-                    <td style="white-space: nowrap;">
-                        <a href="editar_docente_de.jsp" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>
-                        <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>
-                        <a href="#" class="action-btn delete" title="Eliminar"><i class="bi bi-trash"></i></a>
-                    </td>
+                    <td colspan="6" class="text-center text-muted py-4">Cargando docentes...</td>
                 </tr>
             </tbody>
         </table>
@@ -143,6 +70,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>window.contextPath = '<%= request.getContextPath() %>';</script>
 <script src="assets/js/coordinador.js"></script>
+<script src="assets/js/GestionUsuarios.js"></script>
 </body>
 </html>

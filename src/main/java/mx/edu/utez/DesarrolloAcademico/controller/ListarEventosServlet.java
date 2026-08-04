@@ -18,8 +18,17 @@ public class ListarEventosServlet extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
+        HttpSession session = request.getSession(false);
+        Integer idDivision = null;
+        if (session != null) {
+            mx.edu.utez.DesarrolloAcademico.model.Usuario u = (mx.edu.utez.DesarrolloAcademico.model.Usuario) session.getAttribute("usuario");
+            if (u != null && "coordinador".equalsIgnoreCase(u.getRol())) {
+                idDivision = u.getIdDivision();
+            }
+        }
+
         AgregarEvento_Co dao = new AgregarEvento_Co();
-        List<agregarEvento_co> eventos = dao.listarEventos();
+        List<agregarEvento_co> eventos = dao.listarEventos(idDivision);
 
         StringBuilder json = new StringBuilder("[");
         for (int i = 0; i < eventos.size(); i++) {
@@ -34,7 +43,8 @@ public class ListarEventosServlet extends HttpServlet {
                     .append("\"descripcion\":\"").append(escapar(ev.getDescripcion())).append("\",")
                     .append("\"fechaInicio\":\"").append(escapar(ev.getFechaInicio())).append("\",")
                     .append("\"fechaFin\":\"").append(escapar(ev.getFechaFin())).append("\",")
-                    .append("\"modalidad\":\"").append(escapar(ev.getModalidad())).append("\"")
+                    .append("\"modalidad\":\"").append(escapar(ev.getModalidad())).append("\",")
+                    .append("\"nombreDivision\":\"").append(escapar(ev.getNombreDivision())).append("\"")
                     .append("}");
         }
         json.append("]");

@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<jsp:include page="sidebar.jsp">
+<jsp:include page="sidebar_de.jsp">
     <jsp:param name="active" value="gestion_evento" />
 </jsp:include>
 
@@ -41,10 +41,11 @@
     <div class="data-card p-0 mb-4" style="overflow: hidden;">
         <table class="table-custom mb-0">
             <colgroup>
-                <col style="width: 30%;">
+                <col style="width: 25%;">
                 <col style="width: 14%;">
-                <col style="width: 22%;">
                 <col style="width: 20%;">
+                <col style="width: 15%;">
+                <col style="width: 12%;">
                 <col style="width: 14%;">
             </colgroup>
             <thead>
@@ -53,12 +54,13 @@
                 <th>Tipo</th>
                 <th>Institución</th>
                 <th>Fecha</th>
+                <th>División</th>
                 <th>Acciones</th>
             </tr>
             </thead>
             <tbody id="tablaEventosBody">
             <tr>
-                <td colspan="5" class="text-center text-muted py-4">Cargando eventos...</td>
+                <td colspan="6" class="text-center text-muted py-4">Cargando eventos...</td>
             </tr>
             </tbody>
         </table>

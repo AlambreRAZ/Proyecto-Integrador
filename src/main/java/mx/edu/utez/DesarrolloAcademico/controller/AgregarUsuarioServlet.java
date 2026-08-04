@@ -70,18 +70,22 @@ public class AgregarUsuarioServlet extends HttpServlet {
             }
 
             int idDivision = 0;
-            switch(divisionStr) {
-                case "DACEA": idDivision = 1; break;
-                case "DAMI": idDivision = 2; break;
-                case "DATID": idDivision = 3; break;
-                case "DATEFI": idDivision = 4; break;
-                default: 
-                    try {
-                        idDivision = Integer.parseInt(divisionStr);
-                    } catch (NumberFormatException e) {
-                        out.write("{\"success\": false, \"message\": \"División inválida.\"}");
-                        return;
-                    }
+            if ("coordinador".equalsIgnoreCase(adminUser.getRol()) && adminUser.getIdDivision() != null) {
+                idDivision = adminUser.getIdDivision();
+            } else {
+                switch(divisionStr) {
+                    case "DACEA": idDivision = 1; break;
+                    case "DAMI": idDivision = 2; break;
+                    case "DATID": idDivision = 3; break;
+                    case "DATEFI": idDivision = 4; break;
+                    default: 
+                        try {
+                            idDivision = Integer.parseInt(divisionStr);
+                        } catch (NumberFormatException e) {
+                            out.write("{\"success\": false, \"message\": \"División inválida.\"}");
+                            return;
+                        }
+                }
             }
 
             if (!contra.equals(confirmContra)) {

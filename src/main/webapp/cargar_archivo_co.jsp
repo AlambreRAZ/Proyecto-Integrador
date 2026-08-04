@@ -38,7 +38,7 @@
 </head>
 <body>
 
-<jsp:include page="sidebar.jsp">
+<jsp:include page="sidebar_co.jsp">
     <jsp:param name="active" value="gestion_evento" />
 </jsp:include>
 
