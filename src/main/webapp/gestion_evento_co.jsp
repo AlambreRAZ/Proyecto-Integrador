@@ -64,15 +64,7 @@
         </table>
     </div>
 
-    <div class="pagination-container">
-        <a href="#" class="page-btn"><i class="bi bi-chevron-left"></i></a>
-        <a href="#" class="page-btn active">1</a>
-        <a href="#" class="page-btn">2</a>
-        <a href="#" class="page-btn">3</a>
-        <span class="page-btn dots">...</span>
-        <a href="#" class="page-btn">10</a>
-        <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
-    </div>
+    <div class="pagination-container" id="paginationContainer"></div>
 
 </main>
 

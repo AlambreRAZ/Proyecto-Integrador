@@ -81,9 +81,11 @@ public class SubirConstanciaServlet extends HttpServlet {
             }
             
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            if (!fileName.toLowerCase().endsWith(".pdf")) {
+            String fileNameLower = fileName.toLowerCase();
+            if (!fileNameLower.endsWith(".pdf") && !fileNameLower.endsWith(".png")
+                    && !fileNameLower.endsWith(".jpg") && !fileNameLower.endsWith(".jpeg")) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.write("{\"success\": false, \"message\": \"El archivo debe ser PDF.\"}");
+                out.write("{\"success\": false, \"message\": \"El archivo debe ser PDF, PNG o JPG.\"}");
                 out.flush();
                 return;
             }

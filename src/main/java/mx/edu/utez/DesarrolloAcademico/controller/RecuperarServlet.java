@@ -46,33 +46,47 @@ public class RecuperarServlet extends HttpServlet {
 
         if (usuario != null) {
             String codigo = generarCodigo(6);
-            
             boolean guardado = usuarioDao.guardarCodigoRecuperacion(usuario.getIdUsuario(), codigo);
-            
             if (guardado) {
                 emailService.enviarCodigoRecuperacion(usuario.getCorreoInstitucional(), codigo);
             }
         }
-        
-        request.setAttribute("mensajeInfo", "Si el correo o número de empleado se encuentra registrado, te llegará un correo electrónico con instrucciones.");
+
+        // Guardamos el dato en sesión para poder reenviar el código sin pedir el correo otra vez
+        request.getSession().setAttribute("datoRecuperacion", dato);
+
+        request.setAttribute("mensajeInfo", "Si el correo o número de empleado se encuentra registrado, te llegará un correo con instrucciones.");
+        request.setAttribute("emailParaReenvio", dato); // Para el botón 'Reenviar' en la vista
         request.setAttribute("step", "verificar");
         request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
     }
 
     private void verificarCodigo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String codigo = request.getParameter("codigo");
-        
+        // El nuevo JSP manda el código ensamblado en el campo 'codigoCompleto' (hidden)
+        // pero mantenemos compatibilidad con el campo 'codigo' por si acaso
+        String codigo = request.getParameter("codigoCompleto");
+        if (codigo == null || codigo.trim().isEmpty()) {
+            codigo = request.getParameter("codigo");
+        }
+        if (codigo != null) {
+            codigo = codigo.trim().toUpperCase();
+        }
+
+        // Recuperamos el dato de sesión para el botón reenviar
+        String datoSesion = (String) request.getSession().getAttribute("datoRecuperacion");
+
         Usuario usuario = usuarioDao.verificarCodigo(codigo);
-        
+
         if (usuario != null) {
             HttpSession session = request.getSession();
             session.setAttribute("idUsuarioRecuperacion", usuario.getIdUsuario());
             session.setAttribute("emailUsuarioRecuperacion", usuario.getCorreoInstitucional());
-            
+
             request.setAttribute("step", "cambiar");
             request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
         } else {
             request.setAttribute("mensajeError", "Código incorrecto o expirado, intenta de nuevo.");
+            request.setAttribute("emailParaReenvio", datoSesion);
             request.setAttribute("step", "verificar");
             request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
         }
@@ -91,24 +105,36 @@ public class RecuperarServlet extends HttpServlet {
         String pass1 = request.getParameter("pass1");
         String pass2 = request.getParameter("pass2");
 
-        if (pass1 != null && pass1.equals(pass2) && !pass1.trim().isEmpty()) {
-            boolean actualizado = usuarioDao.actualizarPasswordLimpiaCodigo(idUsuario, pass1);
-            
-            if (actualizado) {
-                emailService.enviarConfirmacionCambio(email);
-                
-                session.removeAttribute("idUsuarioRecuperacion");
-                session.removeAttribute("emailUsuarioRecuperacion");
-                
-                request.setAttribute("mensajeExito", "Tu contraseña ha sido cambiada exitosamente. Ya puedes iniciar sesión.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-            } else {
-                request.setAttribute("mensajeError", "Error al actualizar la contraseña en la BD.");
-                request.setAttribute("step", "cambiar");
-                request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
-            }
+        // Validar longitud 12-15 caracteres
+        if (pass1 == null || pass1.trim().isEmpty()) {
+            request.setAttribute("mensajeError", "La contraseña no puede estar vacía.");
+            request.setAttribute("step", "cambiar");
+            request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
+            return;
+        }
+        if (pass1.length() < 12 || pass1.length() > 15) {
+            request.setAttribute("mensajeError", "La contraseña debe tener entre 12 y 15 caracteres.");
+            request.setAttribute("step", "cambiar");
+            request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
+            return;
+        }
+        if (!pass1.equals(pass2)) {
+            request.setAttribute("mensajeError", "Las contraseñas no coinciden.");
+            request.setAttribute("step", "cambiar");
+            request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
+            return;
+        }
+
+        boolean actualizado = usuarioDao.actualizarPasswordLimpiaCodigo(idUsuario, pass1);
+
+        if (actualizado) {
+            emailService.enviarConfirmacionCambio(email);
+            session.removeAttribute("idUsuarioRecuperacion");
+            session.removeAttribute("emailUsuarioRecuperacion");
+            request.setAttribute("mensajeExito", "Tu contraseña ha sido cambiada exitosamente. Ya puedes iniciar sesión.");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         } else {
-            request.setAttribute("mensajeError", "Las contraseñas no coinciden o están vacías.");
+            request.setAttribute("mensajeError", "Error al actualizar la contraseña en la BD.");
             request.setAttribute("step", "cambiar");
             request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
         }

@@ -67,13 +67,23 @@
                 <label class="form-label">Fecha de fin <span class="text-danger">*</span></label>
                 <input type="date" class="form-control" name="fechaFin" required>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label class="form-label">Modalidad <span class="text-danger">*</span></label>
                 <select class="form-select" name="modalidad" required>
                     <option value="" disabled selected>Selecciona una opción</option>
                     <option value="presencial">Presencial</option>
                     <option value="virtual">Virtual</option>
                     <option value="mixta">Mixto</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">División Académica <span class="text-danger">*</span></label>
+                <select class="form-select" name="division" id="campoDivision" required>
+                    <option value="" disabled selected>Selecciona una división</option>
+                    <option value="2">DACEA</option>
+                    <option value="4">DAMI</option>
+                    <option value="1">DATID</option>
+                    <option value="3">DATEFI</option>
                 </select>
             </div>
         </div>

@@ -41,6 +41,12 @@ public class CambiarPasswordServlet extends HttpServlet {
                 return;
             }
 
+            // Validar longitud 12-15 caracteres
+            if (passNueva.length() < 12 || passNueva.length() > 15) {
+                out.write("{\"success\": false, \"message\": \"La nueva contraseña debe tener entre 12 y 15 caracteres.\"}");
+                return;
+            }
+
             // Si se especifica idUsuarioTarget (coordinador cambia pass de otro), usar ese ID
             int idUsuarioTarget = u.getIdUsuario();
             if (idTargetStr != null && !idTargetStr.isEmpty()) {

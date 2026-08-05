@@ -99,6 +99,10 @@ document.querySelector('form').addEventListener('submit', function (e) {
             Swal.fire({ icon: 'error', title: 'Contraseñas no coinciden', text: 'La nueva contraseña y su confirmación deben ser iguales.', confirmButtonColor: '#00847b' });
             return;
         }
+        if (passNueva.value.length < 12 || passNueva.value.length > 15) {
+            Swal.fire({ icon: 'error', title: 'Contraseña inválida', text: 'La nueva contraseña debe tener entre 12 y 15 caracteres.', confirmButtonColor: '#00847b' });
+            return;
+        }
     }
 
     fetch(contextPath + '/EditarUsuarioServlet', {

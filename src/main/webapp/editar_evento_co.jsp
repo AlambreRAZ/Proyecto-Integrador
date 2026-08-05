@@ -52,12 +52,12 @@
 
         <div class="row mb-5 align-items-end">
             <div class="col-md-3">
-                <label class="form-label text-muted">Fecha de inicio:</label>
-                <input type="text" class="form-control" id="campoFechaInicio" name="fecha_inicio" value="05/05/26" required>
+                <label class="form-label text-muted fw-semibold mb-2">Fecha de inicio</label>
+                <input type="date" class="form-control" id="campoFechaInicio" name="fecha_inicio" required>
             </div>
             <div class="col-md-3">
-                <label class="form-label text-muted">Fecha de fin:</label>
-                <input type="text" class="form-control" id="campoFechaFin" name="fecha_fin" value="22/05/26" required>
+                <label class="form-label text-muted fw-semibold mb-2">Fecha de termino</label>
+                <input type="date" class="form-control" id="campoFechaFin" name="fecha_fin" required>
             </div>
             <div class="col-md-6 custom-checkbox ps-md-4">
                 <div class="modalidad-label">MODALIDAD</div>

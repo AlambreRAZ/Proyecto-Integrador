@@ -69,18 +69,23 @@ public class AgregarUsuarioServlet extends HttpServlet {
                 return;
             }
 
-            int idDivision = 0;
+            Integer idDivision = null;
+            if ("DACEA".equalsIgnoreCase(divisionStr)) idDivision = 2;
+            else if ("DAMI".equalsIgnoreCase(divisionStr)) idDivision = 4;
+            else if ("DATID".equalsIgnoreCase(divisionStr)) idDivision = 1;
+            else if ("DATEFI".equalsIgnoreCase(divisionStr)) idDivision = 3;
+            else {
+                try {
+                    idDivision = Integer.parseInt(divisionStr);
+                } catch (NumberFormatException e) {
+                    out.write("{\"success\": false, \"message\": \"División inválida.\"}");
+                    return;
+                }
+            }
+
+            // RESTRICCIÓN: Si es coordinador, solo puede agregar a su propia división
             if ("coordinador".equalsIgnoreCase(adminUser.getRol()) && adminUser.getIdDivision() != null) {
                 idDivision = adminUser.getIdDivision();
-            } else {
-                switch(divisionStr) {
-                    case "DACEA": idDivision = 1; break;
-                    case "DAMI": idDivision = 2; break;
-                    case "DATID": idDivision = 3; break;
-                    case "DATEFI": idDivision = 4; break;
-                    default: 
-                        try {
-                            idDivision = Integer.parseInt(divisionStr);
                         } catch (NumberFormatException e) {
                             out.write("{\"success\": false, \"message\": \"División inválida.\"}");
                             return;

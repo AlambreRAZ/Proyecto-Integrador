@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="assets/css/bootstrap.css">
     <link rel="stylesheet" href="assets/css/bi/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/coordinador.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -17,7 +18,7 @@
 </jsp:include>
 
 <main class="main-content">
-    <h3 class="page-title mb-4">GESTION DE DOCENTES</h3>
+    <h3 class="page-title mb-4">GESTION DE DOCENTES/COORDINADORES</h3>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1; margin-right: 20px;">
@@ -25,19 +26,20 @@
             <input type="text" id="buscarUsuario" placeholder="Buscar Docente por nombre, correo ...">
         </div>
         <a href="agregar_docente_de.jsp" class="btn-teal">
-            <i class="bi bi-person-plus"></i> Agregar Docente
+            <i class="bi bi-person-plus"></i> Agregar Docente/Coordinador
         </a>
     </div>
 
     <div class="data-card p-0 mb-4" style="overflow: hidden;">
         <table class="table-custom mb-0 text-center">
             <colgroup>
-                <col style="width: 25%;">
-                <col style="width: 25%;">
-                <col style="width: 15%;">
-                <col style="width: 15%;">
-                <col style="width: 10%;">
-                <col style="width: 10%;">
+                <col style="width: 22%">
+                <col style="width: 22%">
+                <col style="width: 12%">
+                <col style="width: 12%">
+                <col style="width: 10%">
+                <col style="width: 10%">
+                <col style="width: 12%">
             </colgroup>
             <thead>
                 <tr>
@@ -45,6 +47,7 @@
                     <th>Correo</th>
                     <th>Division</th>
                     <th>Num. Empleado</th>
+                    <th>Rol</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -57,15 +60,7 @@
         </table>
     </div>
 
-    <div class="pagination-container">
-        <a href="#" class="page-btn"><i class="bi bi-chevron-left"></i></a>
-        <a href="#" class="page-btn active">1</a>
-        <a href="#" class="page-btn">2</a>
-        <a href="#" class="page-btn">3</a>
-        <span class="page-btn dots">...</span>
-        <a href="#" class="page-btn">10</a>
-        <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
-    </div>
+    <div class="pagination-container" id="paginationContainerDocente"></div>
 
 </main>
 

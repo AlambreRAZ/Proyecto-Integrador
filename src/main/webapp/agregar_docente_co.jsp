@@ -1,4 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
+<% 
+    Usuario admin = (Usuario) session.getAttribute("usuario");
+    String divStr = "";
+    if (admin != null && admin.getIdDivision() != null) {
+        switch(admin.getIdDivision()) {
+            case 1: divStr = "DATID"; break;
+            case 2: divStr = "DACEA"; break;
+            case 3: divStr = "DATEFI"; break;
+            case 4: divStr = "DAMI"; break;
+        }
+    }
+%>
 <!doctype html>
 <html lang="es">
 <head>
@@ -42,13 +55,14 @@
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label">Division Academica <span class="text-danger">*</span> :</label>
-                <select class="form-select" name="division" required>
-                    <option value="" disabled selected></option>
-                    <option value="DACEA">DACEA</option>
-                    <option value="DAMI">DAMI</option>
-                    <option value="DATID">DATID</option>
-                    <option value="DATEFI">DATEFI</option>
+                <select class="form-select" name="division_display" disabled required>
+                    <option value="" <%= divStr.isEmpty() ? "selected" : "" %> disabled>Selecciona...</option>
+                    <option value="DACEA" <%= "DACEA".equals(divStr) ? "selected" : "" %>>DACEA</option>
+                    <option value="DAMI" <%= "DAMI".equals(divStr) ? "selected" : "" %>>DAMI</option>
+                    <option value="DATID" <%= "DATID".equals(divStr) ? "selected" : "" %>>DATID</option>
+                    <option value="DATEFI" <%= "DATEFI".equals(divStr) ? "selected" : "" %>>DATEFI</option>
                 </select>
+                <input type="hidden" name="division" value="<%= divStr %>">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Numero de Empleado <span class="text-danger">*</span> :</label>

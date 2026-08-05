@@ -34,11 +34,21 @@
             </div>
             <span class="sidebar-text">Gestion de Usuarios</span>
         </a>
+
+        <!-- Configuración -->
         <div class="sidebar-submenu">
-            <a href="gestion_docente_de.jsp" class="submenu-item ${param.active_sub == 'docente' ? 'active' : ''}">Docente/Cordinador</a>
+            <a href="gestion_docente_de.jsp" class="submenu-item ${param.active_sub == 'docente' ? 'active' : ''}">Docente/Coordinador</a>
             <a href="gestion_desarrolladores_de.jsp" class="submenu-item ${param.active_sub == 'desarrollador' ? 'active' : ''}">Desarrollo academico</a>
         </div>
     </div>
+
+    <!-- Mis Eventos -->
+    <a href="mi_evento_de.jsp" class="sidebar-item ${param.active == 'mi_evento' ? 'active' : ''}">
+        <div class="sidebar-icon">
+            <i class="bi bi-calendar-event"></i>
+        </div>
+        <span class="sidebar-text">Mis Eventos</span>
+    </a>
 
     <a href="gestion_periodos_carga_de.jsp" class="sidebar-item ${param.active == 'periodos_carga' ? 'active' : ''}">
         <div class="sidebar-icon">

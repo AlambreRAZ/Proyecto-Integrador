@@ -217,4 +217,18 @@ public class UsuarioDao {
         }
         return false;
     }
+    public boolean cambiarEstado(int idUsuario, int nuevoEstado) {
+        String query = "UPDATE usuarios SET activo = ? WHERE id_usuario = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+             
+            ps.setInt(1, nuevoEstado);
+            ps.setInt(2, idUsuario);
+            
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

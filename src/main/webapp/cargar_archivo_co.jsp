@@ -142,14 +142,14 @@
 
             <!-- Upload Zone -->
             <div class="upload-zone text-center p-5 mt-4" id="uploadZone" style="border: 2px dashed #444; border-radius: 12px; background-color: transparent; position: relative;">
-                <input type="file" name="archivo" id="archivoPdf" accept="application/pdf" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;">
+                <input type="file" name="archivo" id="archivoPdf" accept="application/pdf,image/png,image/jpeg" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;">
                 <div class="mb-3">
                     <div style="display: inline-flex; justify-content: center; align-items: center; width: 60px; height: 40px; background-color: var(--teal-main); border-radius: 30px 30px 10px 10px; color: white;">
                         <i class="bi bi-arrow-up-short fs-2"></i>
                     </div>
                 </div>
                 <button type="button" class="btn-teal px-4 py-2 mb-3" style="border-radius: 20px;">Explorar</button>
-                <div class="text-muted small" id="nombreArchivoTexto">Selecciona el Archivo a subir (.pdf)</div>
+                <div class="text-muted small" id="nombreArchivoTexto">Selecciona el Archivo a subir (.pdf, .png, .jpg)</div>
             </div>
 
             <!-- Vista del archivo seleccionado (oculta hasta que eliges un archivo) -->
@@ -164,7 +164,7 @@
         </div>
 
         <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-5">
-            <a href="gestion_evento_co.jsp" class="btn btn-outline-teal px-5 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
+            <a href="mi_evento_co.jsp" class="btn btn-outline-teal px-5 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
                 <i class="bi bi-chevron-left me-2"></i> Volver
             </a>
             <button type="submit" class="btn-teal px-5 py-2" style="border-radius: 6px;">Cargar Archivo</button>
@@ -357,7 +357,7 @@
         e.preventDefault();
         
         if (archivoPdf.files.length === 0) {
-            Swal.fire('Advertencia', 'Debes seleccionar un archivo PDF', 'warning');
+            Swal.fire('Advertencia', 'Debes seleccionar un archivo (PDF, PNG o JPG)', 'warning');
             return;
         }
 

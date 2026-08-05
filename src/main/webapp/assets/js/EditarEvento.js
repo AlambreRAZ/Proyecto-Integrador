@@ -69,8 +69,8 @@ function cargarEvento() {
             campoLugar.value = data.lugar || '';
             campoInstitucion.value = data.institucion || '';
             campoDescripcion.value = data.descripcion || '';
-            campoFechaInicio.value = aFechaVisible(data.fechaInicio);
-            campoFechaFin.value = aFechaVisible(data.fechaFin);
+            campoFechaInicio.value = data.fechaInicio || '';
+            campoFechaFin.value = data.fechaFin || '';
 
             if (campoTipo.querySelector('option[value="' + data.tipo + '"]')) {
                 campoTipo.value = data.tipo;
@@ -97,8 +97,8 @@ form.addEventListener('submit', function (e) {
     datos.append('institucion', campoInstitucion.value);
     datos.append('tipo', campoTipo.value);
     datos.append('descripcion', campoDescripcion.value);
-    datos.append('fechaInicio', aFechaServidor(campoFechaInicio.value));
-    datos.append('fechaFin', aFechaServidor(campoFechaFin.value));
+    datos.append('fechaInicio', campoFechaInicio.value);
+    datos.append('fechaFin', campoFechaFin.value);
     datos.append('modalidad', modalidadSeleccionada ? modalidadSeleccionada.value : '');
 
     fetch(contextPath + '/EditarEventoServlet', { 

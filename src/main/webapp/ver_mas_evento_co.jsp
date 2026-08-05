@@ -242,19 +242,18 @@
                             ? `<a href="#" class="action-btn"><i class="bi bi-eye"></i></a>` 
                             : `<span class="text-muted"><i class="bi bi-eye-slash"></i></span>`;
 
-                        tr.innerHTML = `
-                            <td class="text-start">
-                                <div class="docente-name-container">
-                                    <div class="avatar-circle">${iniciales}</div>
-                                    <div class="docente-name">
-                                        ${p.nombre}<br>${p.apellidoPaterno} ${p.apellidoMaterno}
-                                    </div>
-                                </div>
-                            </td>
-                            <td>${p.correo}</td>
-                            <td class="${statusClass}">${statusText}</td>
-                            <td>${entregadoBtn}</td>
-                        `;
+                        tr.innerHTML = 
+                            '<td class="text-start">' +
+                                '<div class="docente-name-container">' +
+                                    '<div class="avatar-circle">' + iniciales + '</div>' +
+                                    '<div class="docente-name">' +
+                                        p.nombre + '<br>' + p.apellidoPaterno + ' ' + (p.apellidoMaterno || '') +
+                                    '</div>' +
+                                '</div>' +
+                            '</td>' +
+                            '<td>' + (p.correo || '') + '</td>' +
+                            '<td class="' + statusClass + '">' + statusText + '</td>' +
+                            '<td>' + entregadoBtn + '</td>';
                         tbody.appendChild(tr);
                     });
                 }

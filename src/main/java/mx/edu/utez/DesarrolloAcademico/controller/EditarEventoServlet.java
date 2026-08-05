@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet(name = "EditarEventoServlet", value = "/EditarEventoServlet")
-@MultipartConfig
 public class EditarEventoServlet extends HttpServlet {
 
     private String escapar(String valor) {

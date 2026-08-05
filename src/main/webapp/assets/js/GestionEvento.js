@@ -1,12 +1,15 @@
-// 1. CORREGIDO: "const" en lugar de "onst"
+// GestionEvento.js - Eventos con paginación dinámica
 const contextPath = window.contextPath || '';
 const tbody = document.getElementById('tablaEventosBody');
 const inputBuscar = document.getElementById('buscarEvento');
 const filtrosTipo = document.getElementById('filtrosTipo');
+const paginationContainer = document.getElementById('paginationContainer');
 
+const ITEMS_POR_PAGINA = 10;
 let eventosOriginales = [];
 let filtroTexto = '';
 let filtroTipo = 'todos';
+let paginaActual = 1;
 
 function escapeHtml(texto) {
     if (texto === null || texto === undefined) return '';
@@ -46,38 +49,79 @@ function obtenerEventosFiltrados() {
     return filtrados;
 }
 
+function renderPaginacion(total) {
+    if (!paginationContainer) return;
+    const totalPaginas = Math.ceil(total / ITEMS_POR_PAGINA);
+    if (totalPaginas <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    let html = '<a href="#" class="page-btn" id="btnPrevPage"><i class="bi bi-chevron-left"></i></a>';
+    for (let i = 1; i <= totalPaginas; i++) {
+        html += '<a href="#" class="page-btn ' + (i === paginaActual ? 'active' : '') + '" data-page="' + i + '">' + i + '</a>';
+    }
+    html += '<a href="#" class="page-btn" id="btnNextPage"><i class="bi bi-chevron-right"></i></a>';
+    paginationContainer.innerHTML = html;
+
+    paginationContainer.querySelectorAll('[data-page]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            paginaActual = parseInt(this.getAttribute('data-page'));
+            aplicarFiltros();
+        });
+    });
+
+    document.getElementById('btnPrevPage').addEventListener('click', function (e) {
+        e.preventDefault();
+        if (paginaActual > 1) { paginaActual--; aplicarFiltros(); }
+    });
+    document.getElementById('btnNextPage').addEventListener('click', function (e) {
+        e.preventDefault();
+        if (paginaActual < totalPaginas) { paginaActual++; aplicarFiltros(); }
+    });
+}
+
 function renderEventos(eventos) {
-    if (!eventos.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No se encontraron eventos.</td></tr>';
+    const totalFiltrados = eventos.length;
+    const inicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
+    const fin = inicio + ITEMS_POR_PAGINA;
+    const paginados = eventos.slice(inicio, fin);
+
+    if (!paginados.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron eventos.</td></tr>';
+        renderPaginacion(0);
         return;
     }
 
     tbody.innerHTML = '';
-    eventos.forEach(function (ev) {
+    const isDesarrollador = window.location.pathname.includes('_de.jsp');
+    paginados.forEach(function (ev) {
         const fila = document.createElement('tr');
         fila.setAttribute('data-id', ev.id);
-        const isDesarrollador = window.location.pathname.includes('_de.jsp');
         const colDivision = isDesarrollador ? '<td><span class="badge bg-secondary">' + escapeHtml(ev.nombreDivision) + '</span></td>' : '';
-        
+        const editUrl = isDesarrollador ? 'agregar_evento_de.jsp?id=' + ev.id : 'editar_evento_co.jsp?id=' + ev.id;
+        const verUrl = isDesarrollador ? 'ver_mas_evento_de.jsp?id=' + ev.id : 'ver_mas_evento_co.jsp?id=' + ev.id;
+
         fila.innerHTML =
             '<td>' +
             '<div class="fw-semibold">' + escapeHtml(ev.nombre) + '</div>' +
-            '<div class="small text-muted">' + escapeHtml(ev.descripcion) + '</div>' +
             '</td>' +
             '<td>' + escapeHtml(ev.tipo) + '</td>' +
             '<td>' +
             '<div>' + escapeHtml(ev.institucion) + '</div>' +
-            '<div class="small text-muted">' + escapeHtml(ev.lugar) + '</div>' +
             '</td>' +
             '<td>' + formatearFecha(ev.fechaInicio) + ' - ' + formatearFecha(ev.fechaFin) + '</td>' +
             colDivision +
             '<td>' +
-            '<a href="editar_evento_co.jsp?id=' + ev.id + '" class="action-btn"><i class="bi bi-pencil"></i></a>' +
-            '<a href="ver_mas_evento_co.jsp?id=' + ev.id + '" class="action-btn"><i class="bi bi-eye"></i></a>' +
+            '<a href="' + editUrl + '" class="action-btn"><i class="bi bi-pencil"></i></a>' +
+            '<a href="' + verUrl + '" class="action-btn"><i class="bi bi-eye"></i></a>' +
             '<a href="#" class="action-btn delete" data-id="' + ev.id + '"><i class="bi bi-trash"></i></a>' +
             '</td>';
         tbody.appendChild(fila);
     });
+
+    renderPaginacion(totalFiltrados);
 }
 
 function aplicarFiltros() {
@@ -87,7 +131,6 @@ function aplicarFiltros() {
 function cargarEventos() {
     fetch(contextPath + '/ListarEventosServlet')
         .then(function (response) {
-            // 3. MEJORA: Validar si la respuesta es JSON
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 return response.json();
@@ -97,17 +140,19 @@ function cargarEventos() {
         })
         .then(function (eventos) {
             eventosOriginales = eventos || [];
+            paginaActual = 1;
             aplicarFiltros();
         })
         .catch(function (error) {
             console.error('Error al cargar eventos:', error);
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">No se pudieron cargar los eventos. Revisa tu servidor.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">No se pudieron cargar los eventos. Revisa tu servidor.</td></tr>';
         });
 }
 
 if (inputBuscar) {
     inputBuscar.addEventListener('input', function () {
         filtroTexto = inputBuscar.value;
+        paginaActual = 1;
         aplicarFiltros();
     });
 }
@@ -124,11 +169,11 @@ if (filtrosTipo) {
         pill.classList.add('active');
 
         filtroTipo = pill.getAttribute('data-tipo') || 'todos';
+        paginaActual = 1;
         aplicarFiltros();
     });
 }
 
-// 2. CORREGIDO: Validamos que tbody exista antes de meterle eventos y cargar la data
 if (tbody) {
     tbody.addEventListener('click', function (e) {
         const boton = e.target.closest('.action-btn.delete');
@@ -157,7 +202,6 @@ if (tbody) {
                 body: datos
             })
                 .then(function (response) {
-                    // 4. MEJORA: Validamos si la respuesta es JSON al eliminar
                     const contentType = response.headers.get("content-type");
                     if (contentType && contentType.indexOf("application/json") !== -1) {
                         return response.json().then(function (data) {
@@ -197,6 +241,5 @@ if (tbody) {
         });
     });
 
-    // Solo cargamos los eventos si existe la tabla
     cargarEventos();
 }
