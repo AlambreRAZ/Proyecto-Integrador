@@ -45,13 +45,13 @@ public class AgregarUsuarioServlet extends HttpServlet {
             String rol = request.getParameter("rol");
 
             if (nombre == null || nombre.trim().isEmpty() ||
-                apellidoPaterno == null || apellidoPaterno.trim().isEmpty() ||
-                numeroEmpleado == null || numeroEmpleado.trim().isEmpty() ||
-                correoInstitucional == null || correoInstitucional.trim().isEmpty() ||
-                divisionStr == null || divisionStr.trim().isEmpty() ||
-                contra == null || contra.isEmpty() ||
-                rol == null || rol.trim().isEmpty()) {
-                
+                    apellidoPaterno == null || apellidoPaterno.trim().isEmpty() ||
+                    numeroEmpleado == null || numeroEmpleado.trim().isEmpty() ||
+                    correoInstitucional == null || correoInstitucional.trim().isEmpty() ||
+                    divisionStr == null || divisionStr.trim().isEmpty() ||
+                    contra == null || contra.isEmpty() ||
+                    rol == null || rol.trim().isEmpty()) {
+
                 out.write("{\"success\": false, \"message\": \"Faltan campos obligatorios.\"}");
                 return;
             }
@@ -86,11 +86,6 @@ public class AgregarUsuarioServlet extends HttpServlet {
             // RESTRICCIÓN: Si es coordinador, solo puede agregar a su propia división
             if ("coordinador".equalsIgnoreCase(adminUser.getRol()) && adminUser.getIdDivision() != null) {
                 idDivision = adminUser.getIdDivision();
-                        } catch (NumberFormatException e) {
-                            out.write("{\"success\": false, \"message\": \"División inválida.\"}");
-                            return;
-                        }
-                }
             }
 
             if (!contra.equals(confirmContra)) {

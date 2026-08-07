@@ -18,111 +18,74 @@ public class FiltroAutenticacion extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
+        // 1. Prevenir guardado en caché para evitar ver páginas al presionar "Atrás" tras cerrar sesión
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
+
         String requestURI = request.getRequestURI();
-        System.out.println("[FILTRO] URI=" + requestURI);
-
         HttpSession session = request.getSession(false);
-
         boolean loggedIn = (session != null && session.getAttribute("usuario") != null);
 
-        // Páginas de login/registro/recuperación: si ya hay sesión, no tiene sentido volver a mostrarlas.
-        boolean authPage =
-                requestURI.endsWith("login.jsp") ||
-                        requestURI.endsWith("/login") ||
-                        requestURI.endsWith("registro.jsp") ||
-                        requestURI.endsWith("/register") ||
-                        requestURI.endsWith("/registro") ||
-                        requestURI.endsWith("recuperar-contra.jsp") ||
-                        requestURI.endsWith("/recuperar") ||
-                        requestURI.endsWith("/reset");
+        // 2. Definir Páginas y Recursos Públicos (SIN sesión requerida)
+        boolean isAuthPage = requestURI.endsWith("login.jsp") ||
+                requestURI.endsWith("/login") ||
+                requestURI.endsWith("registro.jsp") ||
+                requestURI.endsWith("/register") ||
+                requestURI.endsWith("recuperar-contra.jsp") ||
+                requestURI.endsWith("/recuperar") ||
+                requestURI.endsWith("/reset");
 
-        // Páginas y servlets que, mientras el módulo de login no esté terminado por todo el equipo,
-        // deben poder usarse aunque todavía no exista una sesión iniciada.
-        boolean publicPage =
-                requestURI.endsWith("vista_general_coordinador_co.jsp") ||
-                        requestURI.endsWith("gestion_evento_co.jsp") ||
-                        requestURI.endsWith("agregar_docente_co.jsp") ||
-                        requestURI.endsWith("agregar_evento_co.jsp") ||
-                        requestURI.endsWith("archivo_subido_co.jsp") ||
-                        requestURI.endsWith("cargar_archivo_co.jsp") ||
-                        requestURI.endsWith("editar_docente_co.jsp") ||
-                        requestURI.endsWith("editar_evento_co.jsp") ||
-                        requestURI.endsWith("gestion_docente_co.jsp") ||
-                        requestURI.endsWith("historial_evento_co.jsp") ||
-                        requestURI.endsWith("mi_cuenta_co.jsp") ||
-                        requestURI.endsWith("mi_evento_co.jsp") ||
-                        requestURI.endsWith("ver_mas_evento_co.jsp") ||
-                        requestURI.endsWith("vista_general_docente_do.jsp") ||
-                        requestURI.endsWith("mis_eventos_do.jsp") ||
-                        requestURI.endsWith("historial_evento_do.jsp") ||
-                        requestURI.endsWith("cargar_archivo_do.jsp") ||
-                        requestURI.endsWith("archivo_subido_do.jsp") ||
-                        requestURI.endsWith("mi_cuenta_do.jsp") ||
-                        requestURI.endsWith("ver_mas_evento_do.jsp") ||
-                        requestURI.endsWith("vista_general_desarrollador_de.jsp") ||
-                        requestURI.endsWith("mi_cuenta_de.jsp") ||
-                        requestURI.endsWith("gestion_periodos_carga_de.jsp") ||
-                        requestURI.endsWith("agregar_periodos_cargar_de.jsp") ||
-                        requestURI.endsWith("editar_periodo_carga_de.jsp") ||
-                        requestURI.endsWith("gestion_docente_de.jsp") ||
-                        requestURI.endsWith("agregar_docente_de.jsp") ||
-                        requestURI.endsWith("editar_docente_de.jsp") ||
-                        requestURI.endsWith("gestion_desarrolladores_de.jsp") ||
-                        requestURI.endsWith("agregar_desarrollador_de.jsp") ||
-                        requestURI.endsWith("editar_desarrollador_de.jsp") ||
-                        requestURI.endsWith("gestion_eventos_de.jsp") ||
-                        requestURI.endsWith("agregar_evento_de.jsp") ||
-                        requestURI.endsWith("editar_evento_de.jsp") ||
-                        requestURI.endsWith("ver_mas_evento_de.jsp") ||
-                        requestURI.endsWith("historial_eventos_de.jsp") ||
-                        requestURI.endsWith("cargar_archivo_de.jsp") ||
-                        requestURI.endsWith("archivo_subido_de.jsp") ||
-                        requestURI.endsWith("/EventoServlet") ||
-                        requestURI.endsWith("/ListarEventosServlet") ||
-                        requestURI.endsWith("/EliminarEventoServlet") ||
-                        requestURI.endsWith("/EditarEventoServlet") ||
-                        requestURI.endsWith("/AgregarEventoCO") ||
-                        requestURI.endsWith("/AgregarDesarrolladorServlet") ||
-                        requestURI.endsWith("/EditarDesarrollador") ||
-                        requestURI.endsWith("/EliminarDesarrollador") ||
-                        requestURI.endsWith("/ListarDesarrollador") ||
-                        requestURI.endsWith("/ListarUsuariosServlet") ||
-                        requestURI.endsWith("/ListarMisEventosServlet") ||
-                        requestURI.endsWith("/ListarParticipantesEventoServlet") ||
-                        requestURI.endsWith("/AsignarDocenteEventoServlet") ||
-                        requestURI.endsWith("/RemoverDocenteEventoServlet") ||
-                        requestURI.endsWith("/EditarUsuarioServlet") ||
-                        requestURI.endsWith("/AgregarUsuarioServlet") ||
-                        requestURI.endsWith("/CambiarPasswordServlet");
+        boolean isResource = requestURI.contains("/assets/") ||
+                requestURI.contains("/layout/") ||
+                requestURI.endsWith(".css") ||
+                requestURI.endsWith(".js") ||
+                requestURI.endsWith(".png") ||
+                requestURI.endsWith(".jpg") ||
+                requestURI.endsWith(".ico");
 
-
-        boolean isResource = requestURI.contains("/assets/") || requestURI.contains("/layout/");
-
-        System.out.println("[FILTRO] loggedIn=" + loggedIn + " authPage=" + authPage + " publicPage=" + publicPage + " isResource=" + isResource);
-
+        // 3. Evaluar Estado de Autenticación
         if (loggedIn) {
-            if (authPage) {
+            if (isAuthPage) {
+                // Si el usuario ya está logueado e intenta ir al Login -> Redirigir a su panel
                 Usuario user = (Usuario) session.getAttribute("usuario");
-                String rol = user.getRol();
-                if ("desarrollo".equalsIgnoreCase(rol)) {
-                    response.sendRedirect(request.getContextPath() + "/vista_general_desarrollador_de.jsp");
-                } else if ("coordinador".equalsIgnoreCase(rol)) {
-                    response.sendRedirect(request.getContextPath() + "/vista_general_coordinador_co.jsp");
-                } else if ("docente".equalsIgnoreCase(rol)) {
-                    response.sendRedirect(request.getContextPath() + "/vista_general_docente_do.jsp");
-                } else {
-                    session.invalidate();
-                    response.sendRedirect(request.getContextPath() + "/login.jsp");
+                String rol = (user != null && user.getRol() != null) ? user.getRol().toLowerCase() : "";
+
+                switch (rol) {
+                    case "desarrollo":
+                        response.sendRedirect(request.getContextPath() + "/vista_general_desarrollador_de.jsp");
+                        break;
+                    case "coordinador":
+                        response.sendRedirect(request.getContextPath() + "/vista_general_coordinador_co.jsp");
+                        break;
+                    case "docente":
+                        response.sendRedirect(request.getContextPath() + "/vista_general_docente_do.jsp");
+                        break;
+                    default:
+                        session.invalidate();
+                        response.sendRedirect(request.getContextPath() + "/login.jsp");
+                        break;
                 }
             } else {
+                // Usuario autenticado accediendo a cualquier vista privada o Servlet -> Permitir paso
                 chain.doFilter(request, response);
             }
         } else {
-            if (authPage || publicPage || isResource) {
+            if (isAuthPage || isResource) {
+                // Usuario no autenticado en páginas de login o recursos -> Permitir paso
                 chain.doFilter(request, response);
             } else {
-                System.out.println("[FILTRO] -> redirige a registro.jsp (no logueado y no es authPage/publicPage/isResource)");
-                response.sendRedirect(request.getContextPath() + "/login.jsp");
+                // Intentando acceder a vistas privadas sin iniciar sesión -> Bloquear
+                String requestedWith = request.getHeader("X-Requested-With");
+                String acceptHeader = request.getHeader("Accept");
+
+                if ("XMLHttpRequest".equals(requestedWith) || (acceptHeader != null && acceptHeader.contains("application/json"))) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"success\": false, \"message\": \"Sesión expirada. Por favor inicie sesión nuevamente.\"}");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/login.jsp");
+                }
             }
         }
     }

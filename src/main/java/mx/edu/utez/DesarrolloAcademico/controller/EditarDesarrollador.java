@@ -1,4 +1,5 @@
 package mx.edu.utez.DesarrolloAcademico.controller;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,10 +12,6 @@ import mx.edu.utez.DesarrolloAcademico.model.dao.AgregarDesarrollador_Dao;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-
-
-
-
 @WebServlet(name = "EditarDesarrollador", value = "/EditarDesarrollador")
 @MultipartConfig
 public class EditarDesarrollador extends HttpServlet {
@@ -24,47 +21,31 @@ public class EditarDesarrollador extends HttpServlet {
         return valor.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
-    // Regresa los datos de UN desarrollador en JSON, para llenar el formulario de edición.
-    // La contraseña nunca se incluye en la respuesta.
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json;charset=UTF-8");
-        PrintWriter out = response.getWriter();
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-        try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            AgregarDesarrollador_Dao dao = new AgregarDesarrollador_Dao();
-            Usuario desarrollador = dao.obtenerPorId(id);
+        String idStr = request.getParameter("id");
 
-            if (desarrollador == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                out.write("{\"success\": false, \"message\": \"Desarrollador no encontrado.\"}");
-            } else {
-                out.write("{"
-                        + "\"success\": true,"
-                        + "\"id\":" + desarrollador.getIdUsuario() + ","
-                        + "\"nombre\":\"" + escapar(desarrollador.getNombre()) + "\","
-                        + "\"apellidoPaterno\":\"" + escapar(desarrollador.getApellidoPaterno()) + "\","
-                        + "\"apellidoMaterno\":\"" + escapar(desarrollador.getApellidoMaterno()) + "\","
-                        + "\"idDivision\":" + (desarrollador.getIdDivision() != null ? desarrollador.getIdDivision() : "null") + ","
-                        + "\"numeroEmpleado\":\"" + escapar(desarrollador.getNumeroEmpleado()) + "\","
-                        + "\"telefono\":\"" + escapar(desarrollador.getTelefono()) + "\","
-                        + "\"correo\":\"" + escapar(desarrollador.getCorreoInstitucional()) + "\","
-                        + "\"activo\":" + desarrollador.getActivo()
-                        + "}");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            try {
+                int id = Integer.parseInt(idStr.trim());
+                AgregarDesarrollador_Dao dao = new AgregarDesarrollador_Dao();
+                Usuario desarrollador = dao.obtenerPorId(id);
+
+                if (desarrollador != null) {
+                    request.setAttribute("dev", desarrollador);
+                    request.getRequestDispatcher("/editar_desarrollador_de.jsp").forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("ID inválido: " + idStr);
             }
-        } catch (NumberFormatException ex) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.write("{\"success\": false, \"message\": \"Id de desarrollador inválido.\"}");
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            out.write("{\"success\": false, \"message\": \"Error inesperado en el servidor: " + escapar(e.getMessage()) + "\"}");
         }
-        out.flush();
+
+        response.sendRedirect(request.getContextPath() + "/gestion_desarrolladores_de.jsp");
     }
 
-    // Guarda los cambios del formulario de edición.
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
@@ -83,7 +64,7 @@ public class EditarDesarrollador extends HttpServlet {
             String contrasena = request.getParameter("contrasena");
             String confirmarContrasena = request.getParameter("confirmar_contrasena");
 
-            // Validación mínima en servidor (nunca confiar solo en el "required" del HTML)
+            // Validaciones en servidor
             if (idStr == null || idStr.trim().isEmpty()
                     || nombre == null || nombre.trim().isEmpty()
                     || apellidoPaterno == null || apellidoPaterno.trim().isEmpty()
@@ -92,17 +73,26 @@ public class EditarDesarrollador extends HttpServlet {
                     || numeroEmpleado == null || numeroEmpleado.trim().isEmpty()
                     || telefono == null || telefono.trim().isEmpty()
                     || correo == null || correo.trim().isEmpty()
-                    || contrasena == null || contrasena.isEmpty()
-                    || confirmarContrasena == null || confirmarContrasena.isEmpty()) {
+                    || contrasena == null || contrasena.trim().isEmpty()
+                    || confirmarContrasena == null || confirmarContrasena.trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.write("{\"success\": false, \"message\": \"Faltan campos obligatorios.\"}");
                 out.flush();
                 return;
             }
 
-            if (contrasena.length() < 8) {
+            // Correo institucional
+            if (!correo.trim().toLowerCase().endsWith("@utez.edu.mx")) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.write("{\"success\": false, \"message\": \"La contraseña debe tener al menos 8 caracteres.\"}");
+                out.write("{\"success\": false, \"message\": \"El correo debe terminar en @utez.edu.mx\"}");
+                out.flush();
+                return;
+            }
+
+            // Longitud de 12 a 15 caracteres
+            if (contrasena.trim().length() < 12 || contrasena.trim().length() > 15) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.write("{\"success\": false, \"message\": \"La contraseña debe tener entre 12 y 15 caracteres.\"}");
                 out.flush();
                 return;
             }
@@ -145,18 +135,18 @@ public class EditarDesarrollador extends HttpServlet {
             desarrollador.setTelefono(telefono.trim());
             desarrollador.setCorreoInstitucional(correo.trim());
 
-            boolean exito = dao.actualizarDesarrollador(desarrollador, contrasena);
+            boolean exito = dao.actualizarDesarrollador(desarrollador, contrasena.trim());
 
             if (exito) {
                 out.write("{\"success\": true, \"message\": \"Desarrollador actualizado correctamente.\"}");
             } else {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                out.write("{\"success\": false, \"message\": \"No se pudo actualizar el desarrollador en la base de datos.\"}");
+                out.write("{\"success\": false, \"message\": \"No se pudo actualizar en la base de datos.\"}");
             }
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            out.write("{\"success\": false, \"message\": \"Error inesperado en el servidor: " + escapar(e.getMessage()) + "\"}");
+            out.write("{\"success\": false, \"message\": \"Error inesperado: " + escapar(e.getMessage()) + "\"}");
         }
         out.flush();
     }

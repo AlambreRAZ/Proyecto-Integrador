@@ -104,8 +104,7 @@ public class AgregarDesarrollador_Dao {
         return existe;
     }
 
-    // Obtiene un desarrollador por id, para precargar el formulario de edición.
-    // Se filtra por rol = 'desarrollo' para no editar por accidente a otro tipo de usuario.
+
     public Usuario obtenerPorId(int idUsuario) {
         Usuario usuario = null;
         String query = "SELECT * FROM usuarios WHERE id_usuario = ? AND rol = 'desarrollo'";
@@ -133,7 +132,8 @@ public class AgregarDesarrollador_Dao {
                     usuario.setTelefono(rs.getString("telefono"));
                     usuario.setCorreoInstitucional(rs.getString("correo_institucional"));
                     usuario.setActivo(rs.getInt("activo"));
-                    // No se mapea la contraseña: nunca se debe regresar al cliente.
+
+                    usuario.setContrasena(rs.getString("contrasena"));
                 }
             }
         } catch (SQLException e) {

@@ -36,9 +36,10 @@ public class ListarUsuariosServlet extends HttpServlet {
         String rol = request.getParameter("rol");
         List<Usuario> usuarios;
         if (rol != null && !rol.isEmpty()) {
-            usuarios = dao.listarPorRoles(idDivision, rol);
+            usuarios = dao.listarPorRoles(rol);
         } else {
-            usuarios = dao.listarPorRoles(idDivision, "docente", "coordinador");
+            // Pass only the role strings
+            usuarios = dao.listarPorRoles("docente", "coordinador");
         }
 
         StringBuilder json = new StringBuilder("[");

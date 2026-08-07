@@ -1,158 +1,170 @@
-// GestionDocente.js - Para la vista del Coordinador (gestion_docente_co.jsp)
-// Carga docentes/coordinadores de la MISMA división con switch activar/desactivar y paginación
-const contextPathDocente = window.contextPath || '';
-const tbodyDocente = document.getElementById('tablaDocentesBody');
-const inputBuscarDocente = document.getElementById('buscarDocente');
-const paginationDocente = document.getElementById('paginationContainerDocente');
+const contextPath = window.contextPath || '';
+const tbody = document.getElementById('tablaDocentesBody');
+const inputBuscar = document.getElementById('buscarDocente');
 
-const ITEMS_POR_PAGINA_D = 10;
-let usuariosOriginales = [];
-let filtroTextoDocente = '';
-let paginaActualD = 1;
+// Mismo mapeo id -> nombre de división.
+const DIVISIONES = {
+    1: 'Datid',
+    2: 'Dacea',
+    3: 'Datefi',
+    4: 'Dami',
+    5: 'General'
+};
 
-const DIVISIONES_MAP = { 1: 'DATID', 2: 'DACEA', 3: 'DATEFI', 4: 'DAMI' };
+// "Lista maestra" con todos los docentes que trae el servidor.
+let docentesOriginales = [];
+let filtroTexto = '';
 
-function escHtml(t) {
-    if (t === null || t === undefined) return '';
-    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function escapeHtml(texto) {
+    if (texto === null || texto === undefined) return '';
+    return String(texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
 
-function normDocente(t) {
-    return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function normalizar(texto) {
+    return String(texto || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, ''); // quita acentos
 }
 
-function getNombreCompleto(u) {
-    return [u.nombre, u.apellidoPaterno, u.apellidoMaterno].filter(Boolean).join(' ');
+function nombreCompleto(doc) {
+    return [doc.nombre, doc.apellidoPaterno, doc.apellidoMaterno].filter(Boolean).join(' ');
 }
 
-function getDivisionNombre(id) {
-    return DIVISIONES_MAP[id] || (id ? 'Div. ' + id : 'N/A');
-}
+function obtenerDocentesFiltrados() {
+    const texto = normalizar(filtroTexto);
+    if (texto === '') return docentesOriginales;
 
-function renderPaginacionD(total) {
-    if (!paginationDocente) return;
-    const totalPaginas = Math.ceil(total / ITEMS_POR_PAGINA_D);
-    if (totalPaginas <= 1) {
-        paginationDocente.innerHTML = '';
-        return;
-    }
-    let html = '<a href="#" class="page-btn" id="btnPrevPageD"><i class="bi bi-chevron-left"></i></a>';
-    for (let i = 1; i <= totalPaginas; i++) {
-        html += '<a href="#" class="page-btn ' + (i === paginaActualD ? 'active' : '') + '" data-page="' + i + '">' + i + '</a>';
-    }
-    html += '<a href="#" class="page-btn" id="btnNextPageD"><i class="bi bi-chevron-right"></i></a>';
-    paginationDocente.innerHTML = html;
-
-    paginationDocente.querySelectorAll('[data-page]').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            paginaActualD = parseInt(this.getAttribute('data-page'));
-            aplicarFiltrosDocente();
-        });
-    });
-    document.getElementById('btnPrevPageD').addEventListener('click', function (e) {
-        e.preventDefault();
-        if (paginaActualD > 1) { paginaActualD--; aplicarFiltrosDocente(); }
-    });
-    document.getElementById('btnNextPageD').addEventListener('click', function (e) {
-        e.preventDefault();
-        const totalPags = Math.ceil(obtenerFiltrados().length / ITEMS_POR_PAGINA_D);
-        if (paginaActualD < totalPags) { paginaActualD++; aplicarFiltrosDocente(); }
-    });
-}
-
-function obtenerFiltrados() {
-    const texto = normDocente(filtroTextoDocente);
-    return usuariosOriginales.filter(function (u) {
-        return texto === '' ||
-            normDocente(getNombreCompleto(u)).includes(texto) ||
-            normDocente(u.correo || '').includes(texto) ||
-            normDocente(u.correoInstitucional || '').includes(texto) ||
-            normDocente(u.numeroEmpleado || '').includes(texto);
+    return docentesOriginales.filter(function (doc) {
+        return normalizar(nombreCompleto(doc)).includes(texto) ||
+            normalizar(doc.correo).includes(texto);
     });
 }
 
 function renderDocentes(lista) {
-    if (!tbodyDocente) return;
-    const inicio = (paginaActualD - 1) * ITEMS_POR_PAGINA_D;
-    const paginados = lista.slice(inicio, inicio + ITEMS_POR_PAGINA_D);
+    if (!tbody) return;
 
-    if (!paginados.length) {
-        tbodyDocente.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron usuarios.</td></tr>';
-        if (paginationDocente) renderPaginacionD(0);
+    if (!lista || !lista.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron docentes.</td></tr>';
         return;
     }
 
-    tbodyDocente.innerHTML = '';
-    paginados.forEach(function (u) {
-        const id = u.id || u.idUsuario;
-        const nombreCompleto = escHtml(getNombreCompleto(u));
-        const correo = escHtml(u.correo || u.correoInstitucional || '');
-        const divisionNombre = escHtml(getDivisionNombre(u.idDivision));
-        const initial = u.nombre ? u.nombre.charAt(0).toUpperCase() : 'U';
-        const activo = Number(u.activo) === 1;
-        const iconoToggle = activo
-            ? '<i class="bi bi-toggle-on text-success fs-4 toggle-estado" style="cursor:pointer;" data-id="' + id + '" data-activo="1" title="Activo - click para desactivar"></i>'
-            : '<i class="bi bi-toggle-off text-danger fs-4 toggle-estado" style="cursor:pointer;" data-id="' + id + '" data-activo="0" title="Inactivo - click para activar"></i>';
+    let sufijoRol = 'de';
+    const pathActual = window.location.pathname;
 
-        const tr = document.createElement('tr');
-        tr.setAttribute('data-id', id);
-        tr.innerHTML =
+    if (pathActual.includes('_co.jsp')) {
+        sufijoRol = 'co';
+    } else if (pathActual.includes('_do.jsp')) {
+        sufijoRol = 'do';
+    } else if (pathActual.includes('_de.jsp')) {
+        sufijoRol = 'de';
+    }
+
+    tbody.innerHTML = '';
+    lista.forEach(function (doc) {
+        const activo = Number(doc.activo) === 1;
+        const iconoEstado = activo ? 'bi-toggle-on text-success' : 'bi-toggle-off text-danger';
+        const divisionNombre = DIVISIONES[doc.idDivision] || '';
+
+        const fila = document.createElement('tr');
+        fila.setAttribute('data-id', doc.id);
+        fila.innerHTML =
             '<td class="text-start">' +
-            '  <div class="docente-name-container">' +
-            '    <div class="avatar-circle" style="flex-shrink:0;">' + initial + '</div>' +
-            '    <div class="docente-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + nombreCompleto + '</div>' +
-            '  </div>' +
+            '<div class="docente-name-container">' +
+            '<div class="avatar-circle" style="flex-shrink:0;"></div>' +
+            '<div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' +
+            escapeHtml(nombreCompleto(doc)) +
+            '</div>' +
+            '</div>' +
             '</td>' +
-            '<td>' + correo + '</td>' +
-            '<td>' + divisionNombre + '</td>' +
-            '<td>' + escHtml(u.numeroEmpleado || '') + '</td>' +
-            '<td>' + iconoToggle + '</td>' +
-            '<td style="white-space:nowrap;">' +
-            '  <a href="editar_docente_co.jsp?id=' + id + '" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>' +
-            '  <a href="#" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>' +
-            '</td>';
-        tbodyDocente.appendChild(tr);
-    });
+            '<td>' + escapeHtml(doc.correo) + '</td>' +
+            '<td>' + escapeHtml(divisionNombre) + '</td>' +
+            '<td>' + escapeHtml(doc.numeroEmpleado) + '</td>' +
+            '<td>' +
+            '<i class="bi ' + iconoEstado + ' fs-4 toggle-estado" style="cursor:pointer;" data-id="' + doc.id + '" data-activo="' + (activo ? 1 : 0) + '"></i>' +
+            '</td>' +
+            '<td class="acciones-cell" style="white-space: nowrap;">' +
 
-    renderPaginacionD(lista.length);
+            /* EDITAR */
+            '<a href="' + contextPath + '/editar_docente_' + sufijoRol + '.jsp?id=' + doc.id + '" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>' +
+
+            /* VER DETALLES */
+            '<a href="' + contextPath + '/verDocente?id=' + doc.id + '" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>' +
+
+            /* ELIMINAR PERMANENTE */
+            '<a href="#" class="action-btn delete" title="Eliminar" data-id="' + doc.id + '"><i class="bi bi-trash"></i></a>' +
+            '</td>';
+        tbody.appendChild(fila);
+    });
 }
 
-function aplicarFiltrosDocente() {
-    renderDocentes(obtenerFiltrados());
+function aplicarFiltro() {
+    renderDocentes(obtenerDocentesFiltrados());
 }
 
 function cargarDocentes() {
-    const url = contextPathDocente + '/ListarUsuariosServlet?t=' + Date.now();
-    fetch(url)
-        .then(function (res) {
-            if (!res.ok) throw new Error('Error de servidor: ' + res.status);
-            return res.json();
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr>';
+
+    fetch(contextPath + '/ListarDocente')
+        .then(function (response) { return response.json(); })
+        .then(function (docentes) {
+            docentesOriginales = docentes || [];
+            aplicarFiltro();
         })
-        .then(function (data) {
-            usuariosOriginales = data || [];
-            paginaActualD = 1;
-            aplicarFiltrosDocente();
-        })
-        .catch(function (err) {
-            console.error('Error al cargar usuarios:', err);
-            if (tbodyDocente) {
-                tbodyDocente.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">No se pudieron cargar los usuarios.</td></tr>';
-            }
+        .catch(function (error) {
+            console.error('Error al cargar docentes:', error);
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">No se pudieron cargar los docentes.</td></tr>';
         });
 }
 
-if (inputBuscarDocente) {
-    inputBuscarDocente.addEventListener('input', function () {
-        filtroTextoDocente = inputBuscarDocente.value;
-        paginaActualD = 1;
-        aplicarFiltrosDocente();
+function llenarFormularioDocente(data) {
+    document.getElementById('campoIdUsuario').value = data.idUsuario || '';
+    document.getElementById('campoNombre').value = data.nombre || '';
+    document.getElementById('campoApellidoP').value = data.apellidoPaterno || '';
+    document.getElementById('campoApellidoM').value = data.apellidoMaterno || '';
+    document.getElementById('campoDivision').value = data.idDivision || '';
+    document.getElementById('campoNumEmpleado').value = data.numeroEmpleado || '';
+    document.getElementById('campoTelefono').value = data.telefono || '';
+    document.getElementById('campoCorreo').value = data.correo || '';
+    document.getElementById('campoContrasena').value = data.contrasena || '';
+}
+
+function cambiarEstado(id, nuevoEstado) {
+    const datos = new URLSearchParams();
+    datos.append('id', id);
+    datos.append('estado', nuevoEstado);
+
+    // Si creaste 'CambiarEstadoUsuarioServlet', cambia la URL a '/CambiarEstadoUsuarioServlet'
+    const urlServlet = contextPath + '/CambiarEstado';
+
+    return fetch(urlServlet, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: datos.toString(),
+        credentials: 'same-origin'
+    }).then(function (response) {
+        return response.json().then(function (data) {
+            return { ok: response.ok, data: data };
+        });
     });
 }
 
-if (tbodyDocente) {
-    tbodyDocente.addEventListener('click', function (e) {
-        // Switch toggle de estado
+if (inputBuscar) {
+    inputBuscar.addEventListener('input', function () {
+        filtroTexto = inputBuscar.value;
+        aplicarFiltro();
+    });
+}
+
+if (tbody) {
+    tbody.addEventListener('click', function (e) {
+        // -----------------------------------------------------------
+        // 1. Interruptor de la columna "Estado" (Activar / Desactivar)
+        // -----------------------------------------------------------
         const toggle = e.target.closest('.toggle-estado');
         if (toggle) {
             const id = toggle.getAttribute('data-id');
@@ -160,51 +172,115 @@ if (tbodyDocente) {
             const nuevoEstado = activoActual ? 0 : 1;
             const accion = activoActual ? 'desactivar' : 'activar';
 
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'question',
-                    title: '¿Deseas ' + accion + ' este usuario?',
-                    text: activoActual
-                        ? 'El usuario no podrá iniciar sesión mientras esté inactivo.'
-                        : 'El usuario podrá volver a iniciar sesión.',
-                    showCancelButton: true,
-                    confirmButtonColor: '#00847b',
-                    cancelButtonColor: '#aaaaaa',
-                    confirmButtonText: 'Sí, ' + accion,
-                    cancelButtonText: 'Cancelar'
-                }).then(function (result) {
-                    if (!result.isConfirmed) return;
-                    cambiarEstadoDocente(id, nuevoEstado);
-                });
-            } else {
-                if (confirm('¿Deseas ' + accion + ' este usuario?')) cambiarEstadoDocente(id, nuevoEstado);
-            }
+            Swal.fire({
+                icon: 'question',
+                title: '¿Deseas ' + accion + ' a este docente?',
+                text: activoActual
+                    ? 'El docente no podrá iniciar sesión mientras esté inactivo.'
+                    : 'El docente podrá volver a iniciar sesión.',
+                showCancelButton: true,
+                confirmButtonColor: '#00847b',
+                cancelButtonColor: '#aaaaaa',
+                confirmButtonText: 'Sí, ' + accion,
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+
+                cambiarEstado(id, nuevoEstado)
+                    .then(function (resultado) {
+                        if (resultado.ok && resultado.data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Éxito!',
+                                text: resultado.data.message || 'Estado actualizado correctamente.',
+                                confirmButtonColor: '#00847b',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            cargarDocentes(); // Recarga la tabla para reflejar el cambio del switch
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'No se pudo actualizar el estado',
+                                text: resultado.data.message || 'Ocurrió un error al conectar con la base de datos.',
+                                confirmButtonColor: '#00847b'
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error('Error al cambiar el estado:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de conexión',
+                            text: 'No fue posible comunicarse con el servidor.',
+                            confirmButtonColor: '#00847b'
+                        });
+                    });
+            });
             return;
         }
+
+        // -----------------------------------------------------------
+        // 2. Botón Bote de Basura 🗑 (Sentencia DELETE permanente)
+        // -----------------------------------------------------------
+        const boton = e.target.closest('.action-btn.delete');
+        if (!boton) return;
+        e.preventDefault();
+
+        const idUsuario = boton.getAttribute('data-id');
+
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Estás seguro de eliminar?',
+            text: 'Esta acción borrará permanentemente al docente de la base de datos.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#aaaaaa',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
+
+            const datos = new URLSearchParams();
+            datos.append('idUsuario', idUsuario);
+
+            fetch(contextPath + '/EliminarDocente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                body: datos.toString(),
+                credentials: 'same-origin'
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data && data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Eliminado!',
+                            text: data.message || 'El docente fue eliminado de la base de datos.',
+                            confirmButtonColor: '#00847b'
+                        });
+                        cargarDocentes();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'No se pudo eliminar',
+                            text: data.message || 'Ocurrió un error al intentar eliminar el registro.',
+                            confirmButtonColor: '#00847b'
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error al eliminar el docente:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de conexión',
+                        text: 'No fue posible comunicarse con el servidor.',
+                        confirmButtonColor: '#00847b'
+                    });
+                });
+        });
     });
-
-    cargarDocentes();
 }
 
-function cambiarEstadoDocente(id, nuevoEstado) {
-    const datos = new URLSearchParams();
-    datos.append('id', id);
-    datos.append('estado', nuevoEstado);
-    fetch(contextPathDocente + '/CambiarEstadoUsuarioServlet', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: datos.toString() 
-    })
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-            if (data.success) {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon: 'success', title: nuevoEstado === 1 ? 'Usuario activado' : 'Usuario desactivado', confirmButtonColor: '#00847b' });
-                }
-                cargarDocentes();
-            } else {
-                alert('No se pudo cambiar el estado: ' + (data.message || 'Error desconocido'));
-            }
-        })
-        .catch(function (err) { console.error('Error:', err); });
-}
+// Iniciar carga al entrar
+cargarDocentes();

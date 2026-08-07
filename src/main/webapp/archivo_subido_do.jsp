@@ -69,7 +69,7 @@
         <h1 class="pdf-title">Cetificado_cisco.pdf</h1>
         <p class="pdf-subtitle">Archivo</p>
     </div>
-    <a href="mis_eventos_do.jsp" class="btn" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px; text-decoration: none; padding: 6px 20px; font-weight: 600; background: white;">
+    <a href="mi_evento_do.jsp" class="btn" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px; text-decoration: none; padding: 6px 20px; font-weight: 600; background: white;">
         <i class="bi bi-chevron-left"></i> Volver
     </a>
 </div>

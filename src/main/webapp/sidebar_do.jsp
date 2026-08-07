@@ -20,7 +20,7 @@
         <span class="sidebar-text">Vista general</span>
     </a>
 
-    <a href="mis_eventos_do.jsp" class="sidebar-item ${param.active == 'mis_eventos' ? 'active' : ''}">
+    <a href="mi_evento_do.jsp" class="sidebar-item ${param.active == 'mis_eventos' ? 'active' : ''}">
         <div class="sidebar-icon">
             <i class="bi bi-calendar-heart"></i>
         </div>

@@ -40,30 +40,29 @@
                 <col style="width: 14%;">
             </colgroup>
             <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>División</th>
-                    <th>Núm. Empleado</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>División</th>
+                <th>Núm. Empleado</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
             </thead>
             <tbody id="tablaDocentesBody">
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-4">Cargando personal...</td>
-                </tr>
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">Cargando personal...</td>
+            </tr>
             </tbody>
         </table>
     </div>
-
-    <div class="pagination-container" id="paginationContainerDocente"></div>
 
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>window.contextPath = '<%= request.getContextPath() %>';</script>
 <script src="assets/js/coordinador.js"></script>
-<script src="assets/js/GestionDocente.js?v=5"></script>
+<script src="assets/js/GestionDocente.js?v=4"></script>
 </body>
 </html>
+

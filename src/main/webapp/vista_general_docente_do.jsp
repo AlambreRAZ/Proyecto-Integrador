@@ -1,4 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioListaDao" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioDao" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.Evento" %>
+<%@ page import="java.util.List" %>
+<%
+    // Instanciamos los DAOs para obtener los conteos reales
+    UsuarioListaDao eventoDao = new UsuarioListaDao();
+    UsuarioDao usuarioDao = new UsuarioDao();
+
+    int totalEventos = eventoDao.contarEventos();
+    List<Evento> listaEventos = usuarioDao.obtenerProximosEventos();
+
+    int totalEventos1 = eventoDao.contarEventos();
+    int totalDocentes1 = eventoDao.contarDocentesD();
+%>
 <!doctype html>
 <html lang="es">
 <head>
@@ -18,7 +33,7 @@
 
 
 <main class="main-content">
-    
+
     <div class="row mb-5 gx-4 mt-3">
         <div class="col-md-6 col-lg-5 mb-3">
             <div class="stat-card">
@@ -27,7 +42,7 @@
                 </div>
                 <div>
                     <div class="text-muted small">Eventos registrados</div>
-                    <div class="fs-4 fw-bold lh-1 mt-1">16</div>
+                    <div class="fs-4 fw-bold lh-1 mt-1"><%= totalEventos %></div>
                     <div class="text-muted" style="font-size: 0.75rem;">Total eventos</div>
                 </div>
             </div>
@@ -40,34 +55,33 @@
     </div>
 
     <div id="eventsList">
-        <div class="event-card">
+        <%
+            if (listaEventos != null && !listaEventos.isEmpty()) {
+                for (Evento ev : listaEventos) {
+        %>
+        <div class="event-card mb-3">
             <div>
-                <div class="fw-bold fs-5 mb-1">Taller de innovacion</div>
-                <div class="text-muted small">Junio 5 - agosto 20</div>
+                <div class="fw-bold fs-5 mb-1"><%= ev.getNombre() %></div>
+                <div class="text-muted small">
+                    <%= ev.getFecha_Inicio() %> - <%= ev.getFecha_Fin() %>
+                </div>
             </div>
-            <a href="ver_mas_evento_do.jsp" class="btn-teal">Ver Evento</a>
+            <a href="ver_mas_evento_de.jsp?id=<%= ev.getID() %>" class="btn-teal">
+                Ver detalles
+            </a>
         </div>
-        <div class="event-card">
-            <div>
-                <div class="fw-bold fs-5 mb-1">Taller de innovacion</div>
-                <div class="text-muted small">Junio 5 - agosto 20</div>
-            </div>
-            <a href="ver_mas_evento_do.jsp" class="btn-teal">Ver detalles</a>
+        <%
+            }
+        } else {
+        %>
+        <!-- Si no hay eventos registrados en la BD -->
+        <div class="alert alert-light text-center border p-4 text-muted">
+            <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+            No hay próximos eventos registrados.
         </div>
-        <div class="event-card">
-            <div>
-                <div class="fw-bold fs-5 mb-1">Taller de innovacion</div>
-                <div class="text-muted small">Junio 5 - agosto 20</div>
-            </div>
-            <a href="ver_mas_evento_do.jsp" class="btn-teal">Ver Evento</a>
-        </div>
-        <div class="event-card">
-            <div>
-                <div class="fw-bold fs-5 mb-1">Taller de innovacion</div>
-                <div class="text-muted small">Junio 5 - agosto 20</div>
-            </div>
-            <a href="ver_mas_evento_do.jsp" class="btn-teal">Ver Evento</a>
-        </div>
+        <%
+            }
+        %>
     </div>
 
 </main>

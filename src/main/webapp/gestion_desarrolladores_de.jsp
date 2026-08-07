@@ -22,7 +22,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1; margin-right: 20px;">
             <i class="bi bi-search"></i>
-            <input type="text" id="buscarDesarrollador" placeholder="Buscar Docente por nombre, correo ...">
+            <input type="text" id="buscarDesarrollador" placeholder="Buscar Desarrollador por nombre, correo ...">
         </div>
         <a href="agregar_desarrollador_de.jsp" class="btn-teal">
             <i class="bi bi-person-plus"></i> Agregar Desarrollador

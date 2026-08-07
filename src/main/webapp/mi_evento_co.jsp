@@ -35,18 +35,18 @@
                 <col style="width: 10%;">
             </colgroup>
             <thead>
-                <tr>
-                    <th>Título</th>
-                    <th>Tipo</th>
-                    <th>Institución</th>
-                    <th>Fecha</th>
-                    <th>Acciones</th>
-                </tr>
+            <tr>
+                <th>Título</th>
+                <th>Tipo</th>
+                <th>Institución</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
             </thead>
             <tbody id="tablaMisEventosBody">
-                <tr>
-                    <td colspan="5" class="text-center text-muted py-4">Cargando eventos...</td>
-                </tr>
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">Cargando eventos...</td>
+            </tr>
             </tbody>
         </table>
     </div>

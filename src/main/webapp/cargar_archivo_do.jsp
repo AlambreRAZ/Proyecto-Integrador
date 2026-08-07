@@ -165,7 +165,7 @@
         </div>
 
         <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-5">
-            <a href="mis_eventos_do.jsp" class="btn btn-outline-teal px-5 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
+            <a href="mi_evento_do.jsp" class="btn btn-outline-teal px-5 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
                 <i class="bi bi-chevron-left me-2"></i> Volver
             </a>
             <button type="submit" class="btn-teal px-5 py-2" style="border-radius: 6px;">Cargar Archivo</button>
@@ -187,7 +187,7 @@
         document.getElementById('hiddenIdEvento').value = idEvento;
     } else {
         Swal.fire('Error', 'No se especificó un evento válido', 'error').then(() => {
-            window.location.href = 'mis_eventos_do.jsp';
+            window.location.href = 'mi_evento_do.jsp';
         });
     }
 

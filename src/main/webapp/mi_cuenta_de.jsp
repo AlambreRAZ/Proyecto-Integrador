@@ -1,9 +1,21 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+xt/html;charset=UTF-8" language="java" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
 <%
     Usuario u = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
     if (u == null) { response.sendRedirect("login.jsp"); return; }
-    String divisionStr = (u.getIdDivision() != null) ? String.valueOf(u.getIdDivision()) : "N/A";
+
+    // Mapeo dinámico de la división académica
+    String nombreDivision = "General";
+    if (u.getIdDivision() != null) {
+        switch (u.getIdDivision()) {
+            case 1: nombreDivision = "DATID"; break;
+            case 2: nombreDivision = "DACEA"; break;
+            case 3: nombreDivision = "DATEFI"; break;
+            case 4: nombreDivision = "DAMI"; break;
+            case 5: nombreDivision = "General"; break;
+            default: nombreDivision = "General"; break;
+        }
+    }
 %>
 <!doctype html>
 <html lang="es">
@@ -52,15 +64,22 @@
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label text-muted">Division Academica :</label>
-                <input type="text" class="form-control" value="División <%= divisionStr %>" readonly>
+                <input type="text" class="form-control" value="<%= nombreDivision %>" readonly>
             </div>
             <div class="col-md-4">
-                <label class="form-label text-muted">Número de Empleado:</label>
+                <label class="form-label text-muted">Numero de Empleado:</label>
                 <input type="text" class="form-control" value="<%= u.getNumeroEmpleado() %>" readonly>
             </div>
+
+
             <div class="col-md-4">
-                <label class="form-label text-muted">Teléfono:</label>
-                <input type="text" class="form-control" value="<%= u.getTelefono() %>" readonly>
+                <label class="form-label text-muted">Telefono:</label>
+                <input type="text"
+                       id="campoTelefono"
+                       name="telefono"
+                       class="form-control bg-white"
+                       value="<%= u.getTelefono() != null ? u.getTelefono() : "" %>"
+                       maxlength="10">
             </div>
         </div>
 
@@ -71,46 +90,62 @@
             </div>
         </div>
 
+        <!-- TÍTULO CAMBIO DE CONTRASEÑA -->
         <div class="bg-teal text-white p-2 mb-4 fs-5" style="background-color: var(--teal-main);">
             Cambio de contraseña
         </div>
 
-        <div class="row mb-5">
-            <div class="col-md-4">
-                <label class="form-label text-muted">Contraseña Actual:</label>
+        <div class="row mb-4">
+            <!-- 1. Contraseña Actual -->
+            <div class="col-12 mb-4">
+                <label class="form-label text-muted">Password Actual:</label>
                 <div class="input-group">
-                    <input type="password" id="passActual" class="form-control bg-white">
+                    <input type="password"
+                           id="passActual"
+                           class="form-control"
+                           value="<%= u.getContrasena() != null ? u.getContrasena() : "" %>"
+                           readonly>
                     <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passActual')" style="cursor: pointer;">
-                        <i class="bi bi-eye-fill text-muted"></i>
+                        <i id="icon-passActual" class="bi bi-eye-fill text-muted"></i>
                     </span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label text-muted">Nueva Contraseña:</label>
+
+            <!-- 2. Nueva Contraseña y Confirmar -->
+            <div class="col-md-6 mb-4">
+                <label class="form-label text-muted">New Password:</label>
                 <div class="input-group">
-                    <input type="password" id="passNueva" class="form-control bg-white">
+                    <input type="password"
+                           id="passNueva"
+                           class="form-control bg-white"
+                           autocomplete="new-password">
                     <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passNueva')" style="cursor: pointer;">
-                        <i class="bi bi-eye-fill text-muted"></i>
+                        <i id="icon-passNueva" class="bi bi-eye-fill text-muted"></i>
                     </span>
                 </div>
             </div>
-            <div class="col-md-4">
+
+            <div class="col-md-6 mb-4">
                 <label class="form-label text-muted">Confirmar Contraseña:</label>
                 <div class="input-group">
-                    <input type="password" id="passConfirm" class="form-control bg-white">
+                    <input type="password"
+                           id="passConfirm"
+                           class="form-control bg-white"
+                           autocomplete="new-password">
                     <span class="input-group-text bg-white border-start-0" onclick="togglePassword('passConfirm')" style="cursor: pointer;">
-                        <i class="bi bi-eye-fill text-muted"></i>
+                        <i id="icon-passConfirm" class="bi bi-eye-fill text-muted"></i>
                     </span>
                 </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-3">
+        <div class="d-flex justify-content-end gap-3 mt-4">
             <a href="vista_general_desarrollador_de.jsp" class="btn btn-outline-teal px-4 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
                 <i class="bi bi-chevron-left me-2"></i> Volver
             </a>
+            <!--  MODIFICACIÓN: Cambio de texto del botón -->
             <button type="submit" class="btn-teal px-4 py-2" style="border-radius: 6px;">
-                <i class="bi bi-save me-2"></i> Actualizar Contraseña
+                <i class="bi bi-save me-2"></i> Guardar Cambios
             </button>
         </div>
     </form>
@@ -121,15 +156,18 @@
 <script>
     function togglePassword(inputId) {
         const input = document.getElementById(inputId);
-        const icon = input.nextElementSibling;
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.remove("bi-eye-fill");
-            icon.classList.add("bi-eye-slash-fill");
-        } else {
-            input.type = "password";
-            icon.classList.remove("bi-eye-slash-fill");
-            icon.classList.add("bi-eye-fill");
+        const icon = document.getElementById('icon-' + inputId);
+
+        if (input && icon) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye-fill');
+                icon.classList.add('bi-eye-slash-fill');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash-fill');
+                icon.classList.add('bi-eye-fill');
+            }
         }
     }
 </script>

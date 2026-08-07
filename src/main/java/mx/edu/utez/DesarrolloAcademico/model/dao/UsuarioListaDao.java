@@ -10,7 +10,7 @@ import java.util.List;
 
 public class UsuarioListaDao {
 
-    public List<Usuario> listarPorRoles(Integer idDivision, String... roles) {
+    public List<Usuario> listarPorRoles(String... roles) {
         List<Usuario> lista = new ArrayList<>();
         if (roles == null || roles.length == 0) return lista;
 
@@ -18,23 +18,12 @@ public class UsuarioListaDao {
         for (int i = 0; i < roles.length; i++) {
             sb.append(i == 0 ? "?" : ",?");
         }
-        sb.append(")");
-        
-        if (idDivision != null) {
-            sb.append(" AND id_division = ?");
-        }
-        
-        sb.append(" ORDER BY nombre");
+        sb.append(") ORDER BY nombre");
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sb.toString())) {
-             
-            int paramIndex = 1;
             for (int i = 0; i < roles.length; i++) {
-                ps.setString(paramIndex++, roles[i]);
-            }
-            if (idDivision != null) {
-                ps.setInt(paramIndex++, idDivision);
+                ps.setString(i + 1, roles[i]);
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -93,11 +82,9 @@ public class UsuarioListaDao {
 
     public List<Usuario> listarParticipantesPorEvento(int idEvento) {
         List<Usuario> lista = new ArrayList<>();
-        String query = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo_institucional, u.numero_empleado, u.activo, u.rol, " +
-                "CASE WHEN c.id_constancia IS NOT NULL THEN 1 ELSE 0 END as entregado " +
+        String query = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo_institucional, u.numero_empleado, u.activo, u.rol " +
                 "FROM usuarios u " +
                 "JOIN participantes_eventos pe ON u.id_usuario = pe.id_usuario " +
-                "LEFT JOIN constancias c ON c.id_participante = pe.id_participante " +
                 "WHERE pe.id_evento = ? ORDER BY u.nombre";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
@@ -113,7 +100,6 @@ public class UsuarioListaDao {
                     u.setNumeroEmpleado(rs.getString("numero_empleado"));
                     u.setActivo(rs.getInt("activo"));
                     u.setRol(rs.getString("rol"));
-                    u.setEntregado(rs.getInt("entregado") == 1);
                     lista.add(u);
                 }
             }
@@ -153,10 +139,10 @@ public class UsuarioListaDao {
     public boolean actualizarUsuario(Usuario u) {
         boolean estado = false;
         String query = "UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, id_division = ?, numero_empleado = ?, telefono = ?, correo_institucional = ? WHERE id_usuario = ?";
-        
+
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
-            
+
             ps.setString(1, u.getNombre());
             ps.setString(2, u.getApellidoPaterno());
             ps.setString(3, u.getApellidoMaterno());
@@ -169,14 +155,108 @@ public class UsuarioListaDao {
             ps.setString(6, u.getTelefono());
             ps.setString(7, u.getCorreoInstitucional());
             ps.setInt(8, u.getIdUsuario());
-            
+
+
             int filas = ps.executeUpdate();
             estado = (filas > 0);
-            
+
         } catch (SQLException e) {
             System.err.println("Error al actualizar usuario: " + e.getMessage());
             e.printStackTrace();
         }
         return estado;
     }
+
+    public boolean eliminarUsuario(int idUsuario) {
+        String query = "DELETE FROM usuarios WHERE id_usuario = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idUsuario);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar usuario: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean cambiarEstado(int idUsuario, int nuevoEstado) {
+        String query = "UPDATE usuarios SET activo = ? WHERE id_usuario = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, nuevoEstado);
+            ps.setInt(2, idUsuario);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al cambiar estado del usuario: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int contarEventos() {
+        int total = 0;
+        String sql = "SELECT COUNT(ID_EVENTO) FROM EVENTOS";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                total = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al contar eventos: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return total;
+    }
+
+
+
+    public int contarDocentes(int idDivision) {
+        String sql = "SELECT COUNT(*) FROM USUARIOS WHERE LOWER(ROL) = 'docente' AND ID_DIVISION = ?";
+        int total = 0;
+
+        try (Connection con = DatabaseConnection.getConnection(); // o como obtengas tu conexión
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            // --- ESTA ES LA LÍNEA QUE FALTA ---
+            ps.setInt(1, idDivision); // Asigna el valor al '?'
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al contar docentes: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return total;
+    }
+
+
+    public int contarDocentesD() {
+        String sql = "SELECT COUNT(*) FROM USUARIOS WHERE LOWER(ROL) = 'docente'";
+        int total = 0;
+
+        try (Connection con = DatabaseConnection.getConnection(); // o como obtengas tu conexión
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al contar docentes: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return total;
+    }
+
 }
+
