@@ -101,18 +101,23 @@
                     <input type="email" class="form-control" value="<%= correo %>" disabled>
                 </div>
 
-
+                <!-- Campo de Contraseña -->
                 <div class="col-md-4">
                     <label for="campoContrasenaVer" class="form-label fw-bold">Contraseña :</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="campoContrasenaVer"
-                               value="<%= pass %>" readonly disabled style="background-color: #e9ecef;">
+                        <input type="password"
+                               class="form-control"
+                               id="campoContrasenaVer"
+                               value="<%= pass %>"
+                               readonly
+                               style="background-color: #e9ecef;">
                         <button class="btn btn-outline-secondary" type="button" id="btnTogglePassVer">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
                 </div>
-            </div>s
+            </div>
+
             <!-- Botones -->
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <a href="gestion_desarrolladores_de.jsp" class="btn btn-outline-secondary px-4">
@@ -124,16 +129,31 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    document.getElementById('btnTogglePass').addEventListener('click', function () {
-        const input = document.getElementById('campoPass');
-        const icon = this.querySelector('i');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.replace('bi-eye', 'bi-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.replace('bi-eye-slash', 'bi-eye');
+    document.addEventListener('DOMContentLoaded', function () {
+        const btnToggle = document.getElementById('btnTogglePassVer');
+        const inputPass = document.getElementById('campoContrasenaVer');
+
+        if (btnToggle && inputPass) {
+            btnToggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                const icon = btnToggle.querySelector('i');
+
+                if (inputPass.type === 'password') {
+                    inputPass.type = 'text';
+                    if (icon) {
+                        icon.classList.remove('bi-eye');
+                        icon.classList.add('bi-eye-slash');
+                    }
+                } else {
+                    inputPass.type = 'password';
+                    if (icon) {
+                        icon.classList.remove('bi-eye-slash');
+                        icon.classList.add('bi-eye');
+                    }
+                }
+            });
         }
     });
 </script>

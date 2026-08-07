@@ -145,7 +145,7 @@
                 <td>ejemplo@gmail.com</td>
                 <td class="status-active">Activo</td>
                 <td>
-                    <a href="archivo_subido.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                    <a href="archivo_subido_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
                 </td>
             </tr>
             </tbody>

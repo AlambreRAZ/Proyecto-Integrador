@@ -115,7 +115,7 @@ function configurarVigenciaYArchivo() {
         formData.append('tieneVigencia', radioSi.checked);
         formData.append('fechaVigencia', inputFecha.value);
 
-        fetch(contextPath + '/CargarArchivoServlet', {
+        fetch(contextPath + '/CargarArchivo', {
             method: 'POST',
             body: formData
         })

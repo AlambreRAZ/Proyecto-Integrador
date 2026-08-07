@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<jsp:include page="sidebar.jsp">
+<jsp:include page="sidebar_de.jsp">
     <jsp:param name="active" value="mi_evento" />
 </jsp:include>
 

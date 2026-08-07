@@ -21,19 +21,35 @@ let participantesOriginales = [];
 let todosLosUsuarios = [];
 let filtroParticipante = '';
 
-function aFechaVisible(iso) {
-    if (!iso) return '';
-    const partes = iso.split('-');
-    if (partes.length !== 3) return iso;
-    return partes[2] + '/' + partes[1] + '/' + partes[0].slice(2);
+// Helper para obtener ID de usuario independientemente de si viene como id o idUsuario
+function getIdUsuario(u) {
+    return u.idUsuario || u.id;
 }
 
+// Helper para obtener el correo sin importar el mapeo
+function getCorreoUsuario(u) {
+    return u.correoInstitucional || u.correo || '';
+}
+
+// Transformar ISO (YYYY-MM-DD) a formato input o visible
+function aFechaVisible(iso) {
+    if (!iso) return '';
+    // Si ya viene como YYYY-MM-DD se asigna directamente a input[type=date]
+    return iso;
+}
+
+// Convierte la fecha del input para el Servidor
 function aFechaServidor(visible) {
-    const partes = (visible || '').split('/');
-    if (partes.length !== 3) return '';
+    if (!visible) return '';
+    // Si el input es type="date", 'visible' ya es "YYYY-MM-DD"
+    if (visible.includes('-')) return visible;
+
+    // Si usas un plugin o input con formato "DD/MM/YYYY"
+    const partes = visible.split('/');
+    if (partes.length !== 3) return visible;
     let [d, m, y] = partes;
     if (y.length === 2) y = '20' + y;
-    return y + '-' + m.padStart(2, '0') + '-' + d.padStart(2, '0');
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
 }
 
 function escHtml(texto) {
@@ -54,25 +70,30 @@ function getNombreCompleto(u) {
 // -----------------------------------------------------------------------------
 function cargarEvento() {
     if (!idEvento) {
-        Swal.fire({ icon: 'error', title: 'Falta el id del evento', text: 'Entra a esta página desde "Gestión de Eventos" para poder editar.', confirmButtonColor: '#00847b' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Falta el id del evento',
+            text: 'Entra a esta página desde "Gestión de Eventos" para poder editar.',
+            confirmButtonColor: '#00847b'
+        });
         return;
     }
 
-    fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now())
+    fetch(`${contextPath}/EditarEventoServlet?id=${encodeURIComponent(idEvento)}&t=${Date.now()}`)
         .then(res => res.json())
         .then(data => {
             if (!data.success) {
                 Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'No se pudo cargar', confirmButtonColor: '#00847b' });
                 return;
             }
-            campoNombre.value = data.nombre || '';
-            campoLugar.value = data.lugar || '';
-            campoInstitucion.value = data.institucion || '';
-            campoDescripcion.value = data.descripcion || '';
-            campoFechaInicio.value = aFechaVisible(data.fechaInicio);
-            campoFechaFin.value = aFechaVisible(data.fechaFin);
+            if (campoNombre) campoNombre.value = data.nombre || '';
+            if (campoLugar) campoLugar.value = data.lugar || '';
+            if (campoInstitucion) campoInstitucion.value = data.institucion || '';
+            if (campoDescripcion) campoDescripcion.value = data.descripcion || '';
+            if (campoFechaInicio) campoFechaInicio.value = aFechaVisible(data.fechaInicio);
+            if (campoFechaFin) campoFechaFin.value = aFechaVisible(data.fechaFin);
 
-            if (campoTipo && campoTipo.querySelector('option[value="' + data.tipo + '"]')) {
+            if (campoTipo && campoTipo.querySelector(`option[value="${data.tipo}"]`)) {
                 campoTipo.value = data.tipo;
             }
             document.querySelectorAll('input[name="modalidad"]').forEach(chk => {
@@ -82,9 +103,7 @@ function cargarEvento() {
             cargarParticipantes();
             cargarTodosLosUsuarios();
         })
-        .catch(err => {
-            console.error('Error al cargar:', err);
-        });
+        .catch(err => console.error('Error al cargar evento:', err));
 }
 
 if (form) {
@@ -96,13 +115,13 @@ if (form) {
         datos.append('nombre', campoNombre.value);
         datos.append('lugar', campoLugar.value);
         datos.append('institucion', campoInstitucion.value);
-        datos.append('tipo', campoTipo.value);
+        datos.append('tipo', campoTipo ? campoTipo.value : '');
         datos.append('descripcion', campoDescripcion.value);
         datos.append('fechaInicio', aFechaServidor(campoFechaInicio.value));
         datos.append('fechaFin', aFechaServidor(campoFechaFin.value));
         datos.append('modalidad', modalidadSeleccionada ? modalidadSeleccionada.value : '');
 
-        fetch(contextPath + '/EditarEventoServlet', {
+        fetch(`${contextPath}/EditarEventoServlet`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: datos.toString()
@@ -121,7 +140,8 @@ if (form) {
                 } else {
                     Swal.fire({ icon: 'error', title: 'Error', text: resultado.data.message || 'No se pudo actualizar.', confirmButtonColor: '#00847b' });
                 }
-            }).catch(err => console.error(err));
+            })
+            .catch(err => console.error(err));
     });
 }
 
@@ -129,7 +149,7 @@ if (form) {
 // PARTICIPANTES - CARGA Y GESTIÓN
 // -----------------------------------------------------------------------------
 function cargarParticipantes() {
-    fetch(contextPath + '/ListarParticipantesEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now())
+    fetch(`${contextPath}/ListarParticipantesEventoServlet?id=${encodeURIComponent(idEvento)}&t=${Date.now()}`)
         .then(res => {
             if (!res.ok) throw new Error('HTTP error ' + res.status);
             return res.json();
@@ -142,7 +162,7 @@ function cargarParticipantes() {
         .catch(err => {
             console.error('Error al cargar participantes:', err);
             if (tbodyParticipantes) {
-                tbodyParticipantes.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4">Error al cargar datos. Verifica tu conexión o reinicia Tomcat.</td></tr>';
+                tbodyParticipantes.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4">Error al cargar datos. Verifica tu conexión o Tomcat.</td></tr>';
             }
         });
 }
@@ -150,7 +170,8 @@ function cargarParticipantes() {
 function aplicarFiltrosParticipantes() {
     const texto = normString(filtroParticipante);
     const filtrados = participantesOriginales.filter(u => {
-        return texto === '' || normString(getNombreCompleto(u)).includes(texto) || normString(u.correo).includes(texto);
+        const correo = getCorreoUsuario(u);
+        return texto === '' || normString(getNombreCompleto(u)).includes(texto) || normString(correo).includes(texto);
     });
     renderParticipantes(filtrados);
 }
@@ -162,35 +183,31 @@ function renderParticipantes(lista) {
         return;
     }
 
-    // Detectar si la página es de Desarrollador (_de.jsp) o Coordinador (_co.jsp)
     const esDesarrollador = window.location.pathname.includes('_de.jsp');
     const sufijoRol = esDesarrollador ? '_de.jsp' : '_co.jsp';
 
     tbodyParticipantes.innerHTML = '';
     lista.forEach(u => {
         const tr = document.createElement('tr');
+        const userId = getIdUsuario(u);
+        const userCorreo = getCorreoUsuario(u);
         const estadoColor = u.activo === 1 ? '#28a745' : '#d32f2f';
         const estadoTexto = u.activo === 1 ? 'Activo' : 'Inactivo';
 
-        tr.innerHTML =
-            '<td>' +
-            '  <div class="docente-name-container">' +
-            '    <div class="avatar-circle"></div>' +
-            '    <div class="docente-name">' + escHtml(getNombreCompleto(u)) + '</div>' +
-            '  </div>' +
-            '</td>' +
-            '<td>' + escHtml(u.correo) + '</td>' +
-            '<td style="color:' + estadoColor + ';font-weight:600;">' + estadoTexto + '</td>' +
-            '<td>' +
-            // 👁️ Botón Ver Más / Detalles
-            '  <a href="' + contextPath + '/ver_mas_evento' + sufijoRol + '?id=' + idEvento + '&usuarioId=' + u.id + '" class="action-btn" title="Ver Detalles"><i class="bi bi-eye"></i></a> ' +
-
-            // ☁️ BOTÓN DE LA NUBE CORREGIDO (Usa idEvento y u.id correctamente)
-            '  <a href="' + contextPath + '/cargar_archivo' + sufijoRol + '?id=' + idEvento + '&usuarioId=' + u.id + '" class="action-btn" title="Cargar Archivo"><i class="bi bi-cloud-arrow-up"></i></a> ' +
-
-            // 🗑️ Botón Remover
-            '  <a href="#" class="action-btn delete btn-remover-participante" data-id="' + u.id + '" title="Remover del evento"><i class="bi bi-trash"></i></a>' +
-            '</td>';
+        tr.innerHTML = `
+            <td>
+              <div class="docente-name-container">
+                <div class="avatar-circle"></div>
+                <div class="docente-name">${escHtml(getNombreCompleto(u))}</div>
+              </div>
+            </td>
+            <td>${escHtml(userCorreo)}</td>
+            <td style="color:${estadoColor}; font-weight:600;">${estadoTexto}</td>
+            <td>
+              <a href="${contextPath}/ver_mas_evento${sufijoRol}?id=${idEvento}&usuarioId=${userId}" class="action-btn" title="Ver Detalles"><i class="bi bi-eye"></i></a>
+              <a href="${contextPath}/cargar_archivo${sufijoRol}?id=${idEvento}&usuarioId=${userId}" class="action-btn" title="Cargar Archivo"><i class="bi bi-cloud-arrow-up"></i></a>
+              <a href="#" class="action-btn delete btn-remover-participante" data-id="${userId}" title="Remover del evento"><i class="bi bi-trash"></i></a>
+            </td>`;
         tbodyParticipantes.appendChild(tr);
     });
 }
@@ -211,15 +228,20 @@ if (tbodyParticipantes) {
 
         const idUsuario = btn.getAttribute('data-id');
         Swal.fire({
-            icon: 'warning', title: '¿Remover a este docente?', text: 'Se quitará su asignación al evento.',
-            showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#aaaaaa', confirmButtonText: 'Sí, remover'
+            icon: 'warning',
+            title: '¿Remover a este docente?',
+            text: 'Se quitará su asignación al evento.',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#aaaaaa',
+            confirmButtonText: 'Sí, remover'
         }).then(res => {
             if (res.isConfirmed) {
                 const formData = new URLSearchParams();
                 formData.append("idEvento", idEvento);
                 formData.append("idUsuario", idUsuario);
 
-                fetch(contextPath + '/RemoverDocenteEventoServlet', {
+                fetch(`${contextPath}/RemoverDocenteEventoServlet`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData.toString()
@@ -240,7 +262,7 @@ if (tbodyParticipantes) {
 // ASIGNAR NUEVO PARTICIPANTE (MODAL)
 // -----------------------------------------------------------------------------
 function cargarTodosLosUsuarios() {
-    fetch(contextPath + '/ListarUsuariosServlet?t=' + Date.now())
+    fetch(`${contextPath}/ListarUsuariosServlet?t=${Date.now()}`)
         .then(res => {
             if (!res.ok) throw new Error('HTTP error ' + res.status);
             return res.json();
@@ -260,8 +282,8 @@ function cargarTodosLosUsuarios() {
 function actualizarSelectDocentes() {
     if (!selectDocenteAAsignar) return;
 
-    const asignadosIds = participantesOriginales.map(p => Number(p.id));
-    const noAsignados = todosLosUsuarios.filter(u => !asignadosIds.includes(Number(u.id)));
+    const asignadosIds = participantesOriginales.map(p => Number(getIdUsuario(p)));
+    const noAsignados = todosLosUsuarios.filter(u => !asignadosIds.includes(Number(getIdUsuario(u))));
 
     selectDocenteAAsignar.innerHTML = '';
 
@@ -273,8 +295,9 @@ function actualizarSelectDocentes() {
     selectDocenteAAsignar.innerHTML = '<option value="" disabled selected>Selecciona un docente/coordinador...</option>';
     noAsignados.forEach(u => {
         const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = getNombreCompleto(u) + ' (' + (u.numeroEmpleado || 'S/N') + ')';
+        const uId = getIdUsuario(u);
+        opt.value = uId;
+        opt.textContent = `${getNombreCompleto(u)} (${u.numeroEmpleado || 'S/N'})`;
         selectDocenteAAsignar.appendChild(opt);
     });
 }
@@ -291,7 +314,7 @@ if (btnConfirmarAsignacion) {
         formData.append("idEvento", idEvento);
         formData.append("idUsuario", idUsuario);
 
-        fetch(contextPath + '/AsignarDocenteEventoServlet', {
+        fetch(`${contextPath}/AsignarDocenteEventoServlet`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: formData.toString()
