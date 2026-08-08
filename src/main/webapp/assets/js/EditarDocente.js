@@ -219,42 +219,83 @@ function guardarCambios(e) {
     datos.append('confirmar_contrasena', passConfirmVal);
     datos.append('passConfirm', passConfirmVal);
 
-    // Petición al Servlet
-    fetch('EditarDocente', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-        body: datos.toString(),
-        credentials: 'same-origin'
-    })
-        .then(async res => {
-            const data = await res.json().catch(() => null);
-            if (!res.ok) {
-                throw new Error((data && data.message) ? data.message : 'Error al procesar en servidor');
-            }
-            return data;
-        })
-        .then(resultado => {
-            if (!resultado || !(resultado.success || resultado.ok)) {
-                mostrarAlerta('Error al actualizar', (resultado && resultado.message) ? resultado.message : 'Ocurrió un problema al guardar los cambios.', 'error');
-                return;
-            }
+    // PRELOADER Y PETICIÓN AL SERVLET
+    Swal.fire({
+        icon: 'question',
+        title: '¿Deseas guardar los cambios?',
+        text: 'Se actualizarán los datos del docente.',
+        showCancelButton: true,
+        confirmButtonColor: '#00847b',
+        cancelButtonColor: '#aaaaaa',
+        confirmButtonText: 'Sí, guardar',
+        cancelButtonText: 'Cancelar'
+    }).then(function (res) {
+        if (!res.isConfirmed) return;
 
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Docente actualizado con éxito!',
-                    text: resultado.message || 'Los cambios se guardaron correctamente.',
-                    confirmButtonColor: '#00847b'
-                }).then(() => {
-                    window.location.href = obtenerPaginaDestino();
-                });
-            } else {
-                alert('¡Docente actualizado con éxito!');
-                window.location.href = obtenerPaginaDestino();
+        let porcentaje = 0;
+        let timerCarga;
+
+        Swal.fire({
+            title: 'Actualizando docente...',
+            html: '<div style="font-size: 1.8rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeEdit">0%</div>',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+                timerCarga = setInterval(() => {
+                    if (porcentaje < 90) {
+                        porcentaje += 10;
+                        const el = document.getElementById('lblPorcentajeEdit');
+                        if (el) el.textContent = porcentaje + '%';
+                    }
+                }, 80);
             }
-        })
-        .catch(err => {
-            console.error('Error al guardar:', err);
-            mostrarAlerta('Error al guardar', err.message || 'Hubo un problema al intentar guardar los datos.', 'error');
         });
+
+        fetch('EditarDocente', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: datos.toString(),
+            credentials: 'same-origin'
+        })
+            .then(async res => {
+                const data = await res.json().catch(() => null);
+                if (!res.ok) {
+                    throw new Error((data && data.message) ? data.message : 'Error al procesar en servidor');
+                }
+                return data;
+            })
+            .then(resultado => {
+                clearInterval(timerCarga);
+                const el = document.getElementById('lblPorcentajeEdit');
+                if (el) el.textContent = '100%';
+
+                setTimeout(() => {
+                    if (!resultado || !(resultado.success || resultado.ok)) {
+                        mostrarAlerta('Error al actualizar', (resultado && resultado.message) ? resultado.message : 'Ocurrió un problema al guardar los cambios.', 'error');
+                        return;
+                    }
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Docente actualizado con éxito!',
+                            text: resultado.message || 'Los cambios se guardaron correctamente.',
+                            confirmButtonColor: '#00847b'
+                        }).then(() => {
+                            window.location.href = obtenerPaginaDestino();
+                        });
+                    } else {
+                        alert('¡Docente actualizado con éxito!');
+                        window.location.href = obtenerPaginaDestino();
+                    }
+                }, 300);
+            })
+            .catch(err => {
+                clearInterval(timerCarga);
+                console.error('Error al guardar:', err);
+                mostrarAlerta('Error al guardar', err.message || 'Hubo un problema al intentar guardar los datos.', 'error');
+            });
+    });
 }

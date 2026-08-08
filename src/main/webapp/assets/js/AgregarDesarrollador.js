@@ -16,14 +16,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
+    // -------------------------------------------------------------------------
+    // 2. RESTRICCIÓN EN TIEMPO REAL: Solo letras en Nombres y Apellidos
     // -------------------------------------------------------------------------
     const inputsTexto = document.querySelectorAll('#campoNombre, #campoApellidoP, #campoApellidoM, [name="nombre"], [name="apellido_paterno"], [name="apellido_materno"]');
     inputsTexto.forEach(input => {
         if (input) {
             input.addEventListener('input', (e) => {
-                // Elimina únicamente los números (0-9)
-                e.target.value = e.target.value.replace(/[0-9]/g, '');
+                // Elimina cualquier carácter que no sea letra (incluye acentos y ñ) o espacio
+                e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
             });
         }
     });
@@ -59,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // --- B) VALIDACIÓN DE NOMBRES Y APELLIDOS (Permite Ñ y acentos, NO números) ---
+            // --- B) VALIDACIÓN DE NOMBRES Y APELLIDOS ---
             if (!soloLetrasRegex.test(nombre)) {
                 mostrarAlerta('Nombre inválido', 'El nombre no puede contener números ni caracteres especiales.');
                 return;
@@ -105,35 +106,71 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // --- G) ENVÍO AJAX AL SERVIDOR ---
+            // --- G) PREPARACIÓN Y PRELOADER CON PORCENTAJE ---
             if (btnGuardar) btnGuardar.disabled = true;
 
             const datosForm = new FormData(form);
 
+            let porcentaje = 0;
+            let timerCarga;
+
+            // Alerta preloader con el porcentaje
+            Swal.fire({
+                title: 'Registrando desarrollador...',
+                html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeDev">0%</div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+
+                    // Incremento progresivo hasta llegar al 90%
+                    timerCarga = setInterval(() => {
+                        if (porcentaje < 90) {
+                            porcentaje += 10;
+                            const el = document.getElementById('lblPorcentajeDev');
+                            if (el) el.textContent = porcentaje + '%';
+                        }
+                    }, 80);
+                }
+            });
+
+            // --- H) ENVÍO AJAX AL SERVIDOR ---
             fetch(contextPath + '/AgregarDesarrolladorServlet', {
                 method: 'POST',
                 body: datosForm
             })
                 .then(response => response.json().then(data => ({ ok: response.ok, data })))
                 .then(resultado => {
-                    if (resultado.ok && resultado.data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Desarrollador Registrado con Éxito!',
-                            text: resultado.data.message || 'El desarrollador se ha guardado correctamente.',
-                            confirmButtonColor: '#00847b',
-                            confirmButtonText: 'Aceptar'
-                        }).then(result => {
-                            if (result.isConfirmed) {
-                                window.location.href = 'gestion_desarrolladores_de.jsp';
-                            }
-                        });
-                    } else {
-                        mostrarAlerta('No se pudo guardar', resultado.data.message || 'Ocurrió un error en el servidor.');
-                        if (btnGuardar) btnGuardar.disabled = false;
-                    }
+                    // Detenemos el reloj del contador
+                    clearInterval(timerCarga);
+
+                    // Forzamos el 100% de manera visual
+                    const el = document.getElementById('lblPorcentajeDev');
+                    if (el) el.textContent = '100%';
+
+                    // Damos una pausa rápida para que el usuario perciba el 100%
+                    setTimeout(() => {
+                        if (resultado.ok && resultado.data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Desarrollador Registrado con Éxito!',
+                                text: resultado.data.message || 'El desarrollador se ha guardado correctamente.',
+                                confirmButtonColor: '#00847b',
+                                confirmButtonText: 'Aceptar'
+                            }).then(result => {
+                                if (result.isConfirmed) {
+                                    window.location.href = 'gestion_desarrolladores_de.jsp';
+                                }
+                            });
+                        } else {
+                            mostrarAlerta('No se pudo guardar', resultado.data.message || 'Ocurrió un error en el servidor.');
+                            if (btnGuardar) btnGuardar.disabled = false;
+                        }
+                    }, 300);
                 })
                 .catch(error => {
+                    clearInterval(timerCarga);
                     console.error('Error al registrar:', error);
                     mostrarAlerta('Error de conexión', 'No fue posible comunicarse con el servidor.');
                     if (btnGuardar) btnGuardar.disabled = false;
@@ -151,10 +188,3 @@ function mostrarAlerta(titulo, texto) {
         confirmButtonColor: '#00847b'
     });
 }
-const inputsSoloTexto = form ? form.querySelectorAll('#campoNombre, #campoApellidoPaterno, #campoApellidoMaterno') : [];
-inputsSoloTexto.forEach(function (input) {
-    input.addEventListener('input', function () {
-        // Elimina cualquier carácter que no sea letra (incluye acentos y ñ) o espacio
-        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-    });
-});

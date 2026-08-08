@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. RESTRICCIÓN EN TIEMPO REAL: Solo números
     const inputsNumericos = document.querySelectorAll('#campoTelefono, #campoNumEmpleado, [name="telefono"], [name="numero_empleado"]');
     inputsNumericos.forEach(input => {
         if (input) {
@@ -8,11 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // 2. RESTRICCIÓN EN TIEMPO REAL: Solo letras (incluye acentos, espacios y Ñ/ñ)
     const inputsTexto = document.querySelectorAll('#campoNombre, #campoApellidoP, #campoApellidoM, [name="nombre"], [name="apellido_paterno"], [name="apellido_materno"]');
     inputsTexto.forEach(input => {
         if (input) {
             input.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[0-9]/g, '');
+                e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
             });
         }
     });
@@ -90,7 +92,7 @@ function registrarDocente(e) {
     }
 
     if (!correo.toLowerCase().endsWith('@utez.edu.mx')) {
-        mostrarAlerta('Correo no institucional', 'El correo debe terminar strictly en @utez.edu.mx');
+        mostrarAlerta('Correo no institucional', 'El correo debe terminar estrictamente en @utez.edu.mx');
         return;
     }
 
@@ -103,6 +105,29 @@ function registrarDocente(e) {
         mostrarAlerta('Las contraseñas no coinciden', 'Asegúrate de escribir exactamente la misma contraseña en ambos campos.');
         return;
     }
+
+    // --- PREPARACIÓN DEL PRELOADER CON PORCENTAJE ---
+    let porcentaje = 0;
+    let timerCarga;
+
+    Swal.fire({
+        title: 'Registrando docente...',
+        html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeDoc">0%</div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+            // Incremento progresivo hasta llegar al 90% mientras responde el Servlet
+            timerCarga = setInterval(() => {
+                if (porcentaje < 90) {
+                    porcentaje += 10;
+                    const el = document.getElementById('lblPorcentajeDoc');
+                    if (el) el.textContent = porcentaje + '%';
+                }
+            }, 80);
+        }
+    });
 
     // --- CONSTRUCCIÓN Y ENVÍO DE DATOS ---
     const datos = new URLSearchParams();
@@ -134,29 +159,32 @@ function registrarDocente(e) {
             return data;
         })
         .then(resultado => {
-            if (!resultado || !resultado.success) {
-                mostrarAlerta('Error al registrar', (resultado && resultado.message) ? resultado.message : 'Ocurrió un problema en el servidor.', 'error');
-                return;
-            }
+            // Detenemos el reloj de simulación
+            clearInterval(timerCarga);
 
-            Swal.fire({
-                icon: 'success',
-                title: '¡Docente registrado!',
-                text: resultado.message || 'El docente fue registrado con éxito.',
-                confirmButtonColor: '#00847b'
-            }).then(() => {
-                window.location.href = obtenerPaginaDestino();
-            });
+            // Forzamos el 100%
+            const el = document.getElementById('lblPorcentajeDoc');
+            if (el) el.textContent = '100%';
+
+            setTimeout(() => {
+                if (!resultado || !resultado.success) {
+                    mostrarAlerta('Error al registrar', (resultado && resultado.message) ? resultado.message : 'Ocurrió un problema en el servidor.', 'error');
+                    return;
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Docente registrado!',
+                    text: resultado.message || 'El docente fue registrado con éxito.',
+                    confirmButtonColor: '#00847b'
+                }).then(() => {
+                    window.location.href = obtenerPaginaDestino();
+                });
+            }, 300);
         })
         .catch(err => {
+            clearInterval(timerCarga);
             console.error('Error al registrar:', err);
             mostrarAlerta('Error de conexión', err.message || 'No se pudo comunicar con el servidor.', 'error');
         });
 }
-const inputsSoloTexto = form ? form.querySelectorAll('#campoNombre, #campoApellidoPaterno, #campoApellidoMaterno') : [];
-inputsSoloTexto.forEach(function (input) {
-    input.addEventListener('input', function () {
-        // Elimina cualquier carácter que no sea letra (incluye acentos y ñ) o espacio
-        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-    });
-});

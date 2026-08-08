@@ -89,7 +89,29 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append('passActual', passActualVal);
             formData.append('passNueva', novaPasswordVal);
 
-            // --- D) ENVÍO AL SERVLET ---
+            // --- D) PRELOADER CON PORCENTAJE PARA GUARDAR CAMBIOS ---
+            let porcentaje = 0;
+            let timerCarga;
+
+            Swal.fire({
+                title: 'Actualizando tu información...',
+                html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeCuenta">0%</div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    timerCarga = setInterval(() => {
+                        if (porcentaje < 90) {
+                            porcentaje += 10;
+                            const el = document.getElementById('lblPorcentajeCuenta');
+                            if (el) el.textContent = porcentaje + '%';
+                        }
+                    }, 80);
+                }
+            });
+
+            // --- E) ENVÍO AL SERVLET ---
             fetch(contextPath + '/ActualizarMiCuentaServlet', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
@@ -97,32 +119,39 @@ document.addEventListener("DOMContentLoaded", () => {
             })
                 .then(res => res.json().then(data => ({ ok: res.ok, data: data })))
                 .then(resultado => {
-                    if (resultado.ok && resultado.data.success) {
-                        // Si cambió la contraseña, actualizamos visualmente los inputs
-                        if (estaCambiandoPass) {
-                            if (inputActual) inputActual.value = novaPasswordVal;
-                            if (inputNueva) inputNueva.value = '';
-                            if (inputConfirm) inputConfirm.value = '';
-                        }
+                    clearInterval(timerCarga);
+                    const el = document.getElementById('lblPorcentajeCuenta');
+                    if (el) el.textContent = '100%';
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Actualizado con Éxito!',
-                            text: resultado.data.message || 'Tus datos han sido actualizados correctamente.',
-                            confirmButtonColor: '#00847b',
-                            confirmButtonText: 'Aceptar'
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'No se pudo actualizar',
-                            text: resultado.data.message || 'Error al actualizar tus datos.',
-                            confirmButtonColor: '#00847b',
-                            confirmButtonText: 'Aceptar'
-                        });
-                    }
+                    setTimeout(() => {
+                        if (resultado.ok && resultado.data.success) {
+                            // Si cambió la contraseña, actualizamos visualmente los inputs
+                            if (estaCambiandoPass) {
+                                if (inputActual) inputActual.value = novaPasswordVal;
+                                if (inputNueva) inputNueva.value = '';
+                                if (inputConfirm) inputConfirm.value = '';
+                            }
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Actualizado con Éxito!',
+                                text: resultado.data.message || 'Tus datos han sido actualizados correctamente.',
+                                confirmButtonColor: '#00847b',
+                                confirmButtonText: 'Aceptar'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'No se pudo actualizar',
+                                text: resultado.data.message || 'Error al actualizar tus datos.',
+                                confirmButtonColor: '#00847b',
+                                confirmButtonText: 'Aceptar'
+                            });
+                        }
+                    }, 300);
                 })
                 .catch(err => {
+                    clearInterval(timerCarga);
                     console.error('Error:', err);
                     Swal.fire({
                         icon: 'error',

@@ -1,4 +1,4 @@
-const  contextPath = window.contextPath || '';
+const contextPath = window.contextPath || '';
 const tbody = document.getElementById('tablaDocentesBody');
 const inputBuscar = document.getElementById('buscarDocente');
 
@@ -30,54 +30,66 @@ function mostrarAlerta(titulo, mensaje, icono = 'warning') {
 }
 
 // ------------------------------------------------------------------
-// 🛑 VALIDACIONES EN EL FRONTEND (GUARDAR / EDITAR)
+// 👁ALTERNAR VISIBILIDAD DE CONTRASEÑA (SI APLICA EN FORMULARIO/MODAL)
+// ------------------------------------------------------------------
+function setupTogglePassword(btnId, inputId) {
+    const btn = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    if (!btn || !input) return;
+
+    btn.addEventListener('click', function () {
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = 'password';
+            if (icon) icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    });
+}
+
+// ------------------------------------------------------------------
+//  VALIDACIONES EN EL FRONTEND (GUARDAR / EDITAR)
 // ------------------------------------------------------------------
 function validarFormularioDocente(datos) {
     const { nombre, apeP, apeM, division, numEmp, tel, correo, pass, confirmPass } = datos;
 
-    // 1. CAMPOS INCOMPLETOS / OBLIGATORIOS
     if (!nombre || !apeP || !apeM || !numEmp || !tel || !correo || !pass || (confirmPass !== undefined && !confirmPass)) {
         mostrarAlerta('Campos incompletos', 'Por favor, llena todos los campos obligatorios del formulario.');
         return false;
     }
 
-    // 2. SELECCIÓN DE DIVISIÓN ACADÉMICA
     if (!division) {
         mostrarAlerta('División requerida', 'Por favor selecciona una División Académica.');
         return false;
     }
 
-    // 3. NÚMERO DE EMPLEADO ÚNICAMENTE CON DÍGITOS
     if (!/^\d+$/.test(numEmp)) {
         mostrarAlerta('Número de Empleado inválido', 'El número de empleado solo debe contener dígitos numéricos.');
         return false;
     }
 
-    // 4. TELÉFONO ESTRICTAMENTE DE 10 DÍGITOS
     if (!/^\d{10}$/.test(tel)) {
         mostrarAlerta('Teléfono inválido', 'El teléfono debe ser de exactamente 10 dígitos numéricos.');
         return false;
     }
 
-    // 5. CORREO INSTITUCIONAL MÁXIMO 50 CARACTERES
     if (correo.length > 50) {
         mostrarAlerta('Correo demasiado largo', 'El correo institucional no debe exceder los 50 caracteres.');
         return false;
     }
 
-    // 6. CORREO ESTRICTAMENTE TERMINADO EN @utez.edu.mx
     if (!correo.toLowerCase().endsWith('@utez.edu.mx')) {
-        mostrarAlerta('Correo no institucional', 'El correo debe terminar strictly en @utez.edu.mx');
+        mostrarAlerta('Correo no institucional', 'El correo debe terminar estrictamente en @utez.edu.mx');
         return false;
     }
 
-    // 7. CONTRASEÑA ENTRE 12 Y 15 CARACTERES
     if (pass.length < 12 || pass.length > 15) {
         mostrarAlerta('Contraseña inválida', 'La contraseña debe tener entre 12 y 15 caracteres.');
         return false;
     }
 
-    // 8. COINCIDENCIA EXACTA DE CONTRASEÑAS (SI EXISTE CAMPO DE CONFIRMACIÓN)
     if (confirmPass !== undefined && pass !== confirmPass) {
         mostrarAlerta('Las contraseñas no coinciden', 'Asegúrate de escribir exactamente la misma contraseña en ambos campos.');
         return false;
@@ -98,7 +110,7 @@ function normalizar(texto) {
     return String(texto || '')
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, ''); // quita acentos
+        .replace(/[\u0300-\u036f]/g, '');
 }
 
 function nombreCompleto(doc) {
@@ -162,8 +174,8 @@ function renderDocentes(lista) {
             /* EDITAR */
             '<a href="' + contextPath + '/editar_docente_' + sufijoRol + '.jsp?id=' + doc.id + '" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>' +
 
-            /* VER DETALLES */
-            '<a href="' + contextPath + '/verDocente?id=' + doc.id + '" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>' +
+            /* VER DETALLES (Ruta corregida con sufijo de rol) */
+            '<a href="' + contextPath + '/ver_docente_' + sufijoRol + '.jsp?id=' + doc.id + '" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>' +
 
             /* ELIMINAR PERMANENTE */
             '<a href="#" class="action-btn delete" title="Eliminar" data-id="' + doc.id + '"><i class="bi bi-trash"></i></a>' +
@@ -199,18 +211,6 @@ function cargarDocentes() {
         });
 }
 
-function llenarFormularioDocente(data) {
-    if (document.getElementById('campoIdUsuario')) document.getElementById('campoIdUsuario').value = data.idUsuario || '';
-    if (document.getElementById('campoNombre')) document.getElementById('campoNombre').value = data.nombre || '';
-    if (document.getElementById('campoApellidoP')) document.getElementById('campoApellidoP').value = data.apellidoPaterno || '';
-    if (document.getElementById('campoApellidoM')) document.getElementById('campoApellidoM').value = data.apellidoMaterno || '';
-    if (document.getElementById('campoDivision')) document.getElementById('campoDivision').value = data.idDivision || '';
-    if (document.getElementById('campoNumEmpleado')) document.getElementById('campoNumEmpleado').value = data.numeroEmpleado || '';
-    if (document.getElementById('campoTelefono')) document.getElementById('campoTelefono').value = data.telefono || '';
-    if (document.getElementById('campoCorreo')) document.getElementById('campoCorreo').value = data.correo || '';
-    if (document.getElementById('campoContrasena')) document.getElementById('campoContrasena').value = data.contrasena || '';
-}
-
 function cambiarEstado(id, nuevoEstado) {
     const datos = new URLSearchParams();
     datos.append('id', id);
@@ -234,6 +234,10 @@ function cambiarEstado(id, nuevoEstado) {
 // ⌨️ RESTRICCIONES EN TIEMPO REAL (INPUT) Y MANEJO DE EVENTOS DOM
 // ------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
+
+    // Inicializar ojito de contraseña si existe en esta vista
+    setupTogglePassword('btnTogglePass', 'campoContrasena');
+    setupTogglePassword('btnToggleConfirmPass', 'campoConfirmarContrasena');
 
     // 1. RESTRICCIÓN EN TIEMPO REAL: Solo letras y espacios en Nombre y Apellidos
     const inputsTexto = document.querySelectorAll('#campoNombre, #campoApellidoP, #campoApellidoM, #nombre, #apellidoPaterno, #apellidoMaterno');
@@ -285,23 +289,51 @@ document.addEventListener("DOMContentLoaded", function () {
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
 
+                    let porcentaje = 0;
+                    let timerCarga;
+
+                    Swal.fire({
+                        title: 'Actualizando estado...',
+                        html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeDoc">0%</div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            timerCarga = setInterval(() => {
+                                if (porcentaje < 90) {
+                                    porcentaje += 10;
+                                    const el = document.getElementById('lblPorcentajeDoc');
+                                    if (el) el.textContent = porcentaje + '%';
+                                }
+                            }, 80);
+                        }
+                    });
+
                     cambiarEstado(id, nuevoEstado)
                         .then(function (resultado) {
-                            if (resultado.ok && resultado.data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '¡Éxito!',
-                                    text: resultado.data.message || 'Estado actualizado correctamente.',
-                                    confirmButtonColor: '#00847b',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                });
-                                cargarDocentes();
-                            } else {
-                                mostrarAlerta('No se pudo actualizar el estado', resultado.data.message || 'Ocurrió un error al conectar con la base de datos.', 'error');
-                            }
+                            clearInterval(timerCarga);
+                            const el = document.getElementById('lblPorcentajeDoc');
+                            if (el) el.textContent = '100%';
+
+                            setTimeout(function () {
+                                if (resultado.ok && resultado.data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: '¡Éxito!',
+                                        text: resultado.data.message || 'Estado actualizado correctamente.',
+                                        confirmButtonColor: '#00847b',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                    cargarDocentes();
+                                } else {
+                                    mostrarAlerta('No se pudo actualizar el estado', resultado.data.message || 'Ocurrió un error al conectar con la base de datos.', 'error');
+                                }
+                            }, 300);
                         })
                         .catch(function (error) {
+                            clearInterval(timerCarga);
                             console.error('Error al cambiar el estado:', error);
                             mostrarAlerta('Error de conexión', 'No fue posible comunicarse con el servidor.', 'error');
                         });
@@ -328,6 +360,27 @@ document.addEventListener("DOMContentLoaded", function () {
             }).then(function (result) {
                 if (!result.isConfirmed) return;
 
+                let porcentaje = 0;
+                let timerCarga;
+
+                Swal.fire({
+                    title: 'Eliminando docente...',
+                    html: '<div style="font-size: 1.5rem; font-weight: bold; color: #dc3545; margin-top: 10px;" id="lblPorcentajeDoc">0%</div>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        timerCarga = setInterval(() => {
+                            if (porcentaje < 90) {
+                                porcentaje += 10;
+                                const el = document.getElementById('lblPorcentajeDoc');
+                                if (el) el.textContent = porcentaje + '%';
+                            }
+                        }, 80);
+                    }
+                });
+
                 const datos = new URLSearchParams();
                 datos.append('idUsuario', idUsuario);
 
@@ -339,19 +392,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
-                        if (data && data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: '¡Eliminado!',
-                                text: data.message || 'El docente fue eliminado de la base de datos.',
-                                confirmButtonColor: '#00847b'
-                            });
-                            cargarDocentes();
-                        } else {
-                            mostrarAlerta('No se pudo eliminar', data.message || 'Ocurrió un error al intentar eliminar el registro.', 'error');
-                        }
+                        clearInterval(timerCarga);
+                        const el = document.getElementById('lblPorcentajeDoc');
+                        if (el) el.textContent = '100%';
+
+                        setTimeout(function () {
+                            if (data && data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Eliminado!',
+                                    text: data.message || 'El docente fue eliminado de la base de datos.',
+                                    confirmButtonColor: '#00847b'
+                                });
+                                cargarDocentes();
+                            } else {
+                                mostrarAlerta('No se pudo eliminar', data.message || 'Ocurrió un error al intentar eliminar el registro.', 'error');
+                            }
+                        }, 300);
                     })
                     .catch(function (error) {
+                        clearInterval(timerCarga);
                         console.error('Error al eliminar el docente:', error);
                         mostrarAlerta('Error de conexión', 'No fue posible comunicarse con el servidor.', 'error');
                     });
@@ -361,4 +421,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Cargar la lista al cargar la vista
     cargarDocentes();
-});;
+});

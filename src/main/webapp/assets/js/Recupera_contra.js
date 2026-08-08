@@ -9,6 +9,33 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // --- HELPER: Preloader con porcentaje genérico ---
+    function mostrarPreloader(titulo, colorProgreso = '#4cbab8') {
+        let porcentaje = 0;
+        let timerCarga;
+
+        Swal.fire({
+            title: titulo,
+            html: `<div style="font-size: 1.5rem; font-weight: bold; color: ${colorProgreso}; margin-top: 10px;" id="lblPorcentajeRec">0%</div>`,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+                timerCarga = setInterval(() => {
+                    if (porcentaje < 90) {
+                        porcentaje += 10;
+                        const el = document.getElementById('lblPorcentajeRec');
+                        if (el) el.textContent = porcentaje + '%';
+                    }
+                }, 80);
+            }
+        });
+
+        return timerCarga;
+    }
+
+    // ==================== PASO 1 (SOLICITAR CÓDIGO) ====================
     const formPaso1 = document.getElementById('formPaso1');
     if (formPaso1) {
         formPaso1.addEventListener('submit', function (e) {
@@ -22,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-
             if (valor.length > 50) {
                 e.preventDefault();
                 alertaSwal('Atención', 'Correo muy largo', 'warning');
@@ -34,14 +60,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 alertaSwal('Atención', 'El correo debe ser institucional (@utez.edu.mx)', 'warning');
                 return;
             }
+
+            // --- Preloader al enviar el Paso 1 ---
+            mostrarPreloader('Enviando código de verificación...');
         });
     }
 
+    // ==================== PASO 2 (VALIDAR CÓDIGO) ====================
     const formPaso2 = document.getElementById('formPaso2');
     const inputCodigo = document.getElementById('txtCodigo');
 
     if (inputCodigo) {
-
         inputCodigo.addEventListener('input', function () {
             inputCodigo.classList.remove('border-error');
             const valor = this.value;
@@ -78,10 +107,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 alertaSwal('Atención', 'Introduce el código de verificación', 'warning');
                 return;
             }
+
+            // --- Preloader al enviar el Paso 2 ---
+            mostrarPreloader('Verificando código...');
         });
     }
 
-    // ==================== REGLAS PASO 3 (CONTRASEÑA) ====================
+    // ==================== PASO 3 (RESTABLECER CONTRASEÑA) ====================
     const formPaso3 = document.getElementById('formPaso3');
     if (formPaso3) {
         formPaso3.addEventListener('submit', function (e) {
@@ -119,9 +151,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 alertaSwal('Atención', 'Las contraseñas no coinciden', 'warning');
                 return;
             }
+
+            // --- Preloader al enviar el Paso 3 ---
+            mostrarPreloader('Actualizando contraseña...');
         });
     }
 
+    // ==================== RESPUESTAS Y ERRORES DEL SERVIDOR ====================
     const serverError = document.getElementById('serverErrorMsg')?.value;
     const serverStep = document.getElementById('serverStep')?.value;
 

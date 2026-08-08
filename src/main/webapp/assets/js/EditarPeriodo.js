@@ -46,15 +46,38 @@ function guardarEdicionPeriodo() {
     const form = document.getElementById("formEditarPeriodo");
     const formData = new URLSearchParams(new FormData(form));
 
+    // --- PRELOADER CON PORCENTAJE SIMULADO ---
+    let porcentaje = 0;
+    let timerCarga;
+
+    Swal.fire({
+        title: 'Actualizando periodo...',
+        html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeEditPeriodo">0%</div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+            timerCarga = setInterval(() => {
+                if (porcentaje < 90) {
+                    porcentaje += 10;
+                    const el = document.getElementById('lblPorcentajeEditPeriodo');
+                    if (el) el.textContent = porcentaje + '%';
+                }
+            }, 80);
+        }
+    });
+
     fetch("EditarPeriodoServlet", {
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         },
         body: formData.toString()
     })
         .then(async response => {
             const data = await response.json();
+            clearInterval(timerCarga);
 
             // VALIDACIÓN 1: Si hay conflicto / duplicado de división (Código HTTP 409)
             if (response.status === 409) {
@@ -63,10 +86,10 @@ function guardarEdicionPeriodo() {
                     title: 'División duplicada',
                     text: data.message || 'La división ya tiene un periodo de carga asignado.'
                 });
-                return; // DETIENE EL FLUJO. No muestra mensaje de éxito ni redirecciona.
+                return; // DETIENE EL FLUJO.
             }
 
-            // VALIDACIÓN 2: Si ocurrió cualquier otro error
+            // VALIDACIÓN 2: Si ocurrió cualquier otro error HTTP
             if (!response.ok) {
                 Swal.fire({
                     icon: 'error',
@@ -76,17 +99,24 @@ function guardarEdicionPeriodo() {
                 return; // DETIENE EL FLUJO.
             }
 
-            Swal.fire({
-                icon: 'success',
-                title: '¡Actualizado!',
-                text: data.message || 'El periodo de carga se actualizó correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "gestion_periodos_carga_de.jsp";
-            });
+            // Forzar visualización de 100% en caso de éxito
+            const el = document.getElementById('lblPorcentajeEditPeriodo');
+            if (el) el.textContent = '100%';
+
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Actualizado!',
+                    text: data.message || 'El periodo de carga se actualizó correctamente.',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "gestion_periodos_carga_de.jsp";
+                });
+            }, 300);
         })
         .catch(err => {
+            clearInterval(timerCarga);
             console.error("Error en la solicitud:", err);
             Swal.fire({
                 icon: 'error',

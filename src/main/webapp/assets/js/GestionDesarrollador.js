@@ -270,15 +270,45 @@ document.addEventListener("DOMContentLoaded", function () {
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
 
+                    // --- PRELOADER CON PORCENTAJE PARA CAMBIAR ESTADO ---
+                    let porcentaje = 0;
+                    let timerCarga;
+
+                    Swal.fire({
+                        title: 'Actualizando estado...',
+                        html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeDev">0%</div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            timerCarga = setInterval(() => {
+                                if (porcentaje < 90) {
+                                    porcentaje += 10;
+                                    const el = document.getElementById('lblPorcentajeDev');
+                                    if (el) el.textContent = porcentaje + '%';
+                                }
+                            }, 80);
+                        }
+                    });
+
                     cambiarEstado(id, nuevoEstado)
                         .then(function (resultado) {
-                            if (resultado.ok && resultado.data.success) {
-                                cargarDesarrolladores();
-                            } else {
-                                mostrarAlerta('No se pudo actualizar el estado', resultado.data.message || 'Ocurrió un error al conectar con la base de datos.', 'error');
-                            }
+                            clearInterval(timerCarga);
+                            const el = document.getElementById('lblPorcentajeDev');
+                            if (el) el.textContent = '100%';
+
+                            setTimeout(function () {
+                                if (resultado.ok && resultado.data.success) {
+                                    Swal.close();
+                                    cargarDesarrolladores();
+                                } else {
+                                    mostrarAlerta('No se pudo actualizar el estado', resultado.data.message || 'Ocurrió un error al conectar con la base de datos.', 'error');
+                                }
+                            }, 300);
                         })
                         .catch(function (error) {
+                            clearInterval(timerCarga);
                             console.error('Error al cambiar el estado:', error);
                             mostrarAlerta('Error de conexión', 'No fue posible comunicarse con el servidor.', 'error');
                         });
@@ -304,21 +334,50 @@ document.addEventListener("DOMContentLoaded", function () {
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
 
+                    // --- PRELOADER CON PORCENTAJE PARA ELIMINAR ---
+                    let porcentaje = 0;
+                    let timerCarga;
+
+                    Swal.fire({
+                        title: 'Eliminando desarrollador...',
+                        html: '<div style="font-size: 1.5rem; font-weight: bold; color: #dc3545; margin-top: 10px;" id="lblPorcentajeDev">0%</div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            timerCarga = setInterval(() => {
+                                if (porcentaje < 90) {
+                                    porcentaje += 10;
+                                    const el = document.getElementById('lblPorcentajeDev');
+                                    if (el) el.textContent = porcentaje + '%';
+                                }
+                            }, 80);
+                        }
+                    });
+
                     eliminarDesarrolladorPermanente(id)
                         .then(function (resultado) {
-                            if (resultado.ok && resultado.data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '¡Eliminado!',
-                                    text: resultado.data.message || 'El desarrollador fue eliminado correctamente.',
-                                    confirmButtonColor: '#00847b'
-                                });
-                                cargarDesarrolladores();
-                            } else {
-                                mostrarAlerta('No se pudo eliminar', resultado.data.message || 'Ocurrió un error al eliminar el desarrollador.', 'error');
-                            }
+                            clearInterval(timerCarga);
+                            const el = document.getElementById('lblPorcentajeDev');
+                            if (el) el.textContent = '100%';
+
+                            setTimeout(function () {
+                                if (resultado.ok && resultado.data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: '¡Eliminado!',
+                                        text: resultado.data.message || 'El desarrollador fue eliminado correctamente.',
+                                        confirmButtonColor: '#00847b'
+                                    });
+                                    cargarDesarrolladores();
+                                } else {
+                                    mostrarAlerta('No se pudo eliminar', resultado.data.message || 'Ocurrió un error al eliminar el desarrollador.', 'error');
+                                }
+                            }, 300);
                         })
                         .catch(function (error) {
+                            clearInterval(timerCarga);
                             console.error('Error al eliminar el desarrollador:', error);
                             mostrarAlerta('Error de conexión', 'No fue posible comunicarse con el servidor.', 'error');
                         });

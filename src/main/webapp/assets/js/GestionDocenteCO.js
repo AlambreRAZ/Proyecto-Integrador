@@ -285,23 +285,52 @@ document.addEventListener("DOMContentLoaded", function () {
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
 
+                    // --- PRELOADER CON PORCENTAJE PARA CAMBIAR ESTADO ---
+                    let porcentaje = 0;
+                    let timerCarga;
+
+                    Swal.fire({
+                        title: 'Actualizando estado...',
+                        html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeDoc">0%</div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            timerCarga = setInterval(() => {
+                                if (porcentaje < 90) {
+                                    porcentaje += 10;
+                                    const el = document.getElementById('lblPorcentajeDoc');
+                                    if (el) el.textContent = porcentaje + '%';
+                                }
+                            }, 80);
+                        }
+                    });
+
                     cambiarEstado(id, nuevoEstado)
                         .then(function (resultado) {
-                            if (resultado.ok && resultado.data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '¡Éxito!',
-                                    text: resultado.data.message || 'Estado actualizado correctamente.',
-                                    confirmButtonColor: '#00847b',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                });
-                                cargarDocentes();
-                            } else {
-                                mostrarAlerta('No se pudo actualizar el estado', resultado.data.message || 'Ocurrió un error al conectar con la base de datos.', 'error');
-                            }
+                            clearInterval(timerCarga);
+                            const el = document.getElementById('lblPorcentajeDoc');
+                            if (el) el.textContent = '100%';
+
+                            setTimeout(function () {
+                                if (resultado.ok && resultado.data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: '¡Éxito!',
+                                        text: resultado.data.message || 'Estado actualizado correctamente.',
+                                        confirmButtonColor: '#00847b',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                    cargarDocentes();
+                                } else {
+                                    mostrarAlerta('No se pudo actualizar el estado', resultado.data.message || 'Ocurrió un error al conectar con la base de datos.', 'error');
+                                }
+                            }, 300);
                         })
                         .catch(function (error) {
+                            clearInterval(timerCarga);
                             console.error('Error al cambiar el estado:', error);
                             mostrarAlerta('Error de conexión', 'No fue posible comunicarse con el servidor.', 'error');
                         });
@@ -328,6 +357,28 @@ document.addEventListener("DOMContentLoaded", function () {
             }).then(function (result) {
                 if (!result.isConfirmed) return;
 
+                // --- PRELOADER CON PORCENTAJE PARA ELIMINAR ---
+                let porcentaje = 0;
+                let timerCarga;
+
+                Swal.fire({
+                    title: 'Eliminando docente...',
+                    html: '<div style="font-size: 1.5rem; font-weight: bold; color: #dc3545; margin-top: 10px;" id="lblPorcentajeDoc">0%</div>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        timerCarga = setInterval(() => {
+                            if (porcentaje < 90) {
+                                porcentaje += 10;
+                                const el = document.getElementById('lblPorcentajeDoc');
+                                if (el) el.textContent = porcentaje + '%';
+                            }
+                        }, 80);
+                    }
+                });
+
                 const datos = new URLSearchParams();
                 datos.append('idUsuario', idUsuario);
 
@@ -339,19 +390,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
-                        if (data && data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: '¡Eliminado!',
-                                text: data.message || 'El docente fue eliminado de la base de datos.',
-                                confirmButtonColor: '#00847b'
-                            });
-                            cargarDocentes();
-                        } else {
-                            mostrarAlerta('No se pudo eliminar', data.message || 'Ocurrió un error al intentar eliminar el registro.', 'error');
-                        }
+                        clearInterval(timerCarga);
+                        const el = document.getElementById('lblPorcentajeDoc');
+                        if (el) el.textContent = '100%';
+
+                        setTimeout(function () {
+                            if (data && data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Eliminado!',
+                                    text: data.message || 'El docente fue eliminado de la base de datos.',
+                                    confirmButtonColor: '#00847b'
+                                });
+                                cargarDocentes();
+                            } else {
+                                mostrarAlerta('No se pudo eliminar', data.message || 'Ocurrió un error al intentar eliminar el registro.', 'error');
+                            }
+                        }, 300);
                     })
                     .catch(function (error) {
+                        clearInterval(timerCarga);
                         console.error('Error al eliminar el docente:', error);
                         mostrarAlerta('Error de conexión', 'No fue posible comunicarse con el servidor.', 'error');
                     });
@@ -359,6 +417,5 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Iniciar carga al entrar
     cargarDocentes();
 });

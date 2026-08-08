@@ -34,17 +34,14 @@ function getCorreoUsuario(u) {
 // Transformar ISO (YYYY-MM-DD) a formato input o visible
 function aFechaVisible(iso) {
     if (!iso) return '';
-    // Si ya viene como YYYY-MM-DD se asigna directamente a input[type=date]
     return iso;
 }
 
 // Convierte la fecha del input para el Servidor
 function aFechaServidor(visible) {
     if (!visible) return '';
-    // Si el input es type="date", 'visible' ya es "YYYY-MM-DD"
     if (visible.includes('-')) return visible;
 
-    // Si usas un plugin o input con formato "DD/MM/YYYY"
     const partes = visible.split('/');
     if (partes.length !== 3) return visible;
     let [d, m, y] = partes;
@@ -109,39 +106,78 @@ function cargarEvento() {
 if (form) {
     form.addEventListener('submit', function (e) {
         e.preventDefault();
+
         const modalidadSeleccionada = document.querySelector('input[name="modalidad"]:checked');
         const datos = new URLSearchParams();
         datos.append('id', idEvento);
-        datos.append('nombre', campoNombre.value);
-        datos.append('lugar', campoLugar.value);
-        datos.append('institucion', campoInstitucion.value);
+        datos.append('nombre', campoNombre ? campoNombre.value : '');
+        datos.append('lugar', campoLugar ? campoLugar.value : '');
+        datos.append('institucion', campoInstitucion ? campoInstitucion.value : '');
         datos.append('tipo', campoTipo ? campoTipo.value : '');
-        datos.append('descripcion', campoDescripcion.value);
-        datos.append('fechaInicio', aFechaServidor(campoFechaInicio.value));
-        datos.append('fechaFin', aFechaServidor(campoFechaFin.value));
+        datos.append('descripcion', campoDescripcion ? campoDescripcion.value : '');
+        datos.append('fechaInicio', aFechaServidor(campoFechaInicio ? campoFechaInicio.value : ''));
+        datos.append('fechaFin', aFechaServidor(campoFechaFin ? campoFechaFin.value : ''));
         datos.append('modalidad', modalidadSeleccionada ? modalidadSeleccionada.value : '');
+
+        // --- PRELOADER CON PORCENTAJE SIMULADO ---
+        let porcentaje = 0;
+        let timerCarga;
+
+        Swal.fire({
+            title: 'Actualizando evento...',
+            html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeEditEvento">0%</div>',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+                timerCarga = setInterval(() => {
+                    if (porcentaje < 90) {
+                        porcentaje += 10;
+                        const el = document.getElementById('lblPorcentajeEditEvento');
+                        if (el) el.textContent = porcentaje + '%';
+                    }
+                }, 80);
+            }
+        });
 
         fetch(`${contextPath}/EditarEventoServlet`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             body: datos.toString()
         })
             .then(res => res.json().then(data => ({ ok: res.ok, data: data })))
             .then(resultado => {
-                if (resultado.ok && resultado.data.success) {
-                    Swal.fire({ icon: 'success', title: '¡Evento actualizado con éxito!', confirmButtonColor: '#00847b', confirmButtonText: 'Aceptar' })
-                        .then(r => {
+                clearInterval(timerCarga);
+
+                const el = document.getElementById('lblPorcentajeEditEvento');
+                if (el) el.textContent = '100%';
+
+                setTimeout(() => {
+                    if (resultado.ok && resultado.data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Evento actualizado con éxito!',
+                            text: resultado.data.message || 'Los cambios se guardaron correctamente.',
+                            confirmButtonColor: '#00847b',
+                            confirmButtonText: 'Aceptar'
+                        }).then(r => {
                             if (r.isConfirmed) {
                                 const esDesarrollador = window.location.pathname.includes('_de.jsp');
                                 const destino = esDesarrollador ? 'gestion_eventos_de.jsp' : 'gestion_evento_co.jsp';
                                 window.location.href = destino;
                             }
                         });
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Error', text: resultado.data.message || 'No se pudo actualizar.', confirmButtonColor: '#00847b' });
-                }
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: resultado.data.message || 'No se pudo actualizar.', confirmButtonColor: '#00847b' });
+                    }
+                }, 300);
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                clearInterval(timerCarga);
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No fue posible comunicarse con el servidor.', confirmButtonColor: '#00847b' });
+            });
     });
 }
 
@@ -243,7 +279,7 @@ if (tbodyParticipantes) {
 
                 fetch(`${contextPath}/RemoverDocenteEventoServlet`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                     body: formData.toString()
                 }).then(r => r.json()).then(data => {
                     if (data.success) {
@@ -316,7 +352,7 @@ if (btnConfirmarAsignacion) {
 
         fetch(`${contextPath}/AsignarDocenteEventoServlet`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             body: formData.toString()
         }).then(r => r.json()).then(data => {
             if (data.success) {

@@ -6,11 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Docentes</title>
 
-    <!-- Rutas dinámicas usando contextPath para evitar errores 404 -->
+    <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bi/bootstrap-icons.css">
+
+    <!-- Bootstrap Icons (CDN para garantizar que carguen todos los íconos como bi-eye, bi-pencil, etc.) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Estilos personalizados -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/coordinador.css">
 
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -38,6 +43,15 @@
             overflow: visible;
             text-overflow: clip;
             max-width: none;
+        }
+        /* Garantiza que los botones de acción tengan puntero y dimensiones visibles */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            text-decoration: none;
         }
     </style>
 
@@ -73,12 +87,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Definición del contextPath global ANTES de importar los scripts locales -->
+<!-- Definición del contextPath global ANTES de importar scripts locales -->
 <script>
     window.contextPath = '${pageContext.request.contextPath}';
 </script>
 
 <script src="${pageContext.request.contextPath}/assets/js/coordinador.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/GestionDocente.js?v=2"></script>
+<script src="${pageContext.request.contextPath}/assets/js/GestionDocente.js?v=3"></script>
 </body>
 </html>

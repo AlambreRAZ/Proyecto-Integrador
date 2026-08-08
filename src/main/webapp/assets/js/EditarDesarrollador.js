@@ -54,15 +54,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        console.log("Cargando desarrollador ID:", idDesarrollador);
-
         fetch(contextPath + '/EditarDesarrollador?id=' + encodeURIComponent(idDesarrollador))
             .then(function (response) {
                 return response.json();
             })
             .then(function (data) {
-                console.log("Datos obtenidos de la BD:", data);
-
                 if (!data.success) {
                     Swal.fire({
                         icon: 'error',
@@ -192,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // 6. VALIDACIÓN DE CORREO INSTITUCIONAL (@utez.edu.mx)
             if (!correoVal.toLowerCase().endsWith('@utez.edu.mx')) {
-                mostrarAlerta('Correo no institucional', 'El correo debe terminar estrictamente en @utez.edu.mx');
+                mostrarAlerta('Correo no institucional', 'El correo debe terminar strictly en @utez.edu.mx');
                 return;
             }
 
@@ -222,6 +218,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (btnGuardar) btnGuardar.disabled = true;
 
+                // --- PRELOADER CON PORCENTAJE SIMULADO ---
+                let porcentaje = 0;
+                let timerCarga;
+
+                Swal.fire({
+                    title: 'Actualizando desarrollador...',
+                    html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeEditDev">0%</div>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        // Incrementa progresivamente hasta llegar al 90%
+                        timerCarga = setInterval(() => {
+                            if (porcentaje < 90) {
+                                porcentaje += 10;
+                                const el = document.getElementById('lblPorcentajeEditDev');
+                                if (el) el.textContent = porcentaje + '%';
+                            }
+                        }, 80);
+                    }
+                });
+
                 // Preparamos los parámetros como URLSearchParams
                 const datosForm = new FormData(form);
                 const paramsForm = new URLSearchParams(datosForm);
@@ -239,29 +258,39 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                     })
                     .then(function (resultado) {
-                        if (resultado.ok && resultado.data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: '¡Desarrollador Actualizado con Éxito!',
-                                text: resultado.data.message || 'Los cambios se guardaron correctamente.',
-                                confirmButtonColor: '#00847b',
-                                confirmButtonText: 'Aceptar'
-                            }).then(function (result) {
-                                if (result.isConfirmed) {
-                                    window.location.href = 'gestion_desarrolladores_de.jsp';
-                                }
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'No se pudo actualizar',
-                                text: resultado.data.message || 'Ocurrió un error al conectar con la base de datos.',
-                                confirmButtonColor: '#00847b'
-                            });
-                            if (btnGuardar) btnGuardar.disabled = false;
-                        }
+                        // Limpiamos el temporizador
+                        clearInterval(timerCarga);
+
+                        // Forzamos la visualización del 100%
+                        const el = document.getElementById('lblPorcentajeEditDev');
+                        if (el) el.textContent = '100%';
+
+                        setTimeout(function () {
+                            if (resultado.ok && resultado.data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Desarrollador Actualizado con Éxito!',
+                                    text: resultado.data.message || 'Los cambios se guardaron correctamente.',
+                                    confirmButtonColor: '#00847b',
+                                    confirmButtonText: 'Aceptar'
+                                }).then(function (result) {
+                                    if (result.isConfirmed) {
+                                        window.location.href = 'gestion_desarrolladores_de.jsp';
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'No se pudo actualizar',
+                                    text: resultado.data.message || 'Ocurrió un error al conectar con la base de datos.',
+                                    confirmButtonColor: '#00847b'
+                                });
+                                if (btnGuardar) btnGuardar.disabled = false;
+                            }
+                        }, 300);
                     })
                     .catch(function (error) {
+                        clearInterval(timerCarga);
                         console.error('Error al actualizar:', error);
                         Swal.fire({
                             icon: 'error',

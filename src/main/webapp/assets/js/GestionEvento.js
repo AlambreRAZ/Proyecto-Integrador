@@ -72,16 +72,16 @@ function renderEventos(eventos) {
             '</td>' +
             '<td>' + formatearFecha(ev.fechaInicio) + ' - ' + formatearFecha(ev.fechaFin) + '</td>' +
             '<td>' +
-            // ✏️ Editar
+            //  Editar
             '<a href="' + contextPath + '/editar_evento' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Editar Evento"><i class="bi bi-pencil"></i></a> ' +
 
-            // 👁️ Ver Detalles
+            //  Ver Detalles
             '<a href="' + contextPath + '/ver_mas_evento' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Ver Evento"><i class="bi bi-eye"></i></a> ' +
 
-            // ☁️ AQUÍ ESTÁ LA NUBE PUTA AGREGADA
+            //  AQUÍ ESTÁ LA NUBE PUTA AGREGADA
             '<a href="' + contextPath + '/cargar_archivo' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Cargar Archivo"><i class="bi bi-cloud-arrow-up"></i></a> ' +
 
-            // 🗑️ Eliminar
+            //  Eliminar
             '<a href="#" class="action-btn delete" data-id="' + ev.id + '" title="Eliminar Evento"><i class="bi bi-trash"></i></a>' +
             '</td>';
         tbody.appendChild(fila);
