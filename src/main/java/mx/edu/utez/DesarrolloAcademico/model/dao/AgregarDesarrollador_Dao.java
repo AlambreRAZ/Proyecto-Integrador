@@ -143,17 +143,41 @@ public class AgregarDesarrollador_Dao {
         return usuario;
     }
 
-    // Actualiza los datos de un desarrollador existente.
-    // Si nuevaContrasena viene null o vacía, la contraseña actual NO se toca.
-    public boolean actualizarDesarrollador(Usuario usuario, String nuevaContrasena) {
+
+    public boolean actualizarDesarrollador(Usuario usuario, String nuevaContrasena) throws Exception {
         boolean estado = false;
         Connection con = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        boolean cambiaPassword = nuevaContrasena != null && !nuevaContrasena.isEmpty();
+        boolean cambiaPassword = nuevaContrasena != null && !nuevaContrasena.trim().isEmpty();
 
         try {
             con = DatabaseConnection.getConnection();
+
+            // 1. VALIDAR SI EL NÚMERO DE EMPLEADO YA PERTENECE A OTRO USUARIO
+            String checkNumEmp = "SELECT COUNT(*) FROM usuarios WHERE numero_empleado = ? AND id_usuario != ?";
+            ps = con.prepareStatement(checkNumEmp);
+            ps.setString(1, usuario.getNumeroEmpleado());
+            ps.setInt(2, usuario.getIdUsuario());
+            rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                throw new Exception("El número de empleado '" + usuario.getNumeroEmpleado() + "' ya se encuentra asignado a otro docente.");
+            }
+            rs.close();
+            ps.close();
+
+            // 2. VALIDAR SI EL CORREO INSTITUCIONAL YA PERTENECE A OTRO USUARIO
+            String checkCorreo = "SELECT COUNT(*) FROM usuarios WHERE correo_institucional = ? AND id_usuario != ?";
+            ps = con.prepareStatement(checkCorreo);
+            ps.setString(1, usuario.getCorreoInstitucional());
+            ps.setInt(2, usuario.getIdUsuario());
+            rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                throw new Exception("El correo '" + usuario.getCorreoInstitucional() + "' ya se encuentra registrado por otro docente.");
+            }
+            rs.close();
+            ps.close();
 
             String query = "UPDATE usuarios SET " +
                     "nombre = ?, apellido_paterno = ?, apellido_materno = ?, id_division = ?, " +
@@ -178,7 +202,7 @@ public class AgregarDesarrollador_Dao {
             ps.setString(i++, usuario.getCorreoInstitucional());
 
             if (cambiaPassword) {
-                ps.setString(i++, nuevaContrasena); // TODO: hashear con BCrypt antes de guardar
+                ps.setString(i++, nuevaContrasena);
             }
 
             ps.setInt(i, usuario.getIdUsuario());
@@ -188,7 +212,9 @@ public class AgregarDesarrollador_Dao {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new Exception("Error al consultar la base de datos: " + e.getMessage());
         } finally {
+            try { if (rs != null) rs.close(); } catch (SQLException ignored) {}
             try { if (ps != null) ps.close(); } catch (SQLException ignored) {}
             try { if (con != null) con.close(); } catch (SQLException ignored) {}
         }

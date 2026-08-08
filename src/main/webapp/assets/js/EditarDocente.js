@@ -1,19 +1,35 @@
 const params = new URLSearchParams(window.location.search);
 const idDocente = params.get('id');
 
-// Elementos del DOM
-const campoIdUsuario = document.getElementById('campoIdUsuario') || document.getElementById('id_usuario') || document.getElementById('idUsuario');
-const campoNombre = document.getElementById('campoNombre') || document.getElementById('nombre');
-const campoApellidoP = document.getElementById('campoApellidoP') || document.getElementById('apellidoPaterno') || document.getElementById('apellido_paterno');
-const campoApellidoM = document.getElementById('campoApellidoM') || document.getElementById('apellidoMaterno') || document.getElementById('apellido_materno');
-const campoDivision = document.getElementById('campoDivision') || document.getElementById('idDivision') || document.getElementById('division');
-const campoNumEmpleado = document.getElementById('campoNumEmpleado') || document.getElementById('numeroEmpleado') || document.getElementById('numero_empleado');
-const campoTelefono = document.getElementById('campoTelefono') || document.getElementById('telefono');
-const campoCorreo = document.getElementById('campoCorreo') || document.getElementById('correoInstitucional') || document.getElementById('correo');
-const campoContrasena = document.getElementById('campoContrasena') || document.getElementById('contrasena');
-const campoConfirmarContrasena = document.getElementById('campoConfirmarContrasena') || document.getElementById('confirmarContrasena');
+// Referencias del DOM
+const campoIdUsuario = document.getElementById('campoIdUsuario');
+const campoNombre = document.getElementById('campoNombre');
+const campoApellidoP = document.getElementById('campoApellidoP');
+const campoApellidoM = document.getElementById('campoApellidoM');
+const campoDivision = document.getElementById('campoDivision');
+const campoDivisionHidden = document.getElementById('campoDivisionHidden');
+const campoNumEmpleado = document.getElementById('campoNumEmpleado');
+const campoTelefono = document.getElementById('campoTelefono');
+const campoCorreo = document.getElementById('campoCorreo');
 
-// Detectar a qué pantalla de gestión regresar
+// Campos de contraseña (TRES CAMPOS)
+const passActual = document.getElementById('passActual');
+const passNueva = document.getElementById('passNueva');
+const passConfirm = document.getElementById('passConfirm');
+
+function mostrarAlerta(titulo, mensaje, icono = 'warning') {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: icono,
+            title: titulo,
+            text: mensaje,
+            confirmButtonColor: '#00847b'
+        });
+    } else {
+        alert(titulo + ': ' + mensaje);
+    }
+}
+
 function obtenerPaginaDestino() {
     const pathActual = window.location.pathname;
     if (pathActual.includes('_de.jsp')) {
@@ -24,43 +40,31 @@ function obtenerPaginaDestino() {
     return 'gestion_docente_co.jsp';
 }
 
-// Llenar formulario con los datos recibidos del Servidor
 function llenarFormularioDocente(data) {
     if (!data) return;
 
-    if (campoIdUsuario) campoIdUsuario.value = data.idUsuario || data.id_usuario || '';
+    if (campoIdUsuario) campoIdUsuario.value = data.idUsuario || data.id_usuario || data.id || '';
     if (campoNombre) campoNombre.value = data.nombre || '';
     if (campoApellidoP) campoApellidoP.value = data.apellidoPaterno || data.apellido_paterno || '';
     if (campoApellidoM) campoApellidoM.value = data.apellidoMaterno || data.apellido_materno || '';
-    if (campoDivision) campoDivision.value = data.idDivision || data.division || '';
     if (campoNumEmpleado) campoNumEmpleado.value = data.numeroEmpleado || data.numero_empleado || '';
     if (campoTelefono) campoTelefono.value = data.telefono || '';
     if (campoCorreo) campoCorreo.value = data.correoInstitucional || data.correo || '';
 
-    // Asignar contraseña a ambos campos si viene desde el backend
-    if (data.contrasena) {
-        if (campoContrasena) campoContrasena.value = data.contrasena;
-        if (campoConfirmarContrasena) campoConfirmarContrasena.value = data.contrasena;
+    const divisionId = data.idDivision || data.division;
+    if (divisionId && campoDivision) {
+        campoDivision.value = divisionId;
+        if (campoDivisionHidden) campoDivisionHidden.value = divisionId;
     }
 }
 
-// Cargar datos iniciales
 function cargarDatosDocente() {
     if (!idDocente) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Falta ID del usuario',
-                text: 'Accede a esta página desde la gestión de docentes.',
-                confirmButtonColor: '#00847b'
-            });
-        }
+        mostrarAlerta('Falta ID del usuario', 'Accede a esta página desde la gestión de docentes.', 'error');
         return;
     }
 
-    fetch('ObtenerDocente?id=' + idDocente, {
-        credentials: 'same-origin'
-    })
+    fetch('ObtenerDocente?id=' + idDocente, { credentials: 'same-origin' })
         .then(res => {
             if (res.redirected || (res.url && res.url.includes('login.jsp'))) {
                 window.location.href = 'login.jsp';
@@ -70,134 +74,111 @@ function cargarDatosDocente() {
         })
         .then(data => {
             if (!data) return;
-
             if (data.success === false) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Docente no encontrado',
-                    text: data.message || 'No se encontraron datos para el ID: ' + idDocente,
-                    confirmButtonColor: '#00847b'
-                });
+                mostrarAlerta('Docente no encontrado', data.message || 'No se encontraron datos para el ID: ' + idDocente, 'error');
                 return;
             }
             llenarFormularioDocente(data);
         })
         .catch(err => {
             console.error('Error al cargar datos:', err);
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de servidor',
-                    text: 'No se pudieron cargar los datos del servidor.',
-                    confirmButtonColor: '#00847b'
-                });
-            }
+            mostrarAlerta('Error de servidor', 'No se pudieron cargar los datos del servidor.', 'error');
         });
 }
 
-// Eventos del DOM
 document.addEventListener("DOMContentLoaded", () => {
     cargarDatosDocente();
 
-    // Toggle Contraseña 1
-    const btnTogglePass = document.getElementById('btnTogglePass');
-    if (btnTogglePass) {
-        btnTogglePass.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (campoContrasena) {
-                const iconoPass = document.getElementById('iconoPass');
-                if (campoContrasena.type === 'password') {
-                    campoContrasena.type = 'text';
-                    if (iconoPass) iconoPass.className = 'bi bi-eye';
-                } else {
-                    campoContrasena.type = 'password';
-                    if (iconoPass) iconoPass.className = 'bi bi-eye-slash';
-                }
-            }
+    // Validaciones en vivo de entradas de texto
+    const inputsTexto = [campoNombre, campoApellidoP, campoApellidoM].filter(Boolean);
+    inputsTexto.forEach(input => {
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
         });
-    }
+    });
 
-    // Toggle Contraseña 2 (Confirmación)
-    const btnToggleConfirmPass = document.getElementById('btnToggleConfirmPass');
-    if (btnToggleConfirmPass) {
-        btnToggleConfirmPass.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (campoConfirmarContrasena) {
-                const iconoConfirmPass = document.getElementById('iconoConfirmPass');
-                if (campoConfirmarContrasena.type === 'password') {
-                    campoConfirmarContrasena.type = 'text';
-                    if (iconoConfirmPass) iconoConfirmPass.className = 'bi bi-eye';
-                } else {
-                    campoConfirmarContrasena.type = 'password';
-                    if (iconoConfirmPass) iconoConfirmPass.className = 'bi bi-eye-slash';
-                }
-            }
+    const inputsNumericos = [campoNumEmpleado, campoTelefono].filter(Boolean);
+    inputsNumericos.forEach(input => {
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
         });
-    }
+    });
 
-    // Guardar Cambios
-    const btnGuardar = document.getElementById('btnGuardar');
-    if (btnGuardar) {
-        btnGuardar.addEventListener('click', guardarCambios);
-    } else {
-        const formEditar = document.getElementById('formEditarDocente') || document.querySelector('form');
-        if (formEditar) {
-            formEditar.addEventListener('submit', function (e) {
-                e.preventDefault();
-                guardarCambios(e);
-            });
-        }
+    const formEditar = document.getElementById('formEditarDocente') || document.querySelector('form');
+    if (formEditar) {
+        formEditar.addEventListener('submit', function (e) {
+            e.preventDefault();
+            guardarCambios(e);
+        });
     }
 });
 
-// Función Principal con Validaciones
 function guardarCambios(e) {
     if (e && e.preventDefault) e.preventDefault();
 
-    const form = document.getElementById('formEditarDocente') || document.querySelector('form');
-    if (form && !form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
+    const nombreVal = campoNombre ? campoNombre.value.trim() : '';
+    const apePVal = campoApellidoP ? campoApellidoP.value.trim() : '';
+    const apeMVal = campoApellidoM ? campoApellidoM.value.trim() : '';
+    const divisionVal = campoDivisionHidden ? campoDivisionHidden.value.trim() : (campoDivision ? campoDivision.value.trim() : '');
+    const numEmpVal = campoNumEmpleado ? campoNumEmpleado.value.trim() : '';
+    const telVal = campoTelefono ? campoTelefono.value.trim() : '';
     const correoVal = campoCorreo ? campoCorreo.value.trim() : '';
-    const passVal = campoContrasena ? campoContrasena.value.trim() : '';
-    const confirmPassVal = campoConfirmarContrasena ? campoConfirmarContrasena.value.trim() : '';
 
-    // 🔴 1. VALIDACIÓN: Máximo 50 caracteres para el correo
+    // Extracción de Contraseñas
+    const passActualVal = passActual ? passActual.value.trim() : '';
+    const passNuevaVal = passNueva ? passNueva.value.trim() : '';
+    const passConfirmVal = passConfirm ? passConfirm.value.trim() : '';
+
+    // 1. CAMPOS BÁSICOS OBLIGATORIOS
+    if (!nombreVal || !apePVal || !apeMVal || !numEmpVal || !telVal || !correoVal) {
+        mostrarAlerta('Campos incompletos', 'Por favor, llena todos los campos obligatorios (*).');
+        return;
+    }
+
+    if (!divisionVal) {
+        mostrarAlerta('División requerida', 'No se detectó la división académica.');
+        return;
+    }
+
+    if (!/^\d+$/.test(numEmpVal)) {
+        mostrarAlerta('Número de Empleado inválido', 'El número de empleado solo debe contener dígitos numéricos.');
+        return;
+    }
+
+    if (!/^\d{10}$/.test(telVal)) {
+        mostrarAlerta('Teléfono inválido', 'El teléfono debe ser de exactamente 10 dígitos numéricos.');
+        return;
+    }
+
     if (correoVal.length > 50) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Correo demasiado largo',
-            text: 'El correo institucional no debe exceder los 50 caracteres.',
-            confirmButtonColor: '#00847b'
-        });
+        mostrarAlerta('Correo demasiado largo', 'El correo no debe exceder los 50 caracteres.');
         return;
     }
 
-    // 🔴 2. VALIDACIÓN: Longitud de la contraseña entre 12 y 15 caracteres
-    if (passVal.length < 12 || passVal.length > 15) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Contraseña inválida',
-            text: 'La contraseña debe tener entre 12 y 15 caracteres.',
-            confirmButtonColor: '#00847b'
-        });
+    if (!correoVal.toLowerCase().endsWith('@utez.edu.mx')) {
+        mostrarAlerta('Correo no institucional', 'El correo debe terminar strictly en @utez.edu.mx');
         return;
     }
 
-    // 🔴 3. VALIDACIÓN: Que coincidan ambas contraseñas
-    if (passVal !== confirmPassVal) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Las contraseñas no coinciden',
-            text: 'Por favor, asegúrate de escribir exactamente la misma contraseña en ambos campos.',
-            confirmButtonColor: '#00847b'
-        });
-        return;
+    // 2. VALIDACIÓN DE CONTRASEÑA (SOLO SI SE ESCRIBE UNA NUEVA CONTRASEÑA)
+    if (passNuevaVal !== '') {
+        if (passActualVal === '') {
+            mostrarAlerta('Contraseña actual requerida', 'Debes ingresar tu contraseña actual para autorizar el cambio de contraseña.');
+            return;
+        }
+
+        if (passNuevaVal.length < 12 || passNuevaVal.length > 15) {
+            mostrarAlerta('Contraseña inválida', 'La nueva contraseña debe tener entre 12 y 15 caracteres.');
+            return;
+        }
+
+        if (passNuevaVal !== passConfirmVal) {
+            mostrarAlerta('Las contraseñas no coinciden', 'Asegúrate de escribir exactamente la misma contraseña en "Nueva Contraseña" y "Confirmar Nueva Contraseña".');
+            return;
+        }
     }
 
-    // Creación de parámetros a enviar
+    // Mapeo completo de parámetros para el Servlet Java
     const datos = new URLSearchParams();
 
     const idVal = campoIdUsuario ? campoIdUsuario.value : idDocente;
@@ -205,34 +186,40 @@ function guardarCambios(e) {
     datos.append('id_usuario', idVal);
     datos.append('id', idVal);
 
-    datos.append('nombre', campoNombre ? campoNombre.value : '');
+    datos.append('nombre', nombreVal);
+    datos.append('apellidoPaterno', apePVal);
+    datos.append('apellido_paterno', apePVal);
+    datos.append('apellidoMaterno', apeMVal);
+    datos.append('apellido_materno', apeMVal);
 
-    const apeP = campoApellidoP ? campoApellidoP.value : '';
-    datos.append('apellidoPaterno', apeP);
-    datos.append('apellido_paterno', apeP);
+    datos.append('idDivision', divisionVal);
+    datos.append('division', divisionVal);
 
-    const apeM = campoApellidoM ? campoApellidoM.value : '';
-    datos.append('apellidoMaterno', apeM);
-    datos.append('apellido_materno', apeM);
+    datos.append('numeroEmpleado', numEmpVal);
+    datos.append('numero_empleado', numEmpVal);
 
-    const divVal = campoDivision ? campoDivision.value : '';
-    datos.append('idDivision', divVal);
-    datos.append('division', divVal);
-
-    const numEmp = campoNumEmpleado ? campoNumEmpleado.value : '';
-    datos.append('numeroEmpleado', numEmp);
-    datos.append('numero_empleado', numEmp);
-
-    datos.append('telefono', campoTelefono ? campoTelefono.value : '');
+    datos.append('telefono', telVal);
 
     datos.append('correoInstitucional', correoVal);
     datos.append('correo', correoVal);
 
-    datos.append('contrasena', passVal);
-    datos.append('confirmarContrasena', confirmPassVal);
-    datos.append('confirmar_contrasena', confirmPassVal);
+    // Mandamos la Contraseña Actual
+    datos.append('passActual', passActualVal);
+    datos.append('contrasenaActual', passActualVal);
+    datos.append('contrasena_actual', passActualVal);
 
-    // Enviar Petición
+    // Mandamos la Contraseña Nueva
+    datos.append('contrasena', passNuevaVal);
+    datos.append('passNueva', passNuevaVal);
+    datos.append('contrasenaNueva', passNuevaVal);
+    datos.append('contrasena_nueva', passNuevaVal);
+
+    // Mandamos la Confirmación
+    datos.append('confirmarContrasena', passConfirmVal);
+    datos.append('confirmar_contrasena', passConfirmVal);
+    datos.append('passConfirm', passConfirmVal);
+
+    // Petición al Servlet
     fetch('EditarDocente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
@@ -242,37 +229,32 @@ function guardarCambios(e) {
         .then(async res => {
             const data = await res.json().catch(() => null);
             if (!res.ok) {
-                throw new Error((data && data.message) ? data.message : 'HTTP ' + res.status);
+                throw new Error((data && data.message) ? data.message : 'Error al procesar en servidor');
             }
             return data;
         })
         .then(resultado => {
             if (!resultado || !(resultado.success || resultado.ok)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error al actualizar',
-                    text: (resultado && resultado.message) ? resultado.message : 'Ocurrió un problema al guardar los cambios.',
-                    confirmButtonColor: '#00847b'
-                });
+                mostrarAlerta('Error al actualizar', (resultado && resultado.message) ? resultado.message : 'Ocurrió un problema al guardar los cambios.', 'error');
                 return;
             }
 
-            Swal.fire({
-                icon: 'success',
-                title: '¡Docente actualizado con éxito!',
-                text: resultado.message || 'Los cambios se guardaron correctamente.',
-                confirmButtonColor: '#00847b'
-            }).then(() => {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Docente actualizado con éxito!',
+                    text: resultado.message || 'Los cambios se guardaron correctamente.',
+                    confirmButtonColor: '#00847b'
+                }).then(() => {
+                    window.location.href = obtenerPaginaDestino();
+                });
+            } else {
+                alert('¡Docente actualizado con éxito!');
                 window.location.href = obtenerPaginaDestino();
-            });
+            }
         })
         .catch(err => {
             console.error('Error al guardar:', err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al guardar',
-                text: err.message || 'Hubo un problema al intentar guardar los datos.',
-                confirmButtonColor: '#00847b'
-            });
+            mostrarAlerta('Error al guardar', err.message || 'Hubo un problema al intentar guardar los datos.', 'error');
         });
 }

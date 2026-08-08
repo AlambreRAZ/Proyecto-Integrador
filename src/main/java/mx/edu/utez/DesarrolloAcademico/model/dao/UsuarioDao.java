@@ -104,7 +104,6 @@ public class UsuarioDao {
     }
 
     public boolean guardarCodigoRecuperacion(int idUsuario, String codigo) {
-        // Incluye UTILIZADO = 0 explícitamente para cumplir con la restricción NOT NULL de la tabla Oracle
         String query = "INSERT INTO tokens_recuperacion (id_usuario, codigo_token, utilizado, fecha_expiracion) " +
                 "VALUES (?, ?, 0, CURRENT_TIMESTAMP + INTERVAL '15' MINUTE)";
         try (Connection con = DatabaseConnection.getConnection();
@@ -147,9 +146,8 @@ public class UsuarioDao {
         boolean exitoso = false;
         try {
             con = DatabaseConnection.getConnection();
-            con.setAutoCommit(false); // Iniciar transacción
+            con.setAutoCommit(false);
 
-            // 1. Actualizar contraseña
             String queryUpdatePass = "UPDATE usuarios SET contrasena = ? WHERE id_usuario = ?";
             try (PreparedStatement ps1 = con.prepareStatement(queryUpdatePass)) {
                 ps1.setString(1, nuevaPassword);
@@ -157,7 +155,6 @@ public class UsuarioDao {
                 ps1.executeUpdate();
             }
 
-            // 2. Marcar todos los tokens de ese usuario como utilizados
             String queryUpdateToken = "UPDATE tokens_recuperacion SET utilizado = 1 WHERE id_usuario = ?";
             try (PreparedStatement ps2 = con.prepareStatement(queryUpdateToken)) {
                 ps2.setInt(1, idUsuario);
@@ -179,7 +176,7 @@ public class UsuarioDao {
             if (con != null) {
                 try {
                     con.setAutoCommit(true);
-                    con.close(); // Cierra la conexión
+                    con.close();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -243,10 +240,9 @@ public class UsuarioDao {
 
     public List<Evento> obtenerProximosEventos() {
         List<Evento> lista = new ArrayList<>();
-        // Consultamos nombre, fechas e ID_EVENTO para el enlace
         String sql = "SELECT ID_EVENTO, NOMBRE, FECHA_INICIO, FECHA_FIN FROM EVENTOS ORDER BY FECHA_INICIO ASC";
 
-        try (Connection con = DatabaseConnection.getConnection(); // Ajusta a tu conexión Oracle/MySQL
+        try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -278,17 +274,15 @@ public class UsuarioDao {
             return false;
         }
     }
+
     public List<Evento> obtenerMisEventos(int idUsuario) {
         List<Evento> lista = new ArrayList<>();
-
-        // Consulta filtrada por la columna CREADO_POR
         String sql = "SELECT ID_EVENTO, NOMBRE, FECHA_INICIO, FECHA_FIN, TIPO_EVENTO, INSTITUCION " +
                 "FROM EVENTOS WHERE CREADO_POR = ? ORDER BY FECHA_INICIO ASC";
 
-        try (Connection con = DatabaseConnection.getConnection(); // Tu clase de conexión
+        try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // Asignamos el ID del usuario en sesión a la columna CREADO_POR
             ps.setInt(1, idUsuario);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -311,10 +305,8 @@ public class UsuarioDao {
         return lista;
     }
 
-    // MÉTODO PARA LISTAR DOCENTES CON CONTRASENA INCLUIDA
     public List<Usuario> GestionDocentes() {
         List<Usuario> lista = new ArrayList<>();
-
         String sql = "SELECT ID_USUARIO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, " +
                 "CORREO_INSTITUCIONAL, ID_DIVISION, NUMERO_EMPLEADO, ACTIVO, CONTRASENA " +
                 "FROM USUARIOS WHERE LOWER(ROL) = 'docente' ORDER BY NOMBRE ASC";
@@ -344,11 +336,6 @@ public class UsuarioDao {
         return lista;
     }
 
-    // ==========================================
-    // MÉTODOS PARA CAMBIAR EL ESTADO (ACTIVO/INACTIVO)
-    // ==========================================
-
-    // Opción 1: Recibe ID y el nuevo estado (1 o 0)
     public boolean cambiarEstado(int idUsuario, int nuevoEstado) {
         String query = "UPDATE usuarios SET activo = ? WHERE id_usuario = ?";
         try (Connection con = DatabaseConnection.getConnection();
@@ -365,11 +352,8 @@ public class UsuarioDao {
         return false;
     }
 
-
-
     public Usuario obtenerDocentePorId(int idUsuario) {
         Usuario u = null;
-        // Consulta exacta a las columnas de tu DDL en Oracle
         String sql = "SELECT ID_USUARIO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, " +
                 "CORREO_INSTITUCIONAL, ID_DIVISION, NUMERO_EMPLEADO, TELEFONO, ACTIVO, CONTRASENA " +
                 "FROM USUARIOS WHERE ID_USUARIO = ?";
@@ -384,7 +368,6 @@ public class UsuarioDao {
                     u.setIdUsuario(rs.getInt("ID_USUARIO"));
                     u.setNombre(rs.getString("NOMBRE"));
                     u.setApellidoPaterno(rs.getString("APELLIDO_PATERNO"));
-                    // Aseguramos que si viene null no rompa
                     u.setApellidoMaterno(rs.getString("APELLIDO_MATERNO") != null ? rs.getString("APELLIDO_MATERNO") : "");
                     u.setCorreoInstitucional(rs.getString("CORREO_INSTITUCIONAL"));
                     u.setIdDivision(rs.getInt("ID_DIVISION"));
@@ -401,20 +384,6 @@ public class UsuarioDao {
         return u;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Opción 2: Alterna el estado automáticamente (Si es 1 pasa a 0, si es 0 pasa a 1)
     public boolean cambiarEstado(int idUsuario) {
         String query = "UPDATE usuarios SET activo = CASE WHEN activo = 1 THEN 0 ELSE 1 END WHERE id_usuario = ?";
         try (Connection con = DatabaseConnection.getConnection();
@@ -430,7 +399,6 @@ public class UsuarioDao {
         return false;
     }
 
-    // Alias por si en tus servlets lo buscas como cambiarEstadoUsuario
     public boolean cambiarEstadoUsuario(int idUsuario, int nuevoEstado) {
         return cambiarEstado(idUsuario, nuevoEstado);
     }
@@ -438,16 +406,14 @@ public class UsuarioDao {
     public boolean cambiarEstadoUsuario(int idUsuario) {
         return cambiarEstado(idUsuario);
     }
-    // ==========================================
-    // MÉTODO PARA ACTUALIZAR PERFIL (TELÉFONO Y CONTRASEÑA)
-    // ==========================================
+
     public boolean actualizarPerfil(int idUsuario, String telefono, String nuevaContrasena) {
         StringBuilder sql = new StringBuilder("UPDATE usuarios SET ");
         boolean tieneTelefono = (telefono != null && !telefono.trim().isEmpty());
         boolean tienePass = (nuevaContrasena != null && !nuevaContrasena.trim().isEmpty());
 
         if (!tieneTelefono && !tienePass) {
-            return false; // No hay nada que actualizar
+            return false;
         }
 
         if (tieneTelefono && tienePass) {
@@ -479,4 +445,58 @@ public class UsuarioDao {
         return false;
     }
 
+    // =======================================================
+    // MÉTODOS CORREGIDOS CON LA TABLA PARTICIPANTES_EVENTOS
+    // =======================================================
+
+    public int obtenerIdParticipante(int idEvento, int idUsuario) {
+        String sql = "SELECT id_participante FROM participantes_eventos WHERE id_evento = ? AND id_usuario = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idEvento);
+            ps.setInt(2, idUsuario);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id_participante");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar id_participante: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public int obtenerOCrearParticipante(int idEvento, int idUsuario) {
+        // 1. Consultar si el usuario ya es participante de este evento
+        int idParticipante = obtenerIdParticipante(idEvento, idUsuario);
+        if (idParticipante != -1) {
+            return idParticipante;
+        }
+
+        String sql = "INSERT INTO participantes_eventos (id_evento, id_usuario, registrado_por, fecha_registro) " +
+                "VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, new String[]{"ID_PARTICIPANTE"})) {
+
+            ps.setInt(1, idEvento);
+            ps.setInt(2, idUsuario);
+            ps.setInt(3, idUsuario); // REGISTRADO_POR
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Advertencia getGeneratedKeys Oracle: " + e.getMessage());
+        }
+
+        // 3. Reconsulta de rescate por si la secuencia no devolvió el valor mediante el driver
+        return obtenerIdParticipante(idEvento, idUsuario);
+    }
 }

@@ -1,5 +1,6 @@
 package mx.edu.utez.DesarrolloAcademico.model.dao;
 
+import mx.edu.utez.DesarrolloAcademico.model.Periodo;
 import mx.edu.utez.DesarrolloAcademico.model.Usuario;
 import mx.edu.utez.DesarrolloAcademico.model.agregarEvento_co;
 import mx.edu.utez.DesarrolloAcademico.utils.DatabaseConnection;
@@ -256,6 +257,232 @@ public class UsuarioListaDao {
         }
 
         return total;
+    }
+    public List<Usuario> listarPorRolesYDivision(int idDivision, String... roles) {
+        List<Usuario> lista = new ArrayList<>();
+        if (roles == null || roles.length == 0) return lista;
+
+        // Construcción de la consulta con filtro de división y minúsculas para roles
+        StringBuilder sb = new StringBuilder(
+                "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, " +
+                        "correo_institucional, numero_empleado, id_division, telefono, activo, rol " +
+                        "FROM usuarios " +
+                        "WHERE id_division = ? AND LOWER(rol) IN ("
+        );
+
+        for (int i = 0; i < roles.length; i++) {
+            sb.append(i == 0 ? "?" : ", ?");
+        }
+        sb.append(") ORDER BY nombre ASC");
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sb.toString())) {
+
+            // Parámetro 1: ID de la división del coordinador
+            ps.setInt(1, idDivision);
+
+            // Parámetros dinámicos: Convertir roles a minúsculas para coincidir con LOWER(rol)
+            for (int i = 0; i < roles.length; i++) {
+                ps.setString(i + 2, roles[i] != null ? roles[i].toLowerCase() : "");
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Usuario u = new Usuario();
+                    u.setIdUsuario(rs.getInt("id_usuario"));
+                    u.setNombre(rs.getString("nombre"));
+                    u.setApellidoPaterno(rs.getString("apellido_paterno"));
+                    u.setApellidoMaterno(rs.getString("apellido_materno"));
+                    u.setCorreoInstitucional(rs.getString("correo_institucional"));
+                    u.setNumeroEmpleado(rs.getString("numero_empleado"));
+                    u.setTelefono(rs.getString("telefono"));
+
+                    Object divObj = rs.getObject("id_division");
+                    u.setIdDivision(divObj != null ? ((Number) divObj).intValue() : null);
+
+                    u.setActivo(rs.getInt("activo"));
+                    u.setRol(rs.getString("rol"));
+
+                    lista.add(u);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en listarPorRolesYDivision: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+
+
+    public boolean registrarPeriodo(Periodo periodo, int idUsuario) {
+        String sql = "INSERT INTO periodos_carga (ID_DIVISION, FECHA_INICIO, FECHA_FIN, ACTIVO, CREADO_POR) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection con = DatabaseConnection.getConnection()) {
+            // Aseguramos que la conexión guarde los cambios
+            con.setAutoCommit(true);
+
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, Integer.parseInt(periodo.getDivision()));
+                ps.setDate(2, periodo.getFechaInicio());
+                ps.setDate(3, periodo.getFechaFin());
+                ps.setInt(4, periodo.isActivo() ? 1 : 0);
+                ps.setInt(5, idUsuario);
+
+                return ps.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+    public List<Periodo> obtenerTodosLosPeriodos() {
+        List<Periodo> lista = new ArrayList<>();
+
+        // Realizamos un JOIN entre periodos_carga y la tabla de divisiones (ajusta "divisiones" si tu tabla se llama diferente)
+        String sql = "SELECT p.ID_PERIODO, d.NOMBRE AS NOMBRE_DIVISION, p.FECHA_INICIO, p.FECHA_FIN, p.ACTIVO " +
+                "FROM periodos_carga p " +
+                "JOIN divisiones d ON p.ID_DIVISION = d.ID_DIVISION " +
+                "ORDER BY p.ID_PERIODO DESC";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Periodo p = new Periodo();
+                p.setId(rs.getInt("ID_PERIODO"));
+
+                // Asignamos el NOMBRE traducido de la división en lugar del ID número 1 o 2
+                p.setDivision(rs.getString("NOMBRE_DIVISION"));
+
+                p.setFechaInicio(rs.getDate("FECHA_INICIO"));
+                p.setFechaFin(rs.getDate("FECHA_FIN"));
+                p.setActivo(rs.getInt("ACTIVO") == 1);
+
+                lista.add(p);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener periodos: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+
+    public boolean eliminarPeriodo(int idPeriodo) {
+        String sql = "DELETE FROM periodos_carga WHERE ID_PERIODO = ?";
+
+        try (Connection con = DatabaseConnection.getConnection()) {
+            con.setAutoCommit(true); // Asegura que el cambio se guarde en Oracle
+
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, idPeriodo);
+                return ps.executeUpdate() > 0;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar el periodo " + idPeriodo + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean cambiarEstadoPeriodo(int idPeriodo, boolean nuevoEstado) {
+        String sql = "UPDATE periodos_carga SET ACTIVO = ? WHERE ID_PERIODO = ?";
+
+        try (Connection con = DatabaseConnection.getConnection()) {
+            con.setAutoCommit(true);
+
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, nuevoEstado ? 1 : 0);
+                ps.setInt(2, idPeriodo);
+
+                return ps.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean actualizarPeriodo(int idPeriodo, String division, String fechaInicio, String fechaFin) {
+        // Usamos AND para incluir el ROWNUM <= 1 en Oracle
+        String sql = "UPDATE periodos_carga SET " +
+                "ID_DIVISION = (SELECT ID_DIVISION FROM divisiones WHERE (NOMBRE = ? OR TO_CHAR(ID_DIVISION) = ?) AND ROWNUM <= 1), " +
+                "FECHA_INICIO = TO_DATE(?, 'YYYY-MM-DD'), " +
+                "FECHA_FIN = TO_DATE(?, 'YYYY-MM-DD') " +
+                "WHERE ID_PERIODO = ?";
+
+        try (Connection con = DatabaseConnection.getConnection()) {
+            con.setAutoCommit(true);
+
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, division);
+                ps.setString(2, division);
+                ps.setString(3, fechaInicio);
+                ps.setString(4, fechaFin);
+                ps.setInt(5, idPeriodo);
+
+                int filasAfectadas = ps.executeUpdate();
+                return filasAfectadas > 0;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar periodo " + idPeriodo + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    public boolean existeDivision(String division, int idPeriodoExcluir) {
+
+        String sql = "SELECT COUNT(*) FROM periodos_carga p " +
+                "JOIN divisiones d ON p.ID_DIVISION = d.ID_DIVISION " +
+                "WHERE (d.NOMBRE = ? OR TO_CHAR(d.ID_DIVISION) = ?) " +
+                "AND (? = 0 OR p.ID_PERIODO != ?)";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, division);
+            ps.setString(2, division);
+            ps.setInt(3, idPeriodoExcluir);
+            ps.setInt(4, idPeriodoExcluir);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar duplicado de división: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public String obtenerNombreDivision(String divisionOrId) {
+        String sql = "SELECT NOMBRE FROM divisiones WHERE NOMBRE = ? OR TO_CHAR(ID_DIVISION) = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, divisionOrId);
+            ps.setString(2, divisionOrId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("NOMBRE");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener nombre de división: " + e.getMessage());
+        }
+        return divisionOrId;
     }
 
 }

@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="assets/css/bootstrap.css">
     <link rel="stylesheet" href="assets/css/bi/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/coordinador.css">
+
+    <!-- Librería SweetAlert2 requerida por el JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -24,27 +27,27 @@
         <h5 class="mb-0 fw-bold">DATOS DEL DOCENTE</h5>
     </div>
 
-    <form action="gestion_docente_de.jsp" method="POST">
+    <form id="formAgregarDocente" action="AgregarUsuarioServlet" method="POST">
         <div class="row mb-4">
             <div class="col-md-4">
                 <label class="form-label">Nombre del Docente <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="nombre" required>
+                <input type="text" class="form-control" id="campoNombre" name="nombre" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Apellido Paterno <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="apellido_paterno" required>
+                <input type="text" class="form-control" id="campoApellidoP" name="apellido_paterno" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Apellido Materno <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="apellido_materno" required>
+                <input type="text" class="form-control" id="campoApellidoM" name="apellido_materno" required>
             </div>
         </div>
 
         <div class="row mb-4">
             <div class="col-md-4">
-                <label class="form-label">Division Academica <span class="text-danger">*</span> :</label>
-                <select class="form-select" name="division" required>
-                    <option value="" disabled selected></option>
+                <label class="form-label">División Académica <span class="text-danger">*</span> :</label>
+                <select class="form-select" id="campoDivision" name="division" required>
+                    <option value="" disabled selected>Selecciona una opción</option>
                     <option value="DACEA">DACEA</option>
                     <option value="DAMI">DAMI</option>
                     <option value="DATID">DATID</option>
@@ -52,19 +55,19 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="form-label">Numero de Empleado <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="numero_empleado" required placeholder="Num. Empleado">
+                <label class="form-label">Número de Empleado <span class="text-danger">*</span> :</label>
+                <input type="text" class="form-control" id="campoNumEmpleado" name="numero_empleado" required placeholder="Num. Empleado">
             </div>
             <div class="col-md-4">
-                <label class="form-label">Numero de Telefono <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" name="telefono" required placeholder="Teléfono">
+                <label class="form-label">Número de Teléfono <span class="text-danger">*</span> :</label>
+                <input type="text" class="form-control" id="campoTelefono" name="telefono" required placeholder="Teléfono" maxlength="10">
             </div>
         </div>
 
         <div class="row mb-4">
             <div class="col-md-4">
-                <label class="form-label">Correo Institucional<span class="text-danger">*</span> :</label>
-                <input type="email" class="form-control" name="correo" required>
+                <label class="form-label">Correo Institucional <span class="text-danger">*</span> :</label>
+                <input type="email" class="form-control" id="campoCorreo" name="correo" required placeholder="ejemplo@utez.edu.mx">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Contraseña <span class="text-danger">*</span> :</label>
@@ -74,7 +77,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <label class="form-label">Confirmar Contraseña<span class="text-danger">*</span> :</label>
+                <label class="form-label">Confirmar Contraseña <span class="text-danger">*</span> :</label>
                 <div class="password-container">
                     <input type="password" class="form-control" name="confirmar_contrasena" id="pass2" required>
                     <i class="bi bi-eye-fill" onclick="togglePassword('pass2')"></i>
@@ -85,15 +88,15 @@
         <div class="mb-5">
             <label class="form-label mb-3">Rol <span class="text-danger">*</span> :</label>
             <div class="d-flex gap-3">
-                <div class="rol-option-card" id="cardDocente" onclick="toggleRol('docente')" style="border: 2px solid var(--teal-main); border-radius: 10px; padding: 15px 30px; cursor: pointer; background: white; text-align: center; min-width: 130px;">
+                <div class="rol-option-card" id="cardDocente" onclick="selectRol('docente')" style="border: 2px solid var(--teal-main); border-radius: 10px; padding: 15px 30px; cursor: pointer; background: white; text-align: center; min-width: 130px;">
                     <i class="bi bi-person-fill fs-3 d-block mb-2" style="color: var(--teal-main);"></i>
                     <div class="fw-semibold" style="color: var(--teal-main);">Docente</div>
-                    <input type="checkbox" name="rol" value="docente" id="checkDocente" checked style="display:none;">
+                    <input type="radio" name="rol" value="docente" id="radioDocente" checked style="display:none;">
                 </div>
-                <div class="rol-option-card" id="cardCoordinador" onclick="toggleRol('coordinador')" style="border: 2px solid #ccc; border-radius: 10px; padding: 15px 30px; cursor: pointer; background: white; text-align: center; min-width: 130px;">
+                <div class="rol-option-card" id="cardCoordinador" onclick="selectRol('coordinador')" style="border: 2px solid #ccc; border-radius: 10px; padding: 15px 30px; cursor: pointer; background: white; text-align: center; min-width: 130px;">
                     <i class="bi bi-person-workspace fs-3 d-block mb-2" style="color: #aaa;"></i>
                     <div class="fw-semibold" style="color: #aaa;">Coordinador</div>
-                    <input type="checkbox" name="rol" value="coordinador" id="checkCoordinador" style="display:none;">
+                    <input type="radio" name="rol" value="coordinador" id="radioCoordinador" style="display:none;">
                 </div>
             </div>
         </div>
@@ -108,8 +111,12 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="assets/js/coordinador.js"></script>
+
 <script>
+    // ContextPath global para peticiones AJAX en Tomcat
+    window.contextPath = "${pageContext.request.contextPath}";
+
+    // Alternar visibilidad de contraseña
     function togglePassword(inputId) {
         const input = document.getElementById(inputId);
         const icon = input.nextElementSibling;
@@ -124,27 +131,31 @@
         }
     }
 
-    function toggleRol(rol) {
-        const isDocente = rol === 'docente';
-        const card = document.getElementById(isDocente ? 'cardDocente' : 'cardCoordinador');
-        const checkbox = document.getElementById(isDocente ? 'checkDocente' : 'checkCoordinador');
-        const icon = card.querySelector('i');
-        const label = card.querySelector('div');
+    // Selección de Rol tipo radio button (Exclusivo)
+    function selectRol(rolElegido) {
+        const radioDocente = document.getElementById('radioDocente');
+        const radioCoordinador = document.getElementById('radioCoordinador');
+        const cardDocente = document.getElementById('cardDocente');
+        const cardCoordinador = document.getElementById('cardCoordinador');
 
-        // Toggle el estado del checkbox
-        checkbox.checked = !checkbox.checked;
+        const isDocente = rolElegido === 'docente';
 
-        // Actualizar UI
-        if (checkbox.checked) {
-            card.style.border = '2px solid var(--teal-main)';
-            icon.style.color = 'var(--teal-main)';
-            label.style.color = 'var(--teal-main)';
-        } else {
-            card.style.border = '2px solid #ccc';
-            icon.style.color = '#aaa';
-            label.style.color = '#aaa';
-        }
+        radioDocente.checked = isDocente;
+        radioCoordinador.checked = !isDocente;
+
+        // Tarjeta Docente
+        cardDocente.style.border = isDocente ? '2px solid var(--teal-main)' : '2px solid #ccc';
+        cardDocente.querySelector('i').style.color = isDocente ? 'var(--teal-main)' : '#aaa';
+        cardDocente.querySelector('div').style.color = isDocente ? 'var(--teal-main)' : '#aaa';
+
+        // Tarjeta Coordinador
+        cardCoordinador.style.border = !isDocente ? '2px solid var(--teal-main)' : '2px solid #ccc';
+        cardCoordinador.querySelector('i').style.color = !isDocente ? 'var(--teal-main)' : '#aaa';
+        cardCoordinador.querySelector('div').style.color = !isDocente ? 'var(--teal-main)' : '#aaa';
     }
 </script>
+
+<script src="assets/js/AgregarDocente.js"></script>
+<script src="assets/js/coordinador.js"></script>
 </body>
 </html>

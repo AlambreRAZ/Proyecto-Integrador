@@ -16,9 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // -------------------------------------------------------------------------
-    // 2. RESTRICCIÓN EN TIEMPO REAL: Cero números en Nombres y Apellidos
-    //    (Permite letras, espacios, acentos y la Ñ / ñ)
+
     // -------------------------------------------------------------------------
     const inputsTexto = document.querySelectorAll('#campoNombre, #campoApellidoP, #campoApellidoM, [name="nombre"], [name="apellido_paterno"], [name="apellido_materno"]');
     inputsTexto.forEach(input => {
@@ -153,3 +151,10 @@ function mostrarAlerta(titulo, texto) {
         confirmButtonColor: '#00847b'
     });
 }
+const inputsSoloTexto = form ? form.querySelectorAll('#campoNombre, #campoApellidoPaterno, #campoApellidoMaterno') : [];
+inputsSoloTexto.forEach(function (input) {
+    input.addEventListener('input', function () {
+        // Elimina cualquier carácter que no sea letra (incluye acentos y ñ) o espacio
+        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+    });
+});

@@ -43,96 +43,96 @@
                 <col style="width: 9%;">
             </colgroup>
             <thead>
-                <tr>
-                    <th>Titulo</th>
-                    <th>Tipo</th>
-                    <th>Institución</th>
-                    <th>Modalidad</th>
-                    <th>Fecha</th>
-                    <th>Acciones</th>
-                </tr>
+            <tr>
+                <th>Titulo</th>
+                <th>Tipo</th>
+                <th>Institución</th>
+                <th>Modalidad</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>Virtual</td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>Virtual</td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>Virtual</td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>Virtual</td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>Virtual</td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    <div class="fw-semibold">Fundamentos de redes</div>
+                    <div class="small text-muted">cisco paket tracer</div>
+                </td>
+                <td>Certificacion</td>
+                <td>
+                    <div>Centro de</div>
+                    <div class="small text-muted">Capacitacion</div>
+                </td>
+                <td>Virtual</td>
+                <td>02/02/26 - 30/03/26</td>
+                <td>
+                    <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="fw-semibold">Fundamentos de redes</div>
+                    <div class="small text-muted">cisco paket tracer</div>
+                </td>
+                <td>Certificacion</td>
+                <td>
+                    <div>Centro de</div>
+                    <div class="small text-muted">Capacitacion</div>
+                </td>
+                <td>Virtual</td>
+                <td>02/02/26 - 30/03/26</td>
+                <td>
+                    <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="fw-semibold">Fundamentos de redes</div>
+                    <div class="small text-muted">cisco paket tracer</div>
+                </td>
+                <td>Certificacion</td>
+                <td>
+                    <div>Centro de</div>
+                    <div class="small text-muted">Capacitacion</div>
+                </td>
+                <td>Virtual</td>
+                <td>02/02/26 - 30/03/26</td>
+                <td>
+                    <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="fw-semibold">Fundamentos de redes</div>
+                    <div class="small text-muted">cisco paket tracer</div>
+                </td>
+                <td>Certificacion</td>
+                <td>
+                    <div>Centro de</div>
+                    <div class="small text-muted">Capacitacion</div>
+                </td>
+                <td>Virtual</td>
+                <td>02/02/26 - 30/03/26</td>
+                <td>
+                    <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="fw-semibold">Fundamentos de redes</div>
+                    <div class="small text-muted">cisco paket tracer</div>
+                </td>
+                <td>Certificacion</td>
+                <td>
+                    <div>Centro de</div>
+                    <div class="small text-muted">Capacitacion</div>
+                </td>
+                <td>Virtual</td>
+                <td>02/02/26 - 30/03/26</td>
+                <td>
+                    <a href="ver_mas_evento_do.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>

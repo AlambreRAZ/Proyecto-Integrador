@@ -118,10 +118,10 @@
     <!-- Formulario de carga (OCULTO por defecto, JS decide cuál mostrar) -->
     <form id="formCargaArchivo" style="display:none;">
         <input type="hidden" name="idEvento" id="hiddenIdEvento" value="">
-        
+
         <div class="data-card mb-5" style="padding: 25px;">
             <h4 class="fw-bold mb-4" style="color: var(--teal-main);">Cargar archivo</h4>
-            
+
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
                 <div class="d-flex align-items-center gap-3">
                     <span class="fw-medium">¿Tiene vigencia?:</span>
@@ -134,7 +134,7 @@
                         <label class="form-check-label" for="vigenciaSi">Si</label>
                     </div>
                 </div>
-                
+
                 <div class="d-flex align-items-center gap-3">
                     <span class="fw-medium">Fecha de Vigencia:</span>
                     <input type="date" name="fechaVencimiento" id="fechaVencimiento" class="form-control" style="width: auto; border-radius: 8px;" disabled>
@@ -165,7 +165,7 @@
         </div>
 
         <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-5">
-            <a href="mi_evento_do.jsp" class="btn btn-outline-teal px-5 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
+            <a href="mis_eventos_do.jsp" class="btn btn-outline-teal px-5 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
                 <i class="bi bi-chevron-left me-2"></i> Volver
             </a>
             <button type="submit" class="btn-teal px-5 py-2" style="border-radius: 6px;">Cargar Archivo</button>
@@ -187,7 +187,7 @@
         document.getElementById('hiddenIdEvento').value = idEvento;
     } else {
         Swal.fire('Error', 'No se especificó un evento válido', 'error').then(() => {
-            window.location.href = 'mi_evento_do.jsp';
+            window.location.href = 'mis_eventos_do.jsp';
         });
     }
 
@@ -347,7 +347,7 @@
 
     document.getElementById('formCargaArchivo').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         if (archivoPdf.files.length === 0) {
             Swal.fire('Advertencia', 'Debes seleccionar un archivo (PDF, PNG o JPG)', 'warning');
             return;
@@ -370,18 +370,18 @@
             method: 'POST',
             body: formData
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire('¡Éxito!', data.message, 'success').then(() => location.reload());
-            } else {
-                Swal.fire('Error', data.message || 'Ocurrió un error', 'error');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            Swal.fire('Error', 'Problema de conexión al subir', 'error');
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('¡Éxito!', data.message, 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.message || 'Ocurrió un error', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'Problema de conexión al subir', 'error');
+            });
     });
 </script>
 </body>

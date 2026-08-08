@@ -78,6 +78,45 @@ public class ConstanciaDao {
         }
         return false;
     }
+    public boolean guardarConstanciaCO(int idParticipante, String rutaArchivo, String nombreArchivo, boolean tieneVigencia, String fechaVencimiento, int subidoPor) {
+
+        // Si idParticipante no es válido, no intentamos el INSERT para evitar la excepción de FK
+        if (idParticipante <= 0) {
+            System.err.println("Error: idParticipante no es válido (" + idParticipante + ")");
+            return false;
+        }
+
+        String query;
+        if (tieneVigencia && fechaVencimiento != null && !fechaVencimiento.trim().isEmpty()) {
+            query = "INSERT INTO constancias (id_participante, ruta_archivo, nombre_archivo, tiene_vigencia, fecha_vencimiento, subido_por) " +
+                    "VALUES (?, ?, ?, 1, ?, ?)";
+        } else {
+            query = "INSERT INTO constancias (id_participante, ruta_archivo, nombre_archivo, tiene_vigencia, subido_por) " +
+                    "VALUES (?, ?, ?, 0, ?)";
+        }
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+
+            ps.setInt(1, idParticipante);
+            ps.setString(2, rutaArchivo);
+            ps.setString(3, nombreArchivo);
+
+            if (tieneVigencia && fechaVencimiento != null && !fechaVencimiento.trim().isEmpty()) {
+                // Convertimos la cadena "YYYY-MM-DD" directamente a java.sql.Date (Estándar JDBC)
+                ps.setDate(4, java.sql.Date.valueOf(fechaVencimiento.trim()));
+                ps.setInt(5, subidoPor);
+            } else {
+                ps.setInt(4, subidoPor);
+            }
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println(" Error SQL al guardar constancia:");
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     // Obtiene la constancia de un participante como un mapa de datos
     public Map<String, Object> obtenerConstancia(int idParticipante) {

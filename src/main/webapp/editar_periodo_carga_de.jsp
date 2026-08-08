@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="assets/css/bootstrap.css">
     <link rel="stylesheet" href="assets/css/bi/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/coordinador.css">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -23,12 +25,16 @@
         <h5 class="mb-0 fw-bold">DATOS DEL PERIODO</h5>
     </div>
 
-    <form action="gestion_periodos_carga_de.jsp">
+    <form id="formEditarPeriodo">
+        <!-- ID Oculto del periodo a editar -->
+        <input type="hidden" id="idPeriodo" name="id">
+
         <div class="row mb-5">
             <div class="col-md-4">
-                <label class="form-label text-muted">Division Academica <span class="text-danger">*</span> :</label>
-                <select class="form-select bg-white">
-                    <option value="DATID" selected>DATID</option>
+                <label class="form-label text-muted">División Académica <span class="text-danger">*</span> :</label>
+                <select class="form-select bg-white" id="selectDivision" name="division" required>
+                    <option value="" disabled selected>Cargando...</option>
+                    <option value="DATID">DATID</option>
                     <option value="DAMI">DAMI</option>
                     <option value="DACEA">DACEA</option>
                     <option value="DATEFI">DATEFI</option>
@@ -37,11 +43,11 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label text-muted">Fecha de inicio <span class="text-danger">*</span> :</label>
-                <input type="date" class="form-control bg-white" value="2026-08-08">
+                <input type="date" class="form-control bg-white" id="fechaInicio" name="fechaInicio" required>
             </div>
             <div class="col-md-4">
-                <label class="form-label text-muted">fecha fin <span class="text-danger">*</span> :</label>
-                <input type="date" class="form-control bg-white" value="2026-09-09">
+                <label class="form-label text-muted">Fecha fin <span class="text-danger">*</span> :</label>
+                <input type="date" class="form-control bg-white" id="fechaFin" name="fechaFin" required>
             </div>
         </div>
 
@@ -56,5 +62,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/coordinador.js"></script>
+
+<script src="assets/js/EditarPeriodo.js"> </script>
 </body>
 </html>

@@ -133,17 +133,17 @@
 
     <!-- Mensajes -->
     <% if (error != null) { %>
-      <div class="alert alert-danger d-flex align-items-center py-2 rounded-3 mb-3" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <div class="small"><%= error %></div>
-      </div>
+    <div class="alert alert-danger d-flex align-items-center py-2 rounded-3 mb-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <div class="small"><%= error %></div>
+    </div>
     <% } %>
 
     <% if (info != null) { %>
-      <div class="alert alert-info d-flex align-items-center py-2 rounded-3 mb-3" role="alert">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        <div class="small"><%= info %></div>
-      </div>
+    <div class="alert alert-info d-flex align-items-center py-2 rounded-3 mb-3" role="alert">
+      <i class="bi bi-info-circle-fill me-2"></i>
+      <div class="small"><%= info %></div>
+    </div>
     <% } %>
 
     <!-- ===== PASO 1: SOLICITAR ===== -->
@@ -250,31 +250,57 @@
 
     <form action="recuperar" method="post" id="formCambiar" onsubmit="return validarPass()">
       <input type="hidden" name="action" value="cambiar">
+
+      <!-- Campo 1: Nueva contraseña -->
       <div class="mb-3">
         <label class="form-label fw-bold text-dark mb-1 small">Nueva contraseña:</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0 text-secondary py-2"><i class="bi bi-lock"></i></span>
-          <input type="password" class="form-control border-start-0 py-2" name="pass1" id="pass1"
+          <input type="password" class="form-control border-start-0 border-end-0 py-2" name="pass1" id="pass1"
                  placeholder="Nueva contraseña" minlength="12" maxlength="15" required>
+          <button class="btn btn-outline-secondary border-start-0 py-2" type="button" onclick="togglePass('pass1', 'btnEye1')">
+            <i class="bi bi-eye" id="btnEye1"></i>
+          </button>
         </div>
         <div class="pass-strength" id="passStrength"></div>
         <div class="pass-hint">Entre 12 y 15 caracteres</div>
       </div>
+
+      <!-- Campo 2: Confirmar contraseña -->
       <div class="mb-3">
         <label class="form-label fw-bold text-dark mb-1 small">Confirmar contraseña:</label>
         <div class="input-group">
           <span class="input-group-text bg-transparent border-end-0 text-secondary py-2"><i class="bi bi-lock"></i></span>
-          <input type="password" class="form-control border-start-0 py-2" name="pass2" id="pass2"
+          <input type="password" class="form-control border-start-0 border-end-0 py-2" name="pass2" id="pass2"
                  placeholder="Repite la contraseña" minlength="12" maxlength="15" required>
+          <button class="btn btn-outline-secondary border-start-0 py-2" type="button" onclick="togglePass('pass2', 'btnEye2')">
+            <i class="bi bi-eye" id="btnEye2"></i>
+          </button>
         </div>
         <div id="passMatchMsg" class="small mt-1"></div>
       </div>
+
       <button class="btn-teal-rec" type="submit">
         <i class="bi bi-floppy me-1"></i> Actualizar contraseña
       </button>
     </form>
 
     <script>
+      // Función para alternar visibilidad de la contraseña
+      function togglePass(inputId, iconId) {
+        var input = document.getElementById(inputId);
+        var icon = document.getElementById(iconId);
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("bi-eye");
+          icon.classList.add("bi-eye-slash");
+        } else {
+          input.type = "password";
+          icon.classList.remove("bi-eye-slash");
+          icon.classList.add("bi-eye");
+        }
+      }
+
       document.getElementById('pass1').addEventListener('input', function () {
         var len = this.value.length;
         var bar = document.getElementById('passStrength');

@@ -17,7 +17,7 @@
 </head>
 <body>
 
-<jsp:include page="sidebar_de.jsp">
+<jsp:include page="sidebar_co.jsp">
     <jsp:param name="active" value="gestion_evento" />
 </jsp:include>
 
@@ -69,8 +69,8 @@
                     <div class="info-card-icon"><i class="bi bi-clock"></i></div>
                     <span class="fw-bold text-teal" style="color: var(--teal-main);">Fecha limite de entrega</span>
                 </div>
-                <div class="text-dark fw-semibold">31 Jul - 23:56</div>
-                <div class="badge-light-green">Faltan 18 dias</div>
+                <div class="text-dark fw-semibold" id="fechaLimiteTexto">-</div>
+                <div class="badge-light-green" id="diasRestantesBadge">Calculando...</div>
             </div>
         </div>
         <div class="col-md-3 mt-3 mt-md-0">
@@ -79,12 +79,12 @@
                     <div class="info-card-icon"><i class="bi bi-people"></i></div>
                     <span class="fw-bold text-teal" style="color: var(--teal-main);">Documentos entregados</span>
                 </div>
-                <div class="fs-5 fw-bold text-dark mt-1">5 de 10</div>
+                <div class="fs-5 fw-bold text-dark mt-1" id="documentosEntregadosTexto">0 de 0</div>
                 <div class="d-flex align-items-center w-100 justify-content-center gap-2">
                     <div class="progress-bar-custom">
-                        <div class="progress-bar-fill" style="width: 50%;"></div>
+                        <div class="progress-bar-fill" id="barraProgresoFill" style="width: 0%;"></div>
                     </div>
-                    <span class="fw-bold text-teal" style="font-size: 0.85rem; color: var(--teal-main);">50%</span>
+                    <span class="fw-bold text-teal" id="porcentajeTexto" style="font-size: 0.85rem; color: var(--teal-main);">0%</span>
                 </div>
             </div>
         </div>
@@ -102,52 +102,8 @@
                 <th>Entregado</th>
             </tr>
             </thead>
-            <tbody>
-            <tr>
-                <td class="text-start">
-                    <div class="docente-name-container">
-                        <div class="avatar-circle"></div>
-                        <div class="docente-name">
-                            Luis Gerardo<br>Barron Flores
-                        </div>
-                    </div>
-                </td>
-                <td>ejemplo@gmail.com</td>
-                <td class="status-active">Activo</td>
-                <td>
-                    <a href="archivo_subido.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td class="text-start">
-                    <div class="docente-name-container">
-                        <div class="avatar-circle"></div>
-                        <div class="docente-name">
-                            Luis Gerardo<br>Barron Flores
-                        </div>
-                    </div>
-                </td>
-                <td>ejemplo@gmail.com</td>
-                <td class="status-active">Activo</td>
-                <td>
-                    <a href="archivo_subido.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                </td>
-            </tr>
-            <tr>
-                <td class="text-start">
-                    <div class="docente-name-container">
-                        <div class="avatar-circle"></div>
-                        <div class="docente-name">
-                            Luis Gerardo<br>Barron Flores
-                        </div>
-                    </div>
-                </td>
-                <td>ejemplo@gmail.com</td>
-                <td class="status-active">Activo</td>
-                <td>
-                    <a href="archivo_subido.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                </td>
-            </tr>
+            <tbody id="tablaDocentesBody">
+            <!-- Se llena con JS -->
             </tbody>
         </table>
     </div>
@@ -199,7 +155,7 @@
             return;
         }
 
-        fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento))
+        fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now())
             .then(function (response) { return response.json(); })
             .then(function (data) {
                 if (!data.success) {
@@ -221,6 +177,34 @@
                 campoFechaInicio.value = aFechaVisible(data.fechaInicio);
                 campoFechaFin.value = aFechaVisible(data.fechaFin);
                 campoModalidad.textContent = capitalizar(data.modalidad);
+
+                // Calcular fecha límite
+                if (data.fechaFin) {
+                    const hoy = new Date();
+                    hoy.setHours(0,0,0,0);
+                    // data.fechaFin viene como yyyy-mm-dd
+                    const partes = data.fechaFin.split('-');
+                    const limite = new Date(partes[0], partes[1] - 1, partes[2]);
+
+                    const difTiempo = limite.getTime() - hoy.getTime();
+                    const difDias = Math.ceil(difTiempo / (1000 * 3600 * 24));
+
+                    document.getElementById('fechaLimiteTexto').textContent = aFechaVisible(data.fechaFin);
+                    const badge = document.getElementById('diasRestantesBadge');
+
+                    if (difDias > 0) {
+                        badge.textContent = 'Faltan ' + difDias + ' días';
+                        badge.className = 'badge-light-green';
+                    } else if (difDias === 0) {
+                        badge.textContent = 'Vence hoy';
+                        badge.className = 'badge text-bg-warning';
+                    } else {
+                        badge.textContent = 'Vencido hace ' + Math.abs(difDias) + ' días';
+                        badge.className = 'badge text-bg-danger';
+                    }
+                }
+
+                cargarParticipantes();
             })
             .catch(function (error) {
                 console.error('Error al cargar el evento:', error);
@@ -231,6 +215,57 @@
                     confirmButtonColor: '#00847b'
                 });
             });
+    }
+
+    function cargarParticipantes() {
+        fetch(contextPath + '/ListarParticipantesEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now())
+            .then(res => res.json())
+            .then(participantes => {
+                const tbody = document.getElementById('tablaDocentesBody');
+                tbody.innerHTML = '';
+
+                let entregados = 0;
+                let total = participantes.length;
+
+                if (total === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">No hay docentes asignados a este evento.</td></tr>';
+                } else {
+                    participantes.forEach(p => {
+                        if (p.entregado) entregados++;
+
+                        const tr = document.createElement('tr');
+                        const statusClass = p.activo === 1 ? 'status-active' : 'text-danger';
+                        const statusText = p.activo === 1 ? 'Activo' : 'Inactivo';
+                        const iniciales = (p.nombre.charAt(0) + p.apellidoPaterno.charAt(0)).toUpperCase();
+
+                        let entregadoBtn = p.entregado
+                            ? `<a href="#" class="action-btn"><i class="bi bi-eye"></i></a>`
+                            : `<span class="text-muted"><i class="bi bi-eye-slash"></i></span>`;
+
+                        tr.innerHTML =
+                            '<td class="text-start">' +
+                            '<div class="docente-name-container">' +
+                            '<div class="avatar-circle">' + iniciales + '</div>' +
+                            '<div class="docente-name">' +
+                            p.nombre + '<br>' + p.apellidoPaterno + ' ' + (p.apellidoMaterno || '') +
+                            '</div>' +
+                            '</div>' +
+                            '</td>' +
+                            '<td>' + (p.correo || '') + '</td>' +
+                            '<td class="' + statusClass + '">' + statusText + '</td>' +
+                            '<td>' + entregadoBtn + '</td>';
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                // Actualizar gráfica circular de porcentaje
+                document.getElementById('documentosEntregadosTexto').textContent = entregados + ' de ' + total;
+                let porcentaje = total > 0 ? Math.round((entregados / total) * 100) : 0;
+
+                document.getElementById('barraProgresoFill').style.width = porcentaje + '%';
+                document.getElementById('porcentajeTexto').textContent = porcentaje + '%';
+            })
+            .catch(error => console.error("Error al cargar participantes:", error));
     }
 
     cargarEvento();

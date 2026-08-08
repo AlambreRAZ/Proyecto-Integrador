@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="assets/css/bootstrap.css">
     <link rel="stylesheet" href="assets/css/bi/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/coordinador.css">
+    <!-- SweetAlert2 para mensajes de error si aplica -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -18,22 +20,25 @@
 <main class="main-content">
     <h3 class="page-title mb-4">HISTORIAL DE EVENTOS</h3>
 
-    <div class="d-flex flex-wrap gap-2 mb-4">
-        <a href="#" class="nav-pill active">Todos</a>
-        <a href="#" class="nav-pill">Diplomado</a>
-        <a href="#" class="nav-pill">Conferencia</a>
-        <a href="#" class="nav-pill">Taller</a>
-        <a href="#" class="nav-pill">Curso</a>
-        <a href="#" class="nav-pill">Certificacion</a>
+    <!-- Filtros por tipo de evento -->
+    <div class="d-flex flex-wrap gap-2 mb-4" id="contenedorFiltrosTipo">
+        <a href="#" class="nav-pill active" data-tipo="todos">Todos</a>
+        <a href="#" class="nav-pill" data-tipo="Diplomado">Diplomado</a>
+        <a href="#" class="nav-pill" data-tipo="Conferencia">Conferencia</a>
+        <a href="#" class="nav-pill" data-tipo="Taller">Taller</a>
+        <a href="#" class="nav-pill" data-tipo="Curso">Curso</a>
+        <a href="#" class="nav-pill" data-tipo="Certificación">Certificación</a>
     </div>
 
+    <!-- Buscador en tiempo real -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1;">
             <i class="bi bi-search"></i>
-            <input type="text" placeholder="Buscar Evento por nombre ...">
+            <input type="text" id="buscarEvento" placeholder="Buscar Evento por nombre...">
         </div>
     </div>
 
+    <!-- Tabla dinámicamente renderizada -->
     <div class="data-card p-0 mb-4" style="overflow: hidden;">
         <table class="table-custom mb-0 text-center">
             <colgroup>
@@ -44,107 +49,34 @@
                 <col style="width: 10%;">
             </colgroup>
             <thead>
-                <tr>
-                    <th class="text-start">Titulo</th>
-                    <th>Tipo</th>
-                    <th>Institución</th>
-                    <th>Fecha</th>
-                    <th>Acciones</th>
-                </tr>
+            <tr>
+                <th class="text-start">Título</th>
+                <th>Tipo</th>
+                <th>Institución</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td class="text-start">
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-start">
-                        <div class="fw-semibold">Fundamentos de redes</div>
-                        <div class="small text-muted">cisco paket tracer</div>
-                    </td>
-                    <td>Certificacion</td>
-                    <td>
-                        <div>Centro de</div>
-                        <div class="small text-muted">Capacitacion</div>
-                    </td>
-                    <td>02/02/26 - 30/03/26</td>
-                    <td>
-                        <a href="ver_mas_evento_de.jsp" class="action-btn"><i class="bi bi-eye"></i></a>
-                    </td>
-                </tr>
+            <tbody id="tablaEventosBody">
+            <!-- Se llena mediante JavaScript desde el Servlet /ListarMisEventos -->
             </tbody>
         </table>
     </div>
 
-    <div class="pagination-container">
+    <!-- Paginador (Preparado para lógica si se requiere) -->
+    <div class="pagination-container" id="paginacionContainer">
         <a href="#" class="page-btn"><i class="bi bi-chevron-left"></i></a>
         <a href="#" class="page-btn active">1</a>
-        <a href="#" class="page-btn">2</a>
-        <a href="#" class="page-btn">3</a>
-        <span class="page-btn dots">...</span>
-        <a href="#" class="page-btn">10</a>
         <a href="#" class="page-btn"><i class="bi bi-chevron-right"></i></a>
     </div>
 
 </main>
 
+<script>
+    // ContextPath global para construir URLs dinámicamente
+    window.contextPath = '<%= request.getContextPath() %>';
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="assets/js/coordinador.js"></script>
+<script src="assets/js/historial_eventos_de.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const  contextPath = window.contextPath || '';
+const contextPath = window.contextPath || '';
 const tbody = document.getElementById('tablaDocentesBody');
 const inputBuscar = document.getElementById('buscarDocente');
 
@@ -30,7 +30,7 @@ function mostrarAlerta(titulo, mensaje, icono = 'warning') {
 }
 
 // ------------------------------------------------------------------
-// 🛑 VALIDACIONES EN EL FRONTEND (GUARDAR / EDITAR)
+//  VALIDACIONES EN EL FRONTEND (GUARDAR / EDITAR)
 // ------------------------------------------------------------------
 function validarFormularioDocente(datos) {
     const { nombre, apeP, apeM, division, numEmp, tel, correo, pass, confirmPass } = datos;
@@ -67,7 +67,7 @@ function validarFormularioDocente(datos) {
 
     // 6. CORREO ESTRICTAMENTE TERMINADO EN @utez.edu.mx
     if (!correo.toLowerCase().endsWith('@utez.edu.mx')) {
-        mostrarAlerta('Correo no institucional', 'El correo debe terminar strictly en @utez.edu.mx');
+        mostrarAlerta('Correo no institucional', 'El correo debe terminar estrictamente en @utez.edu.mx');
         return false;
     }
 
@@ -180,7 +180,7 @@ function cargarDocentes() {
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr>';
 
-    fetch(contextPath + '/ListarDocente', { credentials: 'same-origin' })
+    fetch(contextPath + '/ListarDocente_Co', { credentials: 'same-origin' })
         .then(function (response) {
             if (response.redirected || (response.url && response.url.includes('login.jsp'))) {
                 window.location.href = 'login.jsp';
@@ -231,7 +231,7 @@ function cambiarEstado(id, nuevoEstado) {
 }
 
 // ------------------------------------------------------------------
-// ⌨️ RESTRICCIONES EN TIEMPO REAL (INPUT) Y MANEJO DE EVENTOS DOM
+// ⌨️ RESTRICCIONES EN TIEMPO REAL (INPUT) Y EVENTOS
 // ------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (tbody) {
         tbody.addEventListener('click', function (e) {
 
-            // 1. Interruptor "Estado" (Activar / Desactivar)
+            // 1. Interruptor de la columna "Estado" (Activar / Desactivar)
             const toggle = e.target.closest('.toggle-estado');
             if (toggle) {
                 const id = toggle.getAttribute('data-id');
@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // 2. Botón Bote de Basura 🗑 (Eliminación permanente)
+            // 2. Botón Bote de Basura 🗑 (Sentencia DELETE permanente)
             const boton = e.target.closest('.action-btn.delete');
             if (!boton) return;
             e.preventDefault();
@@ -359,6 +359,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Cargar la lista al cargar la vista
+    // Iniciar carga al entrar
     cargarDocentes();
-});;
+});

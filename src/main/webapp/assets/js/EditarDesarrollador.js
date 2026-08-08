@@ -6,8 +6,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('formEditarDesarrollador');
     const btnGuardar = document.getElementById('btnGuardar');
 
+    // Función auxiliar para mostrar alertas rápidamente
+    function mostrarAlerta(titulo, mensaje, icono = 'warning') {
+        Swal.fire({
+            icon: icono,
+            title: titulo,
+            text: mensaje,
+            confirmButtonColor: '#00847b'
+        });
+    }
+
     // ------------------------------------------------------------------
-    // 🔒 RESTRICCIONES EN TIEMPO REAL (MIENTRAS ESCRIBEN)
+    //  RESTRICCIONES EN TIEMPO REAL (MIENTRAS ESCRIBEN)
     // ------------------------------------------------------------------
 
     // Solo letras y espacios (Nombres y Apellidos)
@@ -28,11 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-
     // ------------------------------------------------------------------
     //  CARGAR DATOS EN EL FORMULARIO (GET)
     // ------------------------------------------------------------------
-    //  CARGAR DATOS EN EL FORMULARIO (GET)
     function cargarDesarrollador() {
         if (!idDesarrollador) {
             Swal.fire({
@@ -75,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const campoTelefono = document.getElementById('campoTelefono');
                 const campoCorreo = document.getElementById('campoCorreo');
 
-                //  OBTENEMOS LOS CAMPOS DE CONTRASEÑA
+                // OBTENEMOS LOS CAMPOS DE CONTRASEÑA
                 const campoContrasena = document.getElementById('campoContrasena');
                 const campoConfirmarContrasena = document.getElementById('campoConfirmarContrasena');
 
@@ -136,42 +144,67 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const correoVal = form.querySelector('[name="correo"]').value.trim();
-            const contrasenaVal = form.querySelector('[name="contrasena"]').value.trim();
-            const confirmarVal = form.querySelector('[name="confirmar_contrasena"]').value.trim();
+            // Función auxiliar para obtener valor por ID o por atributo Name
+            const getVal = (id, nameAttr) => {
+                const el = document.getElementById(id) || form.querySelector(`[name="${nameAttr}"]`);
+                return el ? el.value.trim() : '';
+            };
 
-            // 1. VALIDACIÓN DE CORREO INSTITUCIONAL (@utez.edu.mx)
-            if (!correoVal.toLowerCase().endsWith('@utez.edu.mx')) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Correo inválido',
-                    text: 'El correo debe pertenecer al dominio institucional (@utez.edu.mx).',
-                    confirmButtonColor: '#00847b'
-                });
+            const nombre = getVal('campoNombre', 'nombre');
+            const apeP = getVal('campoApellidoPaterno', 'apellido_paterno');
+            const apeM = getVal('campoApellidoMaterno', 'apellido_materno');
+            const division = getVal('campoDivision', 'division');
+            const numEmp = getVal('campoNumeroEmpleado', 'numero_empleado');
+            const tel = getVal('campoTelefono', 'telefono');
+            const correoVal = getVal('campoCorreo', 'correo');
+            const contrasenaVal = getVal('campoContrasena', 'contrasena');
+            const confirmarVal = getVal('campoConfirmarContrasena', 'confirmar_contrasena');
+
+            // 1. VALIDACIÓN DE CAMPOS INCOMPLETOS
+            if (!nombre || !apeP || !apeM || !numEmp || !tel || !correoVal || !contrasenaVal || !confirmarVal) {
+                mostrarAlerta('Campos incompletos', 'Por favor, llena todos los campos obligatorios del formulario.');
                 return;
             }
 
-            // 2. VALIDACIÓN DE CONTRASEÑA (ENTRE 12 Y 15 CARACTERES)
-            if (contrasenaVal.length > 0) {
-                if (contrasenaVal.length < 12 || contrasenaVal.length > 15) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Longitud de Contraseña',
-                        text: 'La contraseña debe tener entre 12 y 15 caracteres.',
-                        confirmButtonColor: '#00847b'
-                    });
-                    return;
-                }
+            // 2. VALIDACIÓN DE DIVISIÓN
+            if (!division) {
+                mostrarAlerta('División requerida', 'Por favor selecciona una División Académica.');
+                return;
+            }
 
-                if (contrasenaVal !== confirmarVal) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Las contraseñas no coinciden',
-                        text: 'Verifica que ambas contraseñas sean idénticas.',
-                        confirmButtonColor: '#00847b'
-                    });
-                    return;
-                }
+            // 3. VALIDACIÓN DE NÚMERO DE EMPLEADO
+            if (!/^\d+$/.test(numEmp)) {
+                mostrarAlerta('Número de Empleado inválido', 'El número de empleado solo debe contener dígitos numéricos.');
+                return;
+            }
+
+            // 4. VALIDACIÓN DE TELÉFONO (EXACTAMENTE 10 DÍGITOS)
+            if (!/^\d{10}$/.test(tel)) {
+                mostrarAlerta('Teléfono inválido', 'El teléfono debe ser de exactamente 10 dígitos numéricos.');
+                return;
+            }
+
+            // 5. VALIDACIÓN DE LONGITUD DE CORREO
+            if (correoVal.length > 50) {
+                mostrarAlerta('Correo demasiado largo', 'El correo institucional no debe exceder los 50 caracteres.');
+                return;
+            }
+
+            // 6. VALIDACIÓN DE CORREO INSTITUCIONAL (@utez.edu.mx)
+            if (!correoVal.toLowerCase().endsWith('@utez.edu.mx')) {
+                mostrarAlerta('Correo no institucional', 'El correo debe terminar estrictamente en @utez.edu.mx');
+                return;
+            }
+
+            // 7. VALIDACIÓN DE CONTRASEÑA (ENTRE 12 Y 15 CARACTERES Y COINCIDENCIA)
+            if (contrasenaVal.length < 12 || contrasenaVal.length > 15) {
+                mostrarAlerta('Contraseña inválida', 'La contraseña debe tener entre 12 y 15 caracteres.');
+                return;
+            }
+
+            if (contrasenaVal !== confirmarVal) {
+                mostrarAlerta('Las contraseñas no coinciden', 'Asegúrate de escribir exactamente la misma contraseña en ambos campos.');
+                return;
             }
 
             // Confirmación antes de enviar
@@ -189,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (btnGuardar) btnGuardar.disabled = true;
 
-                // Preparamos los parámetros como URLSearchParams para evitar problemas con MultipartConfig
+                // Preparamos los parámetros como URLSearchParams
                 const datosForm = new FormData(form);
                 const paramsForm = new URLSearchParams(datosForm);
 
