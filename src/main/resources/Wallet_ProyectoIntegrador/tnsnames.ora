@@ -1,0 +1,12 @@
+proyectointegrador_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gba8015f355a05b_proyectointegrador_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+proyectointegrador_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gba8015f355a05b_proyectointegrador_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+proyectointegrador_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gba8015f355a05b_proyectointegrador_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+proyectointegrador_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gba8015f355a05b_proyectointegrador_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+proyectointegrador_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gba8015f355a05b_proyectointegrador_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+

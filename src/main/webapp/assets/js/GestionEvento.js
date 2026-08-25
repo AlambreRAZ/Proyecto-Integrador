@@ -40,7 +40,7 @@ function obtenerEventosFiltrados() {
     });
 
     filtrados.sort(function (a, b) {
-        return normalizar(a.nombre).localeCompare(normalizar(b.nombre));
+        return normalizar(a.nombre).localeCompare(normalizar(a.nombre));
     });
 
     return filtrados;
@@ -48,7 +48,7 @@ function obtenerEventosFiltrados() {
 
 function renderEventos(eventos) {
     if (!eventos.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No se encontraron eventos.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron eventos.</td></tr>';
         return;
     }
 
@@ -58,6 +58,9 @@ function renderEventos(eventos) {
 
     tbody.innerHTML = '';
     eventos.forEach(function (ev) {
+        // Obtener el nombre de la división según los atributos del JSON
+        const divisionNombre = ev.nombreDivision || ev.division || ev.nombre_division || ev.idDivision || 'N/A';
+
         const fila = document.createElement('tr');
         fila.setAttribute('data-id', ev.id);
         fila.innerHTML =
@@ -71,6 +74,10 @@ function renderEventos(eventos) {
             '<div class="small text-muted">' + escapeHtml(ev.lugar) + '</div>' +
             '</td>' +
             '<td>' + formatearFecha(ev.fechaInicio) + ' - ' + formatearFecha(ev.fechaFin) + '</td>' +
+
+            //  COLUMNA DIVISIÓN (AGREGADA)
+            '<td><strong>' + escapeHtml(divisionNombre) + '</strong></td>' +
+
             '<td>' +
             //  Editar
             '<a href="' + contextPath + '/editar_evento' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Editar Evento"><i class="bi bi-pencil"></i></a> ' +
@@ -78,7 +85,7 @@ function renderEventos(eventos) {
             //  Ver Detalles
             '<a href="' + contextPath + '/ver_mas_evento' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Ver Evento"><i class="bi bi-eye"></i></a> ' +
 
-            //  AQUÍ ESTÁ LA NUBE PUTA AGREGADA
+            //  Cargar Archivo
             '<a href="' + contextPath + '/cargar_archivo' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Cargar Archivo"><i class="bi bi-cloud-arrow-up"></i></a> ' +
 
             //  Eliminar
@@ -109,7 +116,7 @@ function cargarEventos() {
         })
         .catch(function (error) {
             console.error('Error al cargar eventos:', error);
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">No se pudieron cargar los eventos. Revisa tu servidor.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">No se pudieron cargar los eventos. Revisa tu servidor.</td></tr>';
         });
 }
 

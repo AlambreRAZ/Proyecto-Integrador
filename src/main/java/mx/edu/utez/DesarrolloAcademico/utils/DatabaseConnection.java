@@ -13,29 +13,40 @@ public class DatabaseConnection {
             try (InputStream in = DatabaseConnection.class.getClassLoader().getResourceAsStream("credentials.properties")) {
                 if (in != null) {
                     props.load(in);
+                } else {
+                    System.err.println("No se encontró credentials.properties");
+                    return null;
                 }
             }
 
-            String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : props.getProperty("db.user");
-            String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : props.getProperty("db.password");
-            
-            java.net.URL walletUrl = DatabaseConnection.class.getClassLoader().getResource("wallet");
-            String walletPath = "";
-            if (walletUrl != null) {
-                walletPath = new java.io.File(walletUrl.toURI()).getAbsolutePath();
+            // 1. Obtener propiedades del archivo .properties
+            String dbUser = props.getProperty("db.user");
+            String dbPass = props.getProperty("db.pass");
+            String dbUrl = props.getProperty("db.url");
+
+            // Debug en consola para verificar qué valores lee en tiempo de ejecución
+            System.out.println("Cargando DB URL: " + dbUrl);
+            System.out.println("Cargando DB User: " + dbUser);
+
+            // 2. Validar que ninguna clave esté vacía
+            if (dbUser == null || dbPass == null || dbUrl == null) {
+                System.err.println("Faltan propiedades en credentials.properties (Revisa db.user, db.pass o db.url)");
+                return null;
             }
-            
+
+            // 3. Forzar ruta local de la Wallet en Windows
+            System.setProperty("oracle.net.tns_admin", "C:/Users/Lenovo/Downloads/Wallet_ProyectoIntegrador");
+
             Properties info = new Properties();
             info.put("user", dbUser);
             info.put("password", dbPass);
-            info.put("oracle.net.tns_admin", walletPath);
 
             Class.forName("oracle.jdbc.OracleDriver");
 
-            String dbUrl = "jdbc:oracle:thin:@desarrolloacademico_medium";
             Connection newConnection = DriverManager.getConnection(dbUrl, info);
-            System.out.println("Nueva conexión a Oracle exitosa!");
+            System.out.println("Conexión exitosa a la base de datos.");
             return newConnection;
+
         } catch (Exception e) {
             System.err.println("Error en la conexión a Base de Datos: " + e.getMessage());
             e.printStackTrace();

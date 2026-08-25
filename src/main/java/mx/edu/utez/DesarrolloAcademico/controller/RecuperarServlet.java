@@ -48,7 +48,11 @@ public class RecuperarServlet extends HttpServlet {
             String codigo = generarCodigo(6);
             boolean guardado = usuarioDao.guardarCodigoRecuperacion(usuario.getIdUsuario(), codigo);
             if (guardado) {
-                emailService.enviarCodigoRecuperacion(usuario.getCorreoInstitucional(), codigo);
+                // Se envía en segundo plano para no congelar la vista web
+                final String correoDestino = usuario.getCorreoInstitucional();
+                new Thread(() -> {
+                    emailService.enviarCodigoRecuperacion(correoDestino, codigo);
+                }).start();
             }
         }
 
@@ -56,7 +60,7 @@ public class RecuperarServlet extends HttpServlet {
         request.getSession().setAttribute("datoRecuperacion", dato);
 
         request.setAttribute("mensajeInfo", "Si el correo o número de empleado se encuentra registrado, te llegará un correo con instrucciones.");
-        request.setAttribute("emailParaReenvio", dato); // Para el botón 'Reenviar' en la vista
+        request.setAttribute("emailParaReenvio", dato);
         request.setAttribute("step", "verificar");
         request.getRequestDispatcher("recuperar-contra.jsp").forward(request, response);
     }
@@ -96,7 +100,7 @@ public class RecuperarServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Integer idUsuario = (Integer) session.getAttribute("idUsuarioRecuperacion");
         String email = (String) session.getAttribute("emailUsuarioRecuperacion");
-        
+
         if (idUsuario == null) {
             response.sendRedirect("recuperar-contra.jsp");
             return;

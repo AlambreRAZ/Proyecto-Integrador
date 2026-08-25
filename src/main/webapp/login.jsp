@@ -39,8 +39,7 @@
                     </div>
                 <% } %>
 
-                <form action="login" method="post">
-
+                <form action="${pageContext.request.contextPath}/login" method="post">
                     <div class="mb-3">
                         <label for="txtUsuario" class="form-label fw-bold mb-1 small" style="color: #2B1818;">Correo institucional:</label>
                         <div class="position-relative">

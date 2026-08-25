@@ -1,4 +1,4 @@
-xt/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
 <%
     Usuario u = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
