@@ -17,11 +17,15 @@ public class Usuario {
     private int activo;
     private Integer creadoPor; // Puede ser null
     private boolean entregado;
+    // NUEVOS: datos de la constancia del participante en un evento
+    private int idParticipante;
+    private String rutaConstancia;
+    private String nombreConstancia;
 
     public Usuario() {}
 
-    public Usuario(int idUsuario, String nombre, String apellidoPaterno, String apellidoMaterno, String rol, 
-                   Integer idDivision, String numeroEmpleado, String telefono, String correoInstitucional, 
+    public Usuario(int idUsuario, String nombre, String apellidoPaterno, String apellidoMaterno, String rol,
+                   Integer idDivision, String numeroEmpleado, String telefono, String correoInstitucional,
                    String contrasena, Timestamp fechaRegistro, int activo, Integer creadoPor) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
@@ -79,4 +83,13 @@ public class Usuario {
 
     public boolean isEntregado() { return entregado; }
     public void setEntregado(boolean entregado) { this.entregado = entregado; }
+
+    public int getIdParticipante() { return idParticipante; }
+    public void setIdParticipante(int idParticipante) { this.idParticipante = idParticipante; }
+
+    public String getRutaConstancia() { return rutaConstancia; }
+    public void setRutaConstancia(String rutaConstancia) { this.rutaConstancia = rutaConstancia; }
+
+    public String getNombreConstancia() { return nombreConstancia; }
+    public void setNombreConstancia(String nombreConstancia) { this.nombreConstancia = nombreConstancia; }
 }

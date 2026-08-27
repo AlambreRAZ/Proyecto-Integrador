@@ -96,8 +96,8 @@ public class AgregarEvento_Co {
         }
         query.append("ORDER BY e.id_evento DESC");
 
-        Connection con = DatabaseConnection.getConnection();
-        try (PreparedStatement ps = con.prepareStatement(query.toString())) {
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query.toString())) {
             if (idDivision != null) {
                 ps.setInt(1, idDivision);
             }
@@ -165,12 +165,8 @@ public class AgregarEvento_Co {
     public agregarEvento_co obtenerPorId(int idEvento) {
         String query = "SELECT id_evento, nombre, lugar, institucion, tipo_evento, descripcion, fecha_inicio, fecha_fin, modalidad, id_division, creado_por FROM eventos WHERE id_evento = ?";
 
-        Connection con = DatabaseConnection.getConnection();
-        if (con == null) {
-            System.err.println("Error al obtener el evento: no se pudo obtener conexión a la base de datos.");
-            return null;
-        }
-        try (PreparedStatement ps = con.prepareStatement(query)) {
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, idEvento);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Eventos</title>
     <link rel="stylesheet" href="assets/css/bootstrap.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">    <link rel="stylesheet" href="assets/css/coordinador.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/coordinador.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -39,36 +40,39 @@
         </a>
     </div>
 
-    <!-- TARJETA DE LA TABLA (6 Columnas exactas) -->
-    <colgroup>
-        <col style="width: 25%;">
-        <col style="width: 14%;">
-        <col style="width: 20%;">
-        <col style="width: 15%;">
-        <col style="width: 12%;">
-        <col style="width: 14%;">
-    </colgroup>
-    <thead>
-    <tr>
-        <th>Titulo</th>
-        <th>Tipo</th>
-        <th>Institución</th>
-        <th>Fecha</th>
-        <th>División</th>
-        <th>Acciones</th>
-    </tr>
-    </thead>
-    <tbody id="tablaEventosBody">
-    <tr>
-        <td colspan="6" class="text-center text-muted py-4">Cargando eventos...</td>
-    </tr>
-    </tbody>
+    <!-- TARJETA DE LA TABLA (6 columnas exactas) -->
+    <div class="data-card p-0 mb-4" style="overflow: hidden;">
+        <table class="table-custom mb-0">
+            <colgroup>
+                <col style="width: 25%;">
+                <col style="width: 14%;">
+                <col style="width: 20%;">
+                <col style="width: 15%;">
+                <col style="width: 12%;">
+                <col style="width: 14%;">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>Titulo</th>
+                <th>Tipo</th>
+                <th>Institución</th>
+                <th>Fecha</th>
+                <th>División</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="tablaEventosBody">
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">Cargando eventos...</td>
+            </tr>
+            </tbody>
         </table>
     </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>window.contextPath = '<%= request.getContextPath() %>';</script>
+<script src="assets/js/coordinador.js"></script>
 <script src="assets/js/GestionEvento.js?v=3"></script>
 </body>
 </html>

@@ -40,6 +40,14 @@ public class UsuarioListaDao {
                     u.setIdDivision(divObj != null ? ((Number) divObj).intValue() : null);
                     u.setActivo(rs.getInt("activo"));
                     u.setRol(rs.getString("rol"));
+
+                    // entregado = true si existe una fila en CONSTANCIAS para este participante
+                    rs.getInt("id_constancia");
+                    u.setEntregado(!rs.wasNull());
+                    u.setIdParticipante(rs.getInt("id_participante"));
+                    u.setRutaConstancia(rs.getString("ruta_archivo"));
+                    u.setNombreConstancia(rs.getString("nombre_archivo"));
+
                     lista.add(u);
                 }
             }
@@ -83,9 +91,16 @@ public class UsuarioListaDao {
 
     public List<Usuario> listarParticipantesPorEvento(int idEvento) {
         List<Usuario> lista = new ArrayList<>();
-        String query = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo_institucional, u.numero_empleado, u.activo, u.rol " +
+        // CORREGIDO: antes no se consultaba la tabla CONSTANCIAS, por eso
+        // 'entregado' siempre llegaba en false y nunca se veia quien ya subio archivo.
+        // El LEFT JOIN trae la constancia si existe; si no, los campos vienen en NULL.
+        String query = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, " +
+                "       u.correo_institucional, u.numero_empleado, u.activo, u.rol, " +
+                "       pe.id_participante, " +
+                "       c.id_constancia, c.ruta_archivo, c.nombre_archivo " +
                 "FROM usuarios u " +
                 "JOIN participantes_eventos pe ON u.id_usuario = pe.id_usuario " +
+                "LEFT JOIN constancias c ON c.id_participante = pe.id_participante " +
                 "WHERE pe.id_evento = ? ORDER BY u.nombre";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(query)) {
@@ -101,6 +116,14 @@ public class UsuarioListaDao {
                     u.setNumeroEmpleado(rs.getString("numero_empleado"));
                     u.setActivo(rs.getInt("activo"));
                     u.setRol(rs.getString("rol"));
+
+                    // entregado = true si existe una fila en CONSTANCIAS para este participante
+                    rs.getInt("id_constancia");
+                    u.setEntregado(!rs.wasNull());
+                    u.setIdParticipante(rs.getInt("id_participante"));
+                    u.setRutaConstancia(rs.getString("ruta_archivo"));
+                    u.setNombreConstancia(rs.getString("nombre_archivo"));
+
                     lista.add(u);
                 }
             }

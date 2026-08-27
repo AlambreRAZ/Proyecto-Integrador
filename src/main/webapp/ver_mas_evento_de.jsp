@@ -99,7 +99,8 @@
                 <th class="text-start">Nombre</th>
                 <th>Correo</th>
                 <th>Estado</th>
-                <th>Entregado</th>
+                <th>Constancia</th>
+                <th>Acciones</th>
             </tr>
             </thead>
             <tbody id="tablaDocentesBody">
@@ -227,7 +228,7 @@
                 let total = Array.isArray(participantes) ? participantes.length : 0;
 
                 if (total === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-muted">No hay docentes asignados a este evento.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-3 text-muted">No hay docentes asignados a este evento.</td></tr>';
                 } else {
                     participantes.forEach(p => {
                         if (p.entregado) entregados++;
@@ -237,9 +238,31 @@
                         const statusText = p.activo === 1 ? 'Activo' : 'Inactivo';
                         const iniciales = (p.nombre ? p.nombre.charAt(0) : '') + (p.apellidoPaterno ? p.apellidoPaterno.charAt(0) : '');
 
-                        let entregadoBtn = p.entregado
-                            ? `<a href="#" class="action-btn"><i class="bi bi-eye"></i></a>`
-                            : `<span class="text-muted"><i class="bi bi-eye-slash"></i></span>`;
+                        // OJO CERRADO = ya subio su constancia
+                        // OJO ABIERTO = todavia no la sube
+                        // (sin backticks: este archivo es un JSP y el motor EL
+                        // se come las expresiones con signo de peso y llaves)
+                        var entregadoBtn;
+                        var estadoConstancia;
+
+                        if (p.entregado) {
+                            estadoConstancia =
+                                '<span class="badge" style="background-color:#00847b;">Entregada</span>';
+                            entregadoBtn =
+                                '<a href="' + contextPath + '/' + (p.rutaConstancia || '') + '" ' +
+                                'target="_blank" class="action-btn" title="Ver constancia de ' +
+                                (p.nombre || '') + '">' +
+                                '<i class="bi bi-eye-slash"></i>' +
+                                '</a>';
+                        } else {
+                            estadoConstancia =
+                                '<span class="badge" style="background-color:#adb5bd;">Pendiente</span>';
+                            entregadoBtn =
+                                '<span class="action-btn text-muted" title="Aun no sube su constancia" ' +
+                                'style="cursor: not-allowed;">' +
+                                '<i class="bi bi-eye"></i>' +
+                                '</span>';
+                        }
 
                         tr.innerHTML =
                             '<td class="text-start">' +
@@ -252,6 +275,7 @@
                             '</td>' +
                             '<td>' + (p.correo || '') + '</td>' +
                             '<td class="' + statusClass + '">' + statusText + '</td>' +
+                            '<td>' + estadoConstancia + '</td>' +
                             '<td>' + entregadoBtn + '</td>';
                         tbody.appendChild(tr);
                     });
@@ -265,7 +289,7 @@
             })
             .catch(error => {
                 console.error("Error al cargar participantes:", error);
-                document.getElementById('tablaDocentesBody').innerHTML = '<tr><td colspan="4" class="py-3 text-muted">Sin participantes asignados.</td></tr>';
+                document.getElementById('tablaDocentesBody').innerHTML = '<tr><td colspan="5" class="py-3 text-muted">Sin participantes asignados.</td></tr>';
             });
     }
 

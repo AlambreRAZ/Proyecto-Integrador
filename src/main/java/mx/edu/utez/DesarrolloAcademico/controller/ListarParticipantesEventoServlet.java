@@ -38,14 +38,17 @@ public class ListarParticipantesEventoServlet extends HttpServlet {
                 Usuario u = usuarios.get(i);
                 if (i > 0) json.append(",");
                 json.append("{")
-                    .append("\"id\":").append(u.getIdUsuario()).append(",")
-                    .append("\"nombre\":\"").append(esc(u.getNombre())).append("\",")
-                    .append("\"apellidoPaterno\":\"").append(esc(u.getApellidoPaterno())).append("\",")
-                    .append("\"apellidoMaterno\":\"").append(esc(u.getApellidoMaterno())).append("\",")
-                    .append("\"correo\":\"").append(esc(u.getCorreoInstitucional())).append("\",")
-                    .append("\"activo\":").append(u.getActivo()).append(",")
-                    .append("\"entregado\":").append(u.isEntregado())
-                    .append("}");
+                        .append("\"id\":").append(u.getIdUsuario()).append(",")
+                        .append("\"nombre\":\"").append(esc(u.getNombre())).append("\",")
+                        .append("\"apellidoPaterno\":\"").append(esc(u.getApellidoPaterno())).append("\",")
+                        .append("\"apellidoMaterno\":\"").append(esc(u.getApellidoMaterno())).append("\",")
+                        .append("\"correo\":\"").append(esc(u.getCorreoInstitucional())).append("\",")
+                        .append("\"activo\":").append(u.getActivo()).append(",")
+                        .append("\"entregado\":").append(u.isEntregado()).append(",")
+                        .append("\"idParticipante\":").append(u.getIdParticipante()).append(",")
+                        .append("\"rutaConstancia\":\"").append(esc(u.getRutaConstancia())).append("\",")
+                        .append("\"nombreConstancia\":\"").append(esc(u.getNombreConstancia())).append("\"")
+                        .append("}");
             }
             json.append("]");
 
