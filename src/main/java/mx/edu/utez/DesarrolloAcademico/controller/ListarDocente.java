@@ -12,8 +12,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-// Regresa en JSON a todos los usuarios con rol 'docente', para la tabla
-// de "Gestión de Docentes" (gestion_docentes.jsp).
+/**
+ * Regresa en JSON a los usuarios con rol 'docente' Y 'coordinador',
+ * para la tabla de "Gestión de Docentes / Coordinadores" (gestion_docente_de.jsp).
+ *
+ * BUG CORREGIDO: antes solo pedía dao.listarPorRoles("docente"), por eso un
+ * coordinador recién registrado se guardaba bien en la BD (podía iniciar sesión)
+ * pero nunca aparecía en el listado.
+ */
 @WebServlet(name = "ListarDocente", value = "/ListarDocente")
 public class ListarDocente extends HttpServlet {
 
@@ -28,7 +34,9 @@ public class ListarDocente extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         UsuarioListaDao dao = new UsuarioListaDao();
-        List<Usuario> docentes = dao.listarPorRoles("docente");
+
+        // <<< AQUÍ ESTABA EL BUG: faltaba "coordinador" >>>
+        List<Usuario> docentes = dao.listarPorRoles("docente", "coordinador");
 
         StringBuilder json = new StringBuilder("[");
         for (int i = 0; i < docentes.size(); i++) {
@@ -43,6 +51,8 @@ public class ListarDocente extends HttpServlet {
                     .append("\"numeroEmpleado\":\"").append(escapar(u.getNumeroEmpleado())).append("\",")
                     .append("\"telefono\":\"").append(escapar(u.getTelefono())).append("\",")
                     .append("\"correo\":\"").append(escapar(u.getCorreoInstitucional())).append("\",")
+                    // NUEVO: mandamos el rol para poder mostrarlo en la tabla
+                    .append("\"rol\":\"").append(escapar(u.getRol())).append("\",")
                     .append("\"activo\":").append(u.getActivo())
                     .append("}");
         }

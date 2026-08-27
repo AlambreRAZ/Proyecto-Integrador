@@ -2,19 +2,19 @@
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioListaDao" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioDao" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.Evento" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
 <%@ page import="java.util.List" %>
 <%
-    // Instanciamos los DAOs para obtener los conteos reales
     UsuarioListaDao eventoDao = new UsuarioListaDao();
     UsuarioDao usuarioDao = new UsuarioDao();
 
+    Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
 
-    int totalEventos = eventoDao.contarEventos();
+    int totalEventos  = eventoDao.contarEventos();
     int totalDocentes = eventoDao.contarDocentesD();
 
-    List<Evento> listaEventos = usuarioDao.obtenerProximosEventos();
-
-
+    // Desarrollo ve TODOS los eventos
+    List<Evento> listaEventos = usuarioDao.obtenerProximosEventos(usuarioSesion);
 %>
 <!doctype html>
 <html lang="es">

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import mx.edu.utez.DesarrolloAcademico.model.Usuario;
 import mx.edu.utez.DesarrolloAcademico.model.dao.ConstanciaDao;
+import mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioListaDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +20,9 @@ import java.util.UUID;
 
 @WebServlet(name = "SubirConstanciaServlet", value = "/SubirConstanciaServlet")
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-    maxFileSize = 1024 * 1024 * 10,      // 10MB
-    maxRequestSize = 1024 * 1024 * 15    // 15MB
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10,      // 10MB
+        maxRequestSize = 1024 * 1024 * 15    // 15MB
 )
 public class SubirConstanciaServlet extends HttpServlet {
 
@@ -29,7 +30,7 @@ public class SubirConstanciaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        
+
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("usuario") == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -39,39 +40,52 @@ public class SubirConstanciaServlet extends HttpServlet {
         }
 
         Usuario usuario = (Usuario) session.getAttribute("usuario");
-        
+
+        // --- VALIDACIÓN DE PERIODO DE CARGA ACTIVO Y VIGENTE ---
+        int idDivision = (usuario.getIdDivision() != null) ? usuario.getIdDivision() : 0;
+        UsuarioListaDao usuarioListaDao = new UsuarioListaDao();
+        boolean periodoHabilitado = usuarioListaDao.tienePeriodoCargaActivo(idDivision);
+
+        if (!periodoHabilitado) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            out.write("{\"success\": false, \"message\": \"El periodo de carga para tu división no se encuentra activo o vigente.\"}");
+            out.flush();
+            return;
+        }
+        // -----------------------------------------------------
+
         try {
             String idEventoStr = request.getParameter("idEvento");
             String vigencia = request.getParameter("vigencia"); // "si" o "no"
             String fechaVencimiento = request.getParameter("fechaVencimiento");
-            
+
             if (idEventoStr == null || idEventoStr.isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.write("{\"success\": false, \"message\": \"Falta el ID del evento.\"}");
                 out.flush();
                 return;
             }
-            
+
             int idEvento = Integer.parseInt(idEventoStr);
             boolean tieneVigencia = "si".equalsIgnoreCase(vigencia);
-            
+
             ConstanciaDao dao = new ConstanciaDao();
             int idParticipante = dao.obtenerIdParticipante(idEvento, usuario.getIdUsuario());
-            
+
             if (idParticipante == -1) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 out.write("{\"success\": false, \"message\": \"No estás asignado a este evento.\"}");
                 out.flush();
                 return;
             }
-            
+
             if (dao.verificarConstanciaExistente(idParticipante)) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
                 out.write("{\"success\": false, \"message\": \"Ya has subido una constancia para este evento.\"}");
                 out.flush();
                 return;
             }
-            
+
             Part filePart = request.getPart("archivo");
             if (filePart == null || filePart.getSize() == 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -79,7 +93,7 @@ public class SubirConstanciaServlet extends HttpServlet {
                 out.flush();
                 return;
             }
-            
+
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
             String fileNameLower = fileName.toLowerCase();
             if (!fileNameLower.endsWith(".pdf") && !fileNameLower.endsWith(".png")
@@ -89,25 +103,25 @@ public class SubirConstanciaServlet extends HttpServlet {
                 out.flush();
                 return;
             }
-            
+
             // Directorio de subida relativo a la aplicación web (fuera de WEB-INF para poder ser servido)
             String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads" + File.separator + "constancias";
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
-            
+
             String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
             String filePath = uploadPath + File.separator + uniqueFileName;
-            
+
             // Guardar el archivo en el disco
             filePart.write(filePath);
-            
+
             // Guardar ruta relativa en BD
             String rutaRelativa = "uploads/constancias/" + uniqueFileName;
-            
+
             boolean exito = dao.guardarConstanciaCO(idParticipante, rutaRelativa, fileName, tieneVigencia, fechaVencimiento, usuario.getIdUsuario());
-            
+
             if (exito) {
                 out.write("{\"success\": true, \"message\": \"Constancia subida correctamente.\"}");
             } else {
@@ -116,7 +130,7 @@ public class SubirConstanciaServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 out.write("{\"success\": false, \"message\": \"Error al guardar en base de datos.\"}");
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

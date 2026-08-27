@@ -1,8 +1,16 @@
-// 1. CORREGIDO: "const" en lugar de "onst"
 const contextPath = window.contextPath || '';
 const tbody = document.getElementById('tablaEventosBody');
 const inputBuscar = document.getElementById('buscarEvento');
 const filtrosTipo = document.getElementById('filtrosTipo');
+
+// Diccionario para formatear la celda de División
+const DIVISIONES_NOMBRES = {
+    1: 'DATID',
+    2: 'DACEA',
+    3: 'DATEFI',
+    4: 'DAMI',
+    5: 'General'
+};
 
 let eventosOriginales = [];
 let filtroTexto = '';
@@ -52,14 +60,14 @@ function renderEventos(eventos) {
         return;
     }
 
-    // Detectar si estamos en vista de desarrollador (_de.jsp) o coordinador (_co.jsp)
     const esDesarrollador = window.location.pathname.includes('_de.jsp');
     const sufijoRol = esDesarrollador ? '_de.jsp' : '_co.jsp';
 
     tbody.innerHTML = '';
     eventos.forEach(function (ev) {
-        // Obtener el nombre de la división según los atributos del JSON
-        const divisionNombre = ev.nombreDivision || ev.division || ev.nombre_division || ev.idDivision || 'N/A';
+        // Mapeo del ID/Nombre de División
+        const rawDiv = ev.nombreDivision || ev.division || ev.nombre_division || ev.idDivision;
+        const divisionNombre = DIVISIONES_NOMBRES[rawDiv] || rawDiv || 'N/A';
 
         const fila = document.createElement('tr');
         fila.setAttribute('data-id', ev.id);
@@ -74,21 +82,11 @@ function renderEventos(eventos) {
             '<div class="small text-muted">' + escapeHtml(ev.lugar) + '</div>' +
             '</td>' +
             '<td>' + formatearFecha(ev.fechaInicio) + ' - ' + formatearFecha(ev.fechaFin) + '</td>' +
-
-            //  COLUMNA DIVISIÓN (AGREGADA)
             '<td><strong>' + escapeHtml(divisionNombre) + '</strong></td>' +
-
             '<td>' +
-            //  Editar
             '<a href="' + contextPath + '/editar_evento' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Editar Evento"><i class="bi bi-pencil"></i></a> ' +
-
-            //  Ver Detalles
             '<a href="' + contextPath + '/ver_mas_evento' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Ver Evento"><i class="bi bi-eye"></i></a> ' +
-
-            //  Cargar Archivo
             '<a href="' + contextPath + '/cargar_archivo' + sufijoRol + '?id=' + ev.id + '" class="action-btn" title="Cargar Archivo"><i class="bi bi-cloud-arrow-up"></i></a> ' +
-
-            //  Eliminar
             '<a href="#" class="action-btn delete" data-id="' + ev.id + '" title="Eliminar Evento"><i class="bi bi-trash"></i></a>' +
             '</td>';
         tbody.appendChild(fila);
@@ -102,7 +100,6 @@ function aplicarFiltros() {
 function cargarEventos() {
     fetch(contextPath + '/ListarEventosServlet')
         .then(function (response) {
-            // 3. MEJORA: Validar si la respuesta es JSON
             const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 return response.json();
@@ -143,7 +140,6 @@ if (filtrosTipo) {
     });
 }
 
-// 2. CORREGIDO: Validamos que tbody exista antes de meterle eventos y cargar la data
 if (tbody) {
     tbody.addEventListener('click', function (e) {
         const boton = e.target.closest('.action-btn.delete');
@@ -172,7 +168,6 @@ if (tbody) {
                 body: datos
             })
                 .then(function (response) {
-                    // 4. MEJORA: Validamos si la respuesta es JSON al eliminar
                     const contentType = response.headers.get("content-type");
                     if (contentType && contentType.indexOf("application/json") !== -1) {
                         return response.json().then(function (data) {
@@ -212,6 +207,5 @@ if (tbody) {
         });
     });
 
-    // Solo cargamos los eventos si existe la tabla
     cargarEventos();
 }

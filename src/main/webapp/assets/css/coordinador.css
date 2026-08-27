@@ -574,3 +574,82 @@ body {
     background-color: var(--teal-active);
     color: white;
 }
+/* ===== Botones de Filtro Tipo Cánsula (Filtros superiores) ===== */
+.btn-teal-filter {
+    background-color: var(--teal-main);
+    color: white;
+    border: 1.5px solid var(--teal-main);
+    border-radius: 20px;
+    padding: 6px 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-teal-outline-filter {
+    background-color: white;
+    color: var(--teal-main);
+    border: 1.5px solid var(--teal-main);
+    border-radius: 20px;
+    padding: 6px 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-teal-outline-filter:hover {
+    background-color: var(--teal-main);
+    color: white;
+}
+
+/* ===== Botones de Acción (Iconos en la Tabla) ===== */
+.action-btn.action-edit {
+    border: 1.5px solid var(--teal-main);
+    color: var(--teal-main);
+    background-color: transparent;
+}
+.action-btn.action-edit:hover {
+    background-color: var(--teal-main);
+    color: white;
+}
+
+.action-btn.action-view {
+    border: 1.5px solid var(--teal-dark);
+    color: var(--teal-dark);
+    background-color: transparent;
+}
+.action-btn.action-view:hover {
+    background-color: var(--teal-dark);
+    color: white;
+}
+
+.action-btn.action-delete {
+    border: 1.5px solid #e57373;
+    color: #d32f2f;
+    background-color: #ffebee;
+}
+.action-btn.action-delete:hover {
+    background-color: #d32f2f;
+    color: white;
+    border-color: #d32f2f;
+}
+
+/* ===== Paginación según maqueta ===== */
+.pagination-custom .page-link {
+    border-radius: 8px !important;
+    border: 1.5px solid #cccccc;
+    color: #333333;
+    padding: 6px 14px;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.pagination-custom .page-item.active .page-link {
+    background-color: var(--teal-main);
+    border-color: var(--teal-main);
+    color: #ffffff;
+}
+
+.pagination-custom .page-link:hover:not(.active) {
+    background-color: #f0f0f0;
+}

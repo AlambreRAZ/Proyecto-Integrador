@@ -11,6 +11,7 @@ import jakarta.servlet.http.Part;
 import mx.edu.utez.DesarrolloAcademico.model.Usuario;
 import mx.edu.utez.DesarrolloAcademico.model.dao.ConstanciaDao;
 import mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioDao;
+import mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioListaDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +41,19 @@ public class SubirConstanciaServlet1 extends HttpServlet {
         }
 
         Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+        // --- VALIDACIÓN DE PERIODO DE CARGA ACTIVO Y VIGENTE ---
+        int idDivision = (usuario.getIdDivision() != null) ? usuario.getIdDivision() : 0;
+        UsuarioListaDao usuarioListaDao = new UsuarioListaDao();
+        boolean periodoHabilitado = usuarioListaDao.tienePeriodoCargaActivo(idDivision);
+
+        if (!periodoHabilitado) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            out.write("{\"success\": false, \"message\": \"El periodo de carga para tu división no se encuentra activo o vigente.\"}");
+            out.flush();
+            return;
+        }
+        // -----------------------------------------------------
 
         try {
             String idEventoStr = request.getParameter("idEvento");

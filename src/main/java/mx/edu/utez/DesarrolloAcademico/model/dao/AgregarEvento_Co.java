@@ -90,7 +90,7 @@ public class AgregarEvento_Co {
         List<agregarEvento_co> eventos = new ArrayList<>();
         StringBuilder query = new StringBuilder("SELECT e.id_evento, e.nombre, e.lugar, e.institucion, e.tipo_evento, e.descripcion, e.fecha_inicio, e.fecha_fin, e.modalidad, d.nombre AS nombre_division ");
         query.append("FROM eventos e LEFT JOIN divisiones d ON e.id_division = d.id_division ");
-        
+
         if (idDivision != null) {
             query.append("WHERE e.id_division = ? ");
         }
@@ -210,7 +210,10 @@ public class AgregarEvento_Co {
             }
             con.setAutoCommit(false);
 
-            String query = "UPDATE eventos SET nombre = ?, lugar = ?, institucion = ?, tipo_evento = ?, descripcion = ?, fecha_inicio = ?, fecha_fin = ?, modalidad = ? WHERE id_evento = ?";
+            // CORREGIDO: ahora tambien se actualiza id_division
+            String query = "UPDATE eventos SET nombre = ?, lugar = ?, institucion = ?, tipo_evento = ?, " +
+                    "descripcion = ?, fecha_inicio = ?, fecha_fin = ?, modalidad = ?, id_division = ? " +
+                    "WHERE id_evento = ?";
             psEvento = con.prepareStatement(query);
 
             psEvento.setString(1, evento.getNombre());
@@ -221,7 +224,8 @@ public class AgregarEvento_Co {
             psEvento.setTimestamp(6, java.sql.Timestamp.valueOf(evento.getFechaInicio() + " 00:00:00"));
             psEvento.setTimestamp(7, java.sql.Timestamp.valueOf(evento.getFechaFin() + " 00:00:00"));
             psEvento.setString(8, evento.getModalidad());
-            psEvento.setInt(9, evento.getId());
+            psEvento.setInt(9, evento.getIdDivision());
+            psEvento.setInt(10, evento.getId());
 
             int filasAfectadas = psEvento.executeUpdate();
 
@@ -244,5 +248,89 @@ public class AgregarEvento_Co {
             }
         }
         return estado;
+    }
+
+    /**
+     * METODO NUEVO.
+     * Sincroniza la lista de docentes asignados a un evento:
+     *   - borra los participantes que ya no vienen en la lista
+     *   - inserta los que son nuevos
+     *   - deja intactos los que ya estaban (no se pierden sus constancias)
+     *
+     * Si la lista viene null, no toca nada (util cuando el formulario
+     * de edicion no manda docentes).
+     */
+    public boolean actualizarDocentesEvento(int idEvento, List<Integer> idsDocentes) {
+        if (idsDocentes == null) return true;
+
+        Connection con = null;
+        try {
+            con = DatabaseConnection.getConnection();
+            if (con == null) {
+                throw new SQLException("No se pudo obtener conexion a la base de datos.");
+            }
+            con.setAutoCommit(false);
+
+            // 1) Quien registra: usamos el creador del evento
+            int registradoPor = 0;
+            try (PreparedStatement psC = con.prepareStatement(
+                    "SELECT creado_por FROM eventos WHERE id_evento = ?")) {
+                psC.setInt(1, idEvento);
+                try (ResultSet rs = psC.executeQuery()) {
+                    if (rs.next()) registradoPor = rs.getInt("creado_por");
+                }
+            }
+
+            // 2) Participantes que ya estan en la BD
+            List<Integer> actuales = new ArrayList<>();
+            try (PreparedStatement psA = con.prepareStatement(
+                    "SELECT id_usuario FROM participantes_eventos WHERE id_evento = ?")) {
+                psA.setInt(1, idEvento);
+                try (ResultSet rs = psA.executeQuery()) {
+                    while (rs.next()) actuales.add(rs.getInt("id_usuario"));
+                }
+            }
+
+            // 3) Borrar los que ya no vienen en la lista
+            try (PreparedStatement psD = con.prepareStatement(
+                    "DELETE FROM participantes_eventos WHERE id_evento = ? AND id_usuario = ?")) {
+                for (Integer actual : actuales) {
+                    if (!idsDocentes.contains(actual)) {
+                        psD.setInt(1, idEvento);
+                        psD.setInt(2, actual);
+                        psD.addBatch();
+                    }
+                }
+                psD.executeBatch();
+            }
+
+            // 4) Insertar los nuevos
+            try (PreparedStatement psI = con.prepareStatement(
+                    "INSERT INTO participantes_eventos (id_evento, id_usuario, registrado_por, fecha_registro) " +
+                            "VALUES (?, ?, ?, SYSDATE)")) {
+                for (Integer nuevoId : idsDocentes) {
+                    if (!actuales.contains(nuevoId)) {
+                        psI.setInt(1, idEvento);
+                        psI.setInt(2, nuevoId);
+                        psI.setInt(3, registradoPor);
+                        psI.addBatch();
+                    }
+                }
+                psI.executeBatch();
+            }
+
+            con.commit();
+            return true;
+
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar docentes del evento: " + e.getMessage());
+            e.printStackTrace();
+            try { if (con != null) con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            return false;
+        } finally {
+            try {
+                if (con != null) { con.setAutoCommit(true); con.close(); }
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
     }
 }
