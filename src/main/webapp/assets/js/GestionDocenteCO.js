@@ -4,11 +4,11 @@ const inputBuscar = document.getElementById('buscarDocente');
 
 // Mismo mapeo id -> nombre de división.
 const DIVISIONES = {
-    1: 'Datid',
-    2: 'Dacea',
-    3: 'Datefi',
-    4: 'Dami',
-    5: 'General'
+    1: 'DATID',
+    2: 'DACEA',
+    3: 'DATEFI',
+    4: 'DAMI',
+    5: 'GENERAL'
 };
 
 // "Lista maestra" con todos los docentes que trae el servidor.

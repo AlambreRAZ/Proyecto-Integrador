@@ -237,7 +237,70 @@ public class UsuarioDao {
         }
         return false;
     }
+    /**
+     * Próximos eventos filtrados por rol:
+     *   desarrollo  -> todos los eventos
+     *   coordinador -> solo los de su división
+     *   docente     -> solo aquellos en los que está asignado (participantes_eventos)
+     */
+    public List<Evento> obtenerProximosEventos(Usuario usuario) {
+        List<Evento> lista = new ArrayList<>();
 
+        String rol = (usuario != null && usuario.getRol() != null)
+                ? usuario.getRol().trim().toLowerCase() : "";
+
+        boolean esDocente     = rol.equals("docente");
+        boolean esCoordinador = rol.equals("coordinador");
+
+        StringBuilder sql = new StringBuilder();
+
+        if (esDocente) {
+            sql.append("SELECT e.ID_EVENTO, e.NOMBRE, e.FECHA_INICIO, e.FECHA_FIN ")
+                    .append("FROM EVENTOS e ")
+                    .append("JOIN PARTICIPANTES_EVENTOS pe ON e.ID_EVENTO = pe.ID_EVENTO ")
+                    .append("WHERE pe.ID_USUARIO = ? ");
+        } else if (esCoordinador) {
+            sql.append("SELECT e.ID_EVENTO, e.NOMBRE, e.FECHA_INICIO, e.FECHA_FIN ")
+                    .append("FROM EVENTOS e ")
+                    .append("WHERE e.ID_DIVISION = ? ");
+        } else { // desarrollo: todos
+            sql.append("SELECT e.ID_EVENTO, e.NOMBRE, e.FECHA_INICIO, e.FECHA_FIN ")
+                    .append("FROM EVENTOS e ")
+                    .append("WHERE 1 = 1 ");
+        }
+
+        // Solo eventos que aún no terminan. Si en tus pruebas todos los eventos
+        // ya pasaron y la lista sale vacía, borra esta línea.
+        sql.append("AND e.FECHA_FIN >= TRUNC(SYSDATE) ");
+        sql.append("ORDER BY e.FECHA_INICIO ASC");
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            if (esDocente) {
+                ps.setInt(1, usuario.getIdUsuario());
+            } else if (esCoordinador) {
+                // si el coordinador no tiene división, no le mostramos nada
+                if (usuario.getIdDivision() == null) return lista;
+                ps.setInt(1, usuario.getIdDivision());
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Evento e = new Evento();
+                    e.setID(rs.getInt("ID_EVENTO"));
+                    e.setNombre(rs.getString("NOMBRE"));
+                    e.setFecha_Inicio(rs.getTimestamp("FECHA_INICIO"));
+                    e.setFecha_Fin(rs.getTimestamp("FECHA_FIN"));
+                    lista.add(e);
+                }
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error al listar próximos eventos por rol: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return lista;
+    }
     public List<Evento> obtenerProximosEventos() {
         List<Evento> lista = new ArrayList<>();
         String sql = "SELECT ID_EVENTO, NOMBRE, FECHA_INICIO, FECHA_FIN FROM EVENTOS ORDER BY FECHA_INICIO ASC";

@@ -2,16 +2,21 @@
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioListaDao" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioDao" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.Evento" %>
-<%@ page import="java.util.List" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
+<%@ page import="java.util.List" %>
 <%
     UsuarioDao usuarioDao = new UsuarioDao();
-    UsuarioListaDao usuarioListaDao = new UsuarioListaDao(); // Instancia para contar docentes
+    UsuarioListaDao usuarioListaDao = new UsuarioListaDao();
 
     Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
-    int idDivision = (usuarioSesion != null && usuarioSesion.getIdDivision() != null) ? usuarioSesion.getIdDivision() : 0;    int totalEventos = usuarioListaDao.contarEventos();
+    int idDivision = (usuarioSesion != null && usuarioSesion.getIdDivision() != null)
+            ? usuarioSesion.getIdDivision() : 0;
+
+    int totalEventos  = usuarioListaDao.contarEventos();
     int totalDocentes = usuarioListaDao.contarDocentes(idDivision);
-    List<Evento> listaEventos = usuarioDao.obtenerProximosEventos();
+
+    // Coordinador: solo los eventos de SU division
+    List<Evento> listaEventos = usuarioDao.obtenerProximosEventos(usuarioSesion);
 %>
 <!doctype html>
 <html lang="es">

@@ -4,10 +4,10 @@ const inputBuscar = document.getElementById('buscarDocente');
 
 // Mismo mapeo id -> nombre de división.
 const DIVISIONES = {
-    1: 'Datid',
-    2: 'Dacea',
-    3: 'Datefi',
-    4: 'Dami',
+    1: 'DATID',
+    2: 'DACEA',
+    3: 'DATEFI',
+    4: 'DAMI',
     5: 'General'
 };
 
@@ -50,7 +50,7 @@ function setupTogglePassword(btnId, inputId) {
 }
 
 // ------------------------------------------------------------------
-//  VALIDACIONES EN EL FRONTEND (GUARDAR / EDITAR)
+// VALIDACIONES EN EL FRONTEND (GUARDAR / EDITAR)
 // ------------------------------------------------------------------
 function validarFormularioDocente(datos) {
     const { nombre, apeP, apeM, division, numEmp, tel, correo, pass, confirmPass } = datos;
@@ -131,7 +131,7 @@ function renderDocentes(lista) {
     if (!tbody) return;
 
     if (!lista || !lista.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron docentes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron docentes.</td></tr>';
         return;
     }
 
@@ -151,35 +151,42 @@ function renderDocentes(lista) {
         const activo = Number(doc.activo) === 1;
         const iconoEstado = activo ? 'bi-toggle-on text-success' : 'bi-toggle-off text-danger';
         const divisionNombre = DIVISIONES[doc.idDivision] || doc.division || '';
+        const rolBadge = (doc.rol || '').toLowerCase() === 'coordinador'
+            ? '<span class="badge" style="background-color:#00847b;">Coordinador</span>'
+            : '<span class="badge" style="background-color:#6c757d;">Docente</span>';
 
         const fila = document.createElement('tr');
         fila.setAttribute('data-id', doc.id);
-        fila.innerHTML =
-            '<td class="text-start">' +
-            '<div class="docente-name-container">' +
-            '<div class="avatar-circle" style="flex-shrink:0;"></div>' +
-            '<div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' +
-            escapeHtml(nombreCompleto(doc)) +
-            '</div>' +
-            '</div>' +
-            '</td>' +
-            '<td>' + escapeHtml(doc.correo) + '</td>' +
-            '<td>' + escapeHtml(divisionNombre) + '</td>' +
-            '<td>' + escapeHtml(doc.numeroEmpleado) + '</td>' +
-            '<td>' +
-            '<i class="bi ' + iconoEstado + ' fs-4 toggle-estado" style="cursor:pointer;" data-id="' + doc.id + '" data-activo="' + (activo ? 1 : 0) + '"></i>' +
-            '</td>' +
-            '<td class="acciones-cell" style="white-space: nowrap;">' +
 
-            /* EDITAR */
-            '<a href="' + contextPath + '/editar_docente_' + sufijoRol + '.jsp?id=' + doc.id + '" class="action-btn" title="Editar"><i class="bi bi-pencil"></i></a>' +
+        fila.innerHTML = `
+            <td class="text-start">
+                <div class="docente-name-container">
+                    <div class="avatar-circle" style="flex-shrink:0;"></div>
+                    <div class="docente-name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        ${escapeHtml(nombreCompleto(doc))}
+                    </div>
+                </div>
+            </td>
+            <td>${escapeHtml(doc.correo)}</td>
+            <td>${escapeHtml(divisionNombre)}</td>
+            <td>${escapeHtml(doc.numeroEmpleado)}</td>
+            <td>${rolBadge}</td>
+            <td>
+                <i class="bi ${iconoEstado} fs-4 toggle-estado" style="cursor:pointer;" data-id="${doc.id}" data-activo="${activo ? 1 : 0}"></i>
+            </td>
+            <td class="acciones-cell" style="white-space: nowrap;">
+                <a href="${contextPath}/editar_docente_${sufijoRol}.jsp?id=${doc.id}" class="action-btn" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <a href="${contextPath}/ver_detalles_docente_${sufijoRol}.jsp?id=${doc.id}" class="action-btn" title="Ver">
+                    <i class="bi bi-eye"></i>
+                </a>
+                <a href="#" class="action-btn delete" title="Eliminar" data-id="${doc.id}">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </td>
+        `;
 
-            /* VER DETALLES (Ruta corregida con sufijo de rol) */
-            '<a href="' + contextPath + '/ver_docente_' + sufijoRol + '.jsp?id=' + doc.id + '" class="action-btn" title="Ver"><i class="bi bi-eye"></i></a>' +
-
-            /* ELIMINAR PERMANENTE */
-            '<a href="#" class="action-btn delete" title="Eliminar" data-id="' + doc.id + '"><i class="bi bi-trash"></i></a>' +
-            '</td>';
         tbody.appendChild(fila);
     });
 }
@@ -190,8 +197,7 @@ function aplicarFiltro() {
 
 function cargarDocentes() {
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr>';
-
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron docentes.</td></tr>';
     fetch(contextPath + '/ListarDocente', { credentials: 'same-origin' })
         .then(function (response) {
             if (response.redirected || (response.url && response.url.includes('login.jsp'))) {
@@ -207,8 +213,7 @@ function cargarDocentes() {
         })
         .catch(function (error) {
             console.error('Error al cargar docentes:', error);
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">No se pudieron cargar los docentes.</td></tr>';
-        });
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron docentes.</td></tr>'; });
 }
 
 function cambiarEstado(id, nuevoEstado) {

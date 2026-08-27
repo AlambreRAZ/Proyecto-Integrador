@@ -8,23 +8,31 @@
 %>
 
 <style>
-    /* Corrección de altura y scroll para evitar que el submenú empuje los ítems fuera de pantalla */
     .sidebar-hover {
         display: flex !important;
         flex-direction: column !important;
+        height: 100vh !important;
         max-height: 100vh !important;
     }
 
     .sidebar-menu-scroll {
         flex: 1 1 auto !important;
+        min-height: 0 !important;      /* ← LA LÍNEA QUE FALTABA */
         overflow-y: auto !important;
         overflow-x: hidden !important;
+        padding-bottom: 10px;
     }
 
-    /* Ocultar barra de scroll fea en navegadores Webkit */
-    .sidebar-menu-scroll::-webkit-scrollbar {
-        width: 4px;
+    /* Compactamos un poco los items para que quepan con el submenú abierto */
+    .sidebar-hover .sidebar-item {
+        margin-top: 6px !important;
+        margin-bottom: 6px !important;
     }
+    .sidebar-hover .sidebar-submenu {
+        margin-bottom: 4px !important;
+    }
+
+    .sidebar-menu-scroll::-webkit-scrollbar { width: 4px; }
     .sidebar-menu-scroll::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.2);
         border-radius: 4px;

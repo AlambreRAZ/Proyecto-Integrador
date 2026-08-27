@@ -5,9 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Docente</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.css">
-    <link rel="stylesheet" href="assets/css/bi/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/css/coordinador.css">
+
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/coordinador.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -18,90 +20,140 @@
 </jsp:include>
 
 <main class="main-content">
-    <h3 class="page-title">EDITAR DOCENTE</h3>
+    <h3 class="page-title mb-4">EDITAR DOCENTE</h3>
 
-    <div class="d-flex align-items-center mb-4 mt-4" style="color: var(--teal-main);">
-        <i class="bi bi-info-circle me-2 fs-5"></i>
-        <h5 class="mb-0 fw-bold">DATOS DEL DOCENTE</h5>
+    <div class="data-card p-4">
+        <form id="formEditarDocente">
+            <input type="hidden" id="idDocente" name="id" value="${param.id}">
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Nombre(s)</label>
+                    <input type="text" class="form-control" id="campoNombre" name="nombre" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Apellido Paterno</label>
+                    <input type="text" class="form-control" id="campoApellidoP" name="apellidoPaterno" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Apellido Materno</label>
+                    <input type="text" class="form-control" id="campoApellidoM" name="apellidoMaterno">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Correo Institucional</label>
+                    <input type="email" class="form-control" id="campoCorreo" name="correo" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Número de Empleado</label>
+                    <input type="text" class="form-control" id="campoNumEmpleado" name="numeroEmpleado" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">División Académica</label>
+                    <select class="form-select" id="campoDivision" name="idDivision" required>
+                        <option value="">Selecciona una división...</option>
+                        <option value="1">Datid</option>
+                        <option value="2">Dacea</option>
+                        <option value="3">Datefi</option>
+                        <option value="4">Dami</option>
+                        <option value="5">General</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Teléfono</label>
+                    <input type="text" class="form-control" id="campoTelefono" name="telefono" maxlength="10">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="${pageContext.request.contextPath}/gestion_docente_de.jsp" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+                <button type="submit" class="btn-teal px-4 border-0">
+                    <i class="bi bi-check-circle"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
     </div>
-
-    <form id="formEditarDocente" autocomplete="off">
-        <!-- Campo oculto del ID cargado de la BD -->
-        <input type="hidden" id="campoIdUsuario" name="id_usuario" value="${docente.idUsuario}">
-
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <label for="campoNombre" class="form-label">Nombre del Docente <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" id="campoNombre" name="nombre" value="${docente.nombre}" required>
-            </div>
-            <div class="col-md-4">
-                <label for="campoApellidoP" class="form-label">Apellido Paterno <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" id="campoApellidoP" name="apellido_paterno" value="${docente.apellidoPaterno}" required>
-            </div>
-            <div class="col-md-4">
-                <label for="campoApellidoM" class="form-label">Apellido Materno :</label>
-                <input type="text" class="form-control" id="campoApellidoM" name="apellido_materno" value="${docente.apellidoMaterno}">
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <label for="campoDivision" class="form-label">División Académica <span class="text-danger">*</span> :</label>
-                <select class="form-select" id="campoDivision" name="division" required>
-                    <option value="" disabled ${docente.idDivision == null ? 'selected' : ''}>Seleccione división</option>
-                    <option value="1" ${docente.idDivision == 1 ? 'selected' : ''}>Datid</option>
-                    <option value="2" ${docente.idDivision == 2 ? 'selected' : ''}>Dacea</option>
-                    <option value="3" ${docente.idDivision == 3 ? 'selected' : ''}>Datefi</option>
-                    <option value="4" ${docente.idDivision == 4 ? 'selected' : ''}>Dami</option>
-                    <option value="5" ${docente.idDivision == 5 ? 'selected' : ''}>General</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="campoNumEmpleado" class="form-label">Número de Empleado <span class="text-danger">*</span> :</label>
-                <input type="text" class="form-control" id="campoNumEmpleado" name="numero_empleado" value="${docente.numeroEmpleado}" required>
-            </div>
-            <div class="col-md-4">
-                <label for="campoTelefono" class="form-label">Número de Teléfono :</label>
-                <input type="tel" class="form-control" id="campoTelefono" name="telefono" value="${docente.telefono}">
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <label for="campoCorreo" class="form-label">Correo Institucional <span class="text-danger">*</span> :</label>
-                <input type="email" class="form-control" id="campoCorreo" name="correo" value="${docente.correoInstitucional}" required>
-            </div>
-
-            <!-- Campo Contraseña -->
-            <div class="col-md-4 mb-3">
-                <label for="campoContrasena" class="form-label">Contraseña</label>
-                <div class="input-group">
-                    <input type="password" class="form-control" id="campoContrasena" name="contrasena" placeholder="Nueva contraseña">
-                    <button class="btn btn-outline-secondary" type="button" id="btnTogglePass">
-                        <i class="bi bi-eye-slash" id="iconoPass"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Campo Confirmar Contraseña -->
-            <div class="col-md-4 mb-3">
-                <label for="campoConfirmarContrasena" class="form-label">Confirmar Contraseña</label>
-                <div class="input-group">
-                    <input type="password" class="form-control" id="campoConfirmarContrasena" name="confirmarContrasena" placeholder="Repite la contraseña">
-                    <button class="btn btn-outline-secondary" type="button" id="btnToggleConfirmPass">
-                        <i class="bi bi-eye-slash" id="iconoConfirmPass"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-end gap-2">
-            <a href="gestion_docentes_de.jsp" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary" style="background-color: var(--teal-main); border: none;">Guardar Cambios</button>
-        </div>
-    </form>
 </main>
 
-<script src="${pageContext.request.contextPath}/assets/js/EditarDocente.js?v=1.0.5"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    window.contextPath = '${pageContext.request.contextPath}';
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const idDocente = document.getElementById('idDocente').value;
+        if (!idDocente) return;
+
+        // 1. CARGAR DATOS DEL DOCENTE DESDE /ListarDocente
+        fetch(window.contextPath + '/ListarDocente')
+            .then(res => res.json())
+            .then(listaDocentes => {
+                const docente = listaDocentes.find(d => String(d.id) === String(idDocente));
+                if (docente) {
+                    document.getElementById('campoNombre').value = docente.nombre || '';
+                    document.getElementById('campoApellidoP').value = docente.apellidoPaterno || '';
+                    document.getElementById('campoApellidoM').value = docente.apellidoMaterno || '';
+                    document.getElementById('campoCorreo').value = docente.correo || '';
+                    document.getElementById('campoNumEmpleado').value = docente.numeroEmpleado || '';
+                    document.getElementById('campoDivision').value = docente.idDivision || '';
+                    document.getElementById('campoTelefono').value = docente.telefono || '';
+                } else {
+                    Swal.fire('Error', 'No se encontró la información del docente.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error("Error al cargar datos:", err);
+                Swal.fire('Error', 'No se pudieron obtener los datos del servidor.', 'error');
+            });
+
+        document.getElementById('formEditarDocente').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new URLSearchParams(new FormData(this));
+
+            // Si tu Servlet de edición se llama diferente (ej. /EditarDocente o /ModificarDocente), cámbialo aquí:
+            const urlServlet = window.contextPath + '/EditarDocente';
+
+            fetch(urlServlet, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                body: formData.toString(),
+                credentials: 'same-origin'
+            })
+                .then(async res => {
+                    // Manejo de sesión expirada
+                    if (res.redirected || res.status === 401 || res.status === 403) {
+                        window.location.href = window.contextPath + '/index.jsp'; // o la ruta real de tu login
+                        return null;
+                    }
+                    if (!res.ok) {
+                        throw new Error(`Error HTTP ${res.status}: Servlet no encontrado en ${urlServlet}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    if (data.success || data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Actualizado!',
+                            text: 'Los datos del docente se actualizaron correctamente.',
+                            confirmButtonColor: '#00847b'
+                        }).then(() => {
+                            window.location.href = window.contextPath + '/gestion_docente_de.jsp';
+                        });
+                    } else {
+                        Swal.fire('Error', data.message || 'No se pudieron guardar los cambios.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error("Error al guardar:", err);
+                    Swal.fire('Error', err.message, 'error');
+                });
+        });
+    });
+</script>
 </body>
 </html>

@@ -111,19 +111,38 @@ public class UsuarioListaDao {
     }
 
     public boolean asignarParticipante(int idEvento, int idUsuario, int idRegistrador) {
-        String query = "INSERT INTO participantes_eventos (id_evento, id_usuario, registrado_por, fecha_registro) VALUES (?, ?, ?, SYSDATE)";
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(query)) {
-            ps.setInt(1, idEvento);
-            ps.setInt(2, idUsuario);
-            ps.setInt(3, idRegistrador);
-            return ps.executeUpdate() > 0;
+        // 1) Evitamos duplicados (si ya está asignado, lo damos por bueno)
+        String verificar = "SELECT COUNT(*) FROM participantes_eventos WHERE id_evento = ? AND id_usuario = ?";
+        String insertar  = "INSERT INTO participantes_eventos (id_evento, id_usuario, registrado_por, fecha_registro) " +
+                "VALUES (?, ?, ?, SYSDATE)";
+
+        try (Connection con = DatabaseConnection.getConnection()) {
+            if (con == null) return false;
+            con.setAutoCommit(true);   // <-- garantiza el COMMIT en Oracle
+
+            try (PreparedStatement psV = con.prepareStatement(verificar)) {
+                psV.setInt(1, idEvento);
+                psV.setInt(2, idUsuario);
+                try (ResultSet rs = psV.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        return true; // ya estaba asignado
+                    }
+                }
+            }
+
+            try (PreparedStatement psI = con.prepareStatement(insertar)) {
+                psI.setInt(1, idEvento);
+                psI.setInt(2, idUsuario);
+                psI.setInt(3, idRegistrador);
+                return psI.executeUpdate() > 0;
+            }
+
         } catch (SQLException e) {
+            System.err.println("Error al asignar participante: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
     }
-
     public boolean removerParticipante(int idEvento, int idUsuario) {
         String query = "DELETE FROM participantes_eventos WHERE id_evento = ? AND id_usuario = ?";
         try (Connection con = DatabaseConnection.getConnection();
@@ -156,7 +175,6 @@ public class UsuarioListaDao {
             ps.setString(6, u.getTelefono());
             ps.setString(7, u.getCorreoInstitucional());
             ps.setInt(8, u.getIdUsuario());
-
 
             int filas = ps.executeUpdate();
             estado = (filas > 0);
@@ -214,17 +232,14 @@ public class UsuarioListaDao {
         return total;
     }
 
-
-
     public int contarDocentes(int idDivision) {
         String sql = "SELECT COUNT(*) FROM USUARIOS WHERE LOWER(ROL) = 'docente' AND ID_DIVISION = ?";
         int total = 0;
 
-        try (Connection con = DatabaseConnection.getConnection(); // o como obtengas tu conexión
+        try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // --- ESTA ES LA LÍNEA QUE FALTA ---
-            ps.setInt(1, idDivision); // Asigna el valor al '?'
+            ps.setInt(1, idDivision);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -238,13 +253,12 @@ public class UsuarioListaDao {
 
         return total;
     }
-
 
     public int contarDocentesD() {
         String sql = "SELECT COUNT(*) FROM USUARIOS WHERE LOWER(ROL) = 'docente'";
         int total = 0;
 
-        try (Connection con = DatabaseConnection.getConnection(); // o como obtengas tu conexión
+        try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -258,11 +272,11 @@ public class UsuarioListaDao {
 
         return total;
     }
+
     public List<Usuario> listarPorRolesYDivision(int idDivision, String... roles) {
         List<Usuario> lista = new ArrayList<>();
         if (roles == null || roles.length == 0) return lista;
 
-        // Construcción de la consulta con filtro de división y minúsculas para roles
         StringBuilder sb = new StringBuilder(
                 "SELECT id_usuario, nombre, apellido_paterno, apellido_materno, " +
                         "correo_institucional, numero_empleado, id_division, telefono, activo, rol " +
@@ -278,10 +292,8 @@ public class UsuarioListaDao {
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sb.toString())) {
 
-            // Parámetro 1: ID de la división del coordinador
             ps.setInt(1, idDivision);
 
-            // Parámetros dinámicos: Convertir roles a minúsculas para coincidir con LOWER(rol)
             for (int i = 0; i < roles.length; i++) {
                 ps.setString(i + 2, roles[i] != null ? roles[i].toLowerCase() : "");
             }
@@ -313,15 +325,11 @@ public class UsuarioListaDao {
         return lista;
     }
 
-
-
     public boolean registrarPeriodo(Periodo periodo, int idUsuario) {
         String sql = "INSERT INTO periodos_carga (ID_DIVISION, FECHA_INICIO, FECHA_FIN, ACTIVO, CREADO_POR) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection con = DatabaseConnection.getConnection()) {
-            // Aseguramos que la conexión guarde los cambios
             con.setAutoCommit(true);
-
             try (PreparedStatement ps = con.prepareStatement(sql)) {
                 ps.setInt(1, Integer.parseInt(periodo.getDivision()));
                 ps.setDate(2, periodo.getFechaInicio());
@@ -337,12 +345,9 @@ public class UsuarioListaDao {
         }
     }
 
-
-
     public List<Periodo> obtenerTodosLosPeriodos() {
         List<Periodo> lista = new ArrayList<>();
 
-        // Realizamos un JOIN entre periodos_carga y la tabla de divisiones (ajusta "divisiones" si tu tabla se llama diferente)
         String sql = "SELECT p.ID_PERIODO, d.NOMBRE AS NOMBRE_DIVISION, p.FECHA_INICIO, p.FECHA_FIN, p.ACTIVO " +
                 "FROM periodos_carga p " +
                 "JOIN divisiones d ON p.ID_DIVISION = d.ID_DIVISION " +
@@ -355,10 +360,7 @@ public class UsuarioListaDao {
             while (rs.next()) {
                 Periodo p = new Periodo();
                 p.setId(rs.getInt("ID_PERIODO"));
-
-                // Asignamos el NOMBRE traducido de la división en lugar del ID número 1 o 2
                 p.setDivision(rs.getString("NOMBRE_DIVISION"));
-
                 p.setFechaInicio(rs.getDate("FECHA_INICIO"));
                 p.setFechaFin(rs.getDate("FECHA_FIN"));
                 p.setActivo(rs.getInt("ACTIVO") == 1);
@@ -372,12 +374,11 @@ public class UsuarioListaDao {
         return lista;
     }
 
-
     public boolean eliminarPeriodo(int idPeriodo) {
         String sql = "DELETE FROM periodos_carga WHERE ID_PERIODO = ?";
 
         try (Connection con = DatabaseConnection.getConnection()) {
-            con.setAutoCommit(true); // Asegura que el cambio se guarde en Oracle
+            con.setAutoCommit(true);
 
             try (PreparedStatement ps = con.prepareStatement(sql)) {
                 ps.setInt(1, idPeriodo);
@@ -410,7 +411,6 @@ public class UsuarioListaDao {
     }
 
     public boolean actualizarPeriodo(int idPeriodo, String division, String fechaInicio, String fechaFin) {
-        // Usamos AND para incluir el ROWNUM <= 1 en Oracle
         String sql = "UPDATE periodos_carga SET " +
                 "ID_DIVISION = (SELECT ID_DIVISION FROM divisiones WHERE (NOMBRE = ? OR TO_CHAR(ID_DIVISION) = ?) AND ROWNUM <= 1), " +
                 "FECHA_INICIO = TO_DATE(?, 'YYYY-MM-DD'), " +
@@ -438,9 +438,7 @@ public class UsuarioListaDao {
         }
     }
 
-
     public boolean existeDivision(String division, int idPeriodoExcluir) {
-
         String sql = "SELECT COUNT(*) FROM periodos_carga p " +
                 "JOIN divisiones d ON p.ID_DIVISION = d.ID_DIVISION " +
                 "WHERE (d.NOMBRE = ? OR TO_CHAR(d.ID_DIVISION) = ?) " +
@@ -485,5 +483,82 @@ public class UsuarioListaDao {
         return divisionOrId;
     }
 
-}
+    public int obtenerOCrearPorCorreo(String correo, String nombre) {
+        int idUsuario = 0;
+        String sqlBuscar = "SELECT id_usuario FROM usuarios WHERE LOWER(correo_institucional) = LOWER(?)";
+        String sqlInsertar = "INSERT INTO usuarios (nombre, correo_institucional, rol, activo) VALUES (?, ?, 'docente', 1)";
 
+        try (Connection con = DatabaseConnection.getConnection()) {
+            try (PreparedStatement ps = con.prepareStatement(sqlBuscar)) {
+                ps.setString(1, correo);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("id_usuario");
+                    }
+                }
+            }
+
+            try (PreparedStatement psInsert = con.prepareStatement(sqlInsertar, new String[]{"ID_USUARIO"})) {
+                psInsert.setString(1, nombre != null && !nombre.trim().isEmpty() ? nombre : "Docente");
+                psInsert.setString(2, correo);
+
+                int filas = psInsert.executeUpdate();
+                if (filas > 0) {
+                    try (ResultSet rsKeys = psInsert.getGeneratedKeys()) {
+                        if (rsKeys.next()) {
+                            idUsuario = rsKeys.getInt(1);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en obtenerOCrearPorCorreo: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return idUsuario;
+    }
+
+    public int obtenerIdPorCorreo(String correo) {
+        int idUsuario = 0;
+        String sql = "SELECT id_usuario FROM usuarios WHERE LOWER(correo_institucional) = LOWER(?)";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, correo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    idUsuario = rs.getInt("id_usuario");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener ID por correo: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return idUsuario;
+    }
+
+    // MÉTODO AGREGADO: VERIFICA SI EL PERIODO DE LA DIVISIÓN ESTÁ ACTIVO Y VIGENTE
+    public boolean tienePeriodoCargaActivo(int idDivision) {
+        String sql = "SELECT COUNT(*) FROM periodos_carga " +
+                "WHERE id_division = ? AND activo = 1 " +
+                "AND CURRENT_DATE BETWEEN fecha_inicio AND fecha_fin";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idDivision);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al validar periodo de carga: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+}

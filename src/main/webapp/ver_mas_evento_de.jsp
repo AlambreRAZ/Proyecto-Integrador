@@ -119,7 +119,7 @@
 <script>
     const contextPath = '<%= request.getContextPath() %>';
     const params = new URLSearchParams(window.location.search);
-    const idEvento = params.get('id');
+    let idEvento = params.get('id');
 
     const tituloEvento = document.getElementById('tituloEvento');
     const campoNombre = document.getElementById('campoNombre');
@@ -131,7 +131,6 @@
     const campoFechaFin = document.getElementById('campoFechaFin');
     const campoModalidad = document.getElementById('campoModalidad');
 
-    // Convierte "yyyy-MM-dd" (formato que maneja el servidor) a "dd/mm/yy" (formato que usa esta vista)
     function aFechaVisible(iso) {
         if (!iso) return '';
         const partes = iso.split('-');
@@ -147,10 +146,12 @@
     function cargarEvento() {
         if (!idEvento) {
             Swal.fire({
-                icon: 'error',
-                title: 'Falta el id del evento',
-                text: 'Entra a esta página desde "Gestión de Eventos" para poder ver el detalle.',
+                icon: 'warning',
+                title: 'ID de evento no especificado',
+                text: 'Redirigiendo a la lista de eventos...',
                 confirmButtonColor: '#00847b'
+            }).then(() => {
+                window.location.href = 'gestion_evento_co.jsp';
             });
             return;
         }
@@ -158,11 +159,11 @@
         fetch(contextPath + '/EditarEventoServlet?id=' + encodeURIComponent(idEvento) + '&t=' + Date.now())
             .then(function (response) { return response.json(); })
             .then(function (data) {
-                if (!data.success) {
+                if (!data || !data.success) {
                     Swal.fire({
                         icon: 'error',
                         title: 'No se pudo cargar el evento',
-                        text: data.message || 'Ocurrió un error al obtener los datos.',
+                        text: (data && data.message) ? data.message : 'El ID ' + idEvento + ' no devolvió datos válidos.',
                         confirmButtonColor: '#00847b'
                     });
                     return;
@@ -178,11 +179,9 @@
                 campoFechaFin.value = aFechaVisible(data.fechaFin);
                 campoModalidad.textContent = capitalizar(data.modalidad);
 
-                // Calcular fecha límite
                 if (data.fechaFin) {
                     const hoy = new Date();
                     hoy.setHours(0,0,0,0);
-                    // data.fechaFin viene como yyyy-mm-dd
                     const partes = data.fechaFin.split('-');
                     const limite = new Date(partes[0], partes[1] - 1, partes[2]);
 
@@ -211,7 +210,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error de conexión',
-                    text: 'No fue posible comunicarse con el servidor.',
+                    text: 'No fue posible comunicarse con EditarEventoServlet.',
                     confirmButtonColor: '#00847b'
                 });
             });
@@ -225,10 +224,10 @@
                 tbody.innerHTML = '';
 
                 let entregados = 0;
-                let total = participantes.length;
+                let total = Array.isArray(participantes) ? participantes.length : 0;
 
                 if (total === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4">No hay docentes asignados a este evento.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-muted">No hay docentes asignados a este evento.</td></tr>';
                 } else {
                     participantes.forEach(p => {
                         if (p.entregado) entregados++;
@@ -236,7 +235,7 @@
                         const tr = document.createElement('tr');
                         const statusClass = p.activo === 1 ? 'status-active' : 'text-danger';
                         const statusText = p.activo === 1 ? 'Activo' : 'Inactivo';
-                        const iniciales = (p.nombre.charAt(0) + p.apellidoPaterno.charAt(0)).toUpperCase();
+                        const iniciales = (p.nombre ? p.nombre.charAt(0) : '') + (p.apellidoPaterno ? p.apellidoPaterno.charAt(0) : '');
 
                         let entregadoBtn = p.entregado
                             ? `<a href="#" class="action-btn"><i class="bi bi-eye"></i></a>`
@@ -245,9 +244,9 @@
                         tr.innerHTML =
                             '<td class="text-start">' +
                             '<div class="docente-name-container">' +
-                            '<div class="avatar-circle">' + iniciales + '</div>' +
+                            '<div class="avatar-circle">' + iniciales.toUpperCase() + '</div>' +
                             '<div class="docente-name">' +
-                            p.nombre + '<br>' + p.apellidoPaterno + ' ' + (p.apellidoMaterno || '') +
+                            (p.nombre || '') + '<br>' + (p.apellidoPaterno || '') + ' ' + (p.apellidoMaterno || '') +
                             '</div>' +
                             '</div>' +
                             '</td>' +
@@ -258,14 +257,16 @@
                     });
                 }
 
-                // Actualizar gráfica circular de porcentaje
                 document.getElementById('documentosEntregadosTexto').textContent = entregados + ' de ' + total;
                 let porcentaje = total > 0 ? Math.round((entregados / total) * 100) : 0;
 
                 document.getElementById('barraProgresoFill').style.width = porcentaje + '%';
                 document.getElementById('porcentajeTexto').textContent = porcentaje + '%';
             })
-            .catch(error => console.error("Error al cargar participantes:", error));
+            .catch(error => {
+                console.error("Error al cargar participantes:", error);
+                document.getElementById('tablaDocentesBody').innerHTML = '<tr><td colspan="4" class="py-3 text-muted">Sin participantes asignados.</td></tr>';
+            });
     }
 
     cargarEvento();

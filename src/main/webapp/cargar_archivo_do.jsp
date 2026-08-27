@@ -1,4 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioListaDao" %>
+
+<%
+    // VALIDACIÓN DE PERIODO DE CARGA DESDE SERVIDOR
+    Usuario usuarioSesion = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+    int idDivisionDocente = (usuarioSesion != null && usuarioSesion.getIdDivision() != null) ? usuarioSesion.getIdDivision() : 0;
+
+    UsuarioListaDao daoPeriodo = new UsuarioListaDao();
+    boolean periodoActivoBD = daoPeriodo.tienePeriodoCargaActivo(idDivisionDocente);
+%>
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -168,7 +180,7 @@
             <a href="mis_eventos_do.jsp" class="btn btn-outline-teal px-5 py-2 fw-semibold d-flex align-items-center" style="border: 2px solid var(--teal-main); color: var(--teal-main); border-radius: 6px;">
                 <i class="bi bi-chevron-left me-2"></i> Volver
             </a>
-            <button type="submit" class="btn-teal px-5 py-2" style="border-radius: 6px;">Cargar Archivo</button>
+            <button type="submit" id="btnCargarArchivo" class="btn-teal px-5 py-2" style="border-radius: 6px;">Cargar Archivo</button>
         </div>
     </form>
 </main>
@@ -178,6 +190,7 @@
 <script src="assets/js/coordinador.js"></script>
 <script>
     const contextPath = '<%= request.getContextPath() %>';
+    const periodoActivoBD = <%= periodoActivoBD %>; // Se asigna valor desde Java
     const params = new URLSearchParams(window.location.search);
     const idEvento = params.get('id');
     let constanciaIdActual = null;
@@ -206,6 +219,27 @@
     function mostrarFormulario() {
         document.getElementById('formCargaArchivo').style.display = '';
         document.getElementById('constanciaCard').style.display = 'none';
+
+        // Bloqueo si el periodo general de carga NO está activo en la BD
+        if (!periodoActivoBD) {
+            bloquearFormulario("El periodo de recepción de evidencias para tu división no se encuentra activo o vigente.");
+        }
+    }
+
+    function bloquearFormulario(mensaje) {
+        const form = document.getElementById('formCargaArchivo');
+        form.querySelectorAll('input, button[type="submit"]').forEach(el => el.disabled = true);
+
+        const uploadZone = document.getElementById('uploadZone');
+        if (uploadZone) {
+            uploadZone.style.opacity = '0.4';
+            uploadZone.style.pointerEvents = 'none';
+        }
+
+        const warn = document.createElement('div');
+        warn.className = 'vencido-banner mt-3';
+        warn.innerHTML = `<i class="bi bi-lock-fill me-2"></i><strong>Carga Inhabilitada.</strong> ${mensaje}`;
+        form.querySelector('.data-card').appendChild(warn);
     }
 
     function mostrarConstancia(c, estaVencido) {
@@ -224,10 +258,14 @@
 
         document.getElementById('btnVerArchivo').href = contextPath + '/' + c.rutaArchivo;
 
-        if (estaVencido) {
+        // Bloquear si el evento ya expiró O si el periodo general finalizó
+        if (estaVencido || !periodoActivoBD) {
             document.getElementById('vencidoBanner').style.display = '';
+            if(!periodoActivoBD) {
+                document.getElementById('vencidoBanner').innerHTML = '<i class="bi bi-lock-fill me-2"></i><strong>Periodo Cerrado.</strong> El periodo de carga de evidencias ya no está activo.';
+            }
             document.getElementById('btnCancelarEntrega').disabled = true;
-            document.getElementById('btnCancelarEntrega').title = 'El plazo del evento ha vencido';
+            document.getElementById('btnCancelarEntrega').title = 'El plazo o periodo ha expirado';
         }
     }
 
@@ -264,14 +302,8 @@
                 mostrarConstancia(result.constancia, estaVencido);
             } else {
                 mostrarFormulario();
-                if (estaVencido) {
-                    document.getElementById('formCargaArchivo').querySelectorAll('input, button[type="submit"]').forEach(el => el.disabled = true);
-                    document.getElementById('uploadZone').style.opacity = '0.4';
-                    document.getElementById('uploadZone').style.pointerEvents = 'none';
-                    const warn = document.createElement('div');
-                    warn.className = 'vencido-banner mt-3';
-                    warn.innerHTML = '<i class="bi bi-lock-fill me-2"></i><strong>Plazo vencido.</strong> Ya no es posible subir constancias para este evento.';
-                    document.getElementById('formCargaArchivo').querySelector('.data-card').appendChild(warn);
+                if (estaVencido && periodoActivoBD) {
+                    bloquearFormulario("Ya no es posible subir constancias para este evento por fecha del mismo.");
                 }
             }
         } catch (err) {
@@ -347,6 +379,11 @@
 
     document.getElementById('formCargaArchivo').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        if (!periodoActivoBD) {
+            Swal.fire('Bloqueado', 'El periodo de carga para tu división no está activo.', 'error');
+            return;
+        }
 
         if (archivoPdf.files.length === 0) {
             Swal.fire('Advertencia', 'Debes seleccionar un archivo (PDF, PNG o JPG)', 'warning');

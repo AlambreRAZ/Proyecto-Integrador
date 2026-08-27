@@ -1,15 +1,46 @@
 const contextPath = window.contextPath || '';
 const urlParams = new URLSearchParams(window.location.search);
 const idEvento = urlParams.get('id');
+const sufijoRol = window.location.pathname.includes('_do.jsp') ? '_do.jsp'
+    : window.location.pathname.includes('_co.jsp') ? '_co.jsp'
+        : '_de.jsp';
 
 document.addEventListener('DOMContentLoaded', function () {
+    function validarPeriodoCarga(id) {
+        fetch(contextPath + '/VerificarPeriodoCargaServlet?idEvento=' + encodeURIComponent(id))
+            .then(res => res.json())
+            .then(data => {
+                if (data.habilitado) return;   // periodo abierto, no hacemos nada
+
+                // Periodo cerrado: deshabilitamos todo el formulario
+                const form = document.getElementById('formCargarArchivo');
+                if (form) {
+                    form.querySelectorAll('input, select, button, textarea')
+                        .forEach(el => el.disabled = true);
+
+                    const aviso = document.createElement('div');
+                    aviso.className = 'alert alert-warning mt-3';
+                    aviso.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>' + data.mensaje;
+                    form.prepend(aviso);
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Periodo de carga cerrado',
+                    text: data.mensaje,
+                    confirmButtonColor: '#00847b'
+                });
+            })
+            .catch(err => console.error('Error al validar periodo de carga:', err));
+    }
     // 1. Configurar enlace de volver manteniendo el ID
     if (idEvento) {
         const btnVolver = document.getElementById('btnVolver');
         if (btnVolver) {
-            btnVolver.href = contextPath + '/ver_mas_evento_de.jsp?id=' + idEvento;
+            btnVolver.href = contextPath + '/ver_mas_evento' + sufijoRol + '?id=' + idEvento;
         }
         cargarDatosEvento(idEvento);
+        validarPeriodoCarga(idEvento);
     } else {
         console.warn("No se proporcionó ID de evento en la URL.");
     }
@@ -172,8 +203,7 @@ function configurarVigenciaYArchivo() {
                                 text: data.message || 'El archivo se subió correctamente.',
                                 confirmButtonColor: '#00847b'
                             }).then(() => {
-                                window.location.href = contextPath + '/ver_mas_evento_de.jsp?id=' + idEvento;
-                            });
+                                window.location.href = contextPath + '/ver_mas_evento' + sufijoRol + '?id=' + idEvento;                            });
                         } else {
                             Swal.fire({
                                 icon: 'error',

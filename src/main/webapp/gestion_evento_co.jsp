@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Eventos</title>
     <link rel="stylesheet" href="assets/css/bootstrap.css">
-    <link rel="stylesheet" href="assets/css/bi/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/css/coordinador.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">    <link rel="stylesheet" href="assets/css/coordinador.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -17,60 +16,59 @@
 </jsp:include>
 
 <main class="main-content">
-    <h3 class="page-title mb-4">GESTION DE EVENTOS</h3>
+    <h3 class="page-title">GESTIÓN DE EVENTOS</h3>
 
-    <div class="d-flex flex-wrap gap-2 mb-4" id="filtrosTipo">
-        <a href="#" class="nav-pill active" data-tipo="todos">Todos</a>
-        <a href="#" class="nav-pill" data-tipo="diplomado">Diplomado</a>
-        <a href="#" class="nav-pill" data-tipo="conferencia">Conferencia</a>
-        <a href="#" class="nav-pill" data-tipo="taller">Taller</a>
-        <a href="#" class="nav-pill" data-tipo="curso">Curso</a>
-        <a href="#" class="nav-pill" data-tipo="certificacion">Certificacion</a>
+    <!-- Filtros por tipo de evento -->
+    <div class="d-flex gap-2 mb-3 flex-wrap" id="filtrosTipo">
+        <button class="btn btn-teal-filter nav-pill active" data-tipo="todos">Todos</button>
+        <button class="btn btn-teal-outline-filter nav-pill" data-tipo="diplomado">Diplomado</button>
+        <button class="btn btn-teal-outline-filter nav-pill" data-tipo="conferencia">Conferencia</button>
+        <button class="btn btn-teal-outline-filter nav-pill" data-tipo="taller">Taller</button>
+        <button class="btn btn-teal-outline-filter nav-pill" data-tipo="curso">Curso</button>
+        <button class="btn btn-teal-outline-filter nav-pill" data-tipo="certificacion">Certificación</button>
     </div>
 
+    <!-- Buscador y Botón Agregar -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="search-box mb-0" style="max-width: 600px; flex-grow: 1; margin-right: 20px;">
+        <div class="search-box mb-0" style="max-width: 500px; flex-grow: 1;">
             <i class="bi bi-search"></i>
             <input type="text" id="buscarEvento" placeholder="Buscar Evento por nombre ...">
         </div>
-        <a href="agregar_evento_co.jsp" class="btn-teal">
-            <i class="bi bi-calendar-plus"></i> Agregar Evento
+        <a href="agregar_evento_co.jsp" class="btn-teal px-4 py-2">
+            <i class="bi bi-calendar-plus me-1"></i> Agregar Evento
         </a>
     </div>
 
-    <div class="data-card p-0 mb-4" style="overflow: hidden;">
-        <table class="table-custom mb-0">
-            <colgroup>
-                <col style="width: 30%;">
-                <col style="width: 14%;">
-                <col style="width: 22%;">
-                <col style="width: 20%;">
-                <col style="width: 14%;">
-            </colgroup>
-            <thead>
-            <tr>
-                <th>Titulo</th>
-                <th>Tipo</th>
-                <th>Institución</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-            </tr>
-            </thead>
-            <tbody id="tablaEventosBody">
-            <tr>
-                <td colspan="5" class="text-center text-muted py-4">Cargando eventos...</td>
-            </tr>
-            </tbody>
+    <!-- TARJETA DE LA TABLA (6 Columnas exactas) -->
+    <colgroup>
+        <col style="width: 25%;">
+        <col style="width: 14%;">
+        <col style="width: 20%;">
+        <col style="width: 15%;">
+        <col style="width: 12%;">
+        <col style="width: 14%;">
+    </colgroup>
+    <thead>
+    <tr>
+        <th>Titulo</th>
+        <th>Tipo</th>
+        <th>Institución</th>
+        <th>Fecha</th>
+        <th>División</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody id="tablaEventosBody">
+    <tr>
+        <td colspan="6" class="text-center text-muted py-4">Cargando eventos...</td>
+    </tr>
+    </tbody>
         </table>
     </div>
-
-    <div class="pagination-container" id="paginationContainer"></div>
-
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>window.contextPath = '<%= request.getContextPath() %>';</script>
-<script src="assets/js/coordinador.js"></script>
-<script src="assets/js/GestionEvento.js"></script>
+<script src="assets/js/GestionEvento.js?v=3"></script>
 </body>
 </html>

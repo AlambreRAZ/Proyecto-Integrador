@@ -1,6 +1,7 @@
 package mx.edu.utez.DesarrolloAcademico.utils;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -24,7 +25,6 @@ public class DatabaseConnection {
             String dbPass = props.getProperty("db.pass");
             String dbUrl = props.getProperty("db.url");
 
-            // Debug en consola para verificar qué valores lee en tiempo de ejecución
             System.out.println("Cargando DB URL: " + dbUrl);
             System.out.println("Cargando DB User: " + dbUser);
 
@@ -34,8 +34,15 @@ public class DatabaseConnection {
                 return null;
             }
 
-            // 3. Forzar ruta local de la Wallet en Windows
-            System.setProperty("oracle.net.tns_admin", "C:/Users/Lenovo/Downloads/Wallet_ProyectoIntegrador");
+            // 3. RUTA DINÁMICA DE LA WALLET (Funciona en Windows y en Linux)
+            URL walletResource = DatabaseConnection.class.getClassLoader().getResource("Wallet_ProyectoIntegrador");
+            if (walletResource != null) {
+                // Asigna la ruta de la Wallet que está dentro de resources
+                System.setProperty("oracle.net.tns_admin", walletResource.getPath());
+                System.out.println("Wallet cargada desde: " + walletResource.getPath());
+            } else {
+                System.err.println("No se encontró la carpeta Wallet_ProyectoIntegrador en los resources");
+            }
 
             Properties info = new Properties();
             info.put("user", dbUser);

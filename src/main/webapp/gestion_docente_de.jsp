@@ -58,12 +58,13 @@
     <div class="data-card p-0 mb-4" style="overflow: hidden;">
         <table class="table-custom mb-0 text-center">
             <colgroup>
-                <col style="width: 24%;">
                 <col style="width: 22%;">
-                <col style="width: 13%;">
-                <col style="width: 13%;">
-                <col style="width: 10%;">
-                <col style="width: 18%;">
+                <col style="width: 20%;">
+                <col style="width: 11%;">
+                <col style="width: 11%;">
+                <col style="width: 12%;">
+                <col style="width: 9%;">
+                <col style="width: 15%;">
             </colgroup>
             <thead>
             <tr>
@@ -71,13 +72,14 @@
                 <th>Correo</th>
                 <th>División</th>
                 <th>Núm. Empleado</th>
+                <th>Rol</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
             </thead>
             <tbody id="tablaDocentesBody">
             <tr>
-                <td colspan="6" class="text-center text-muted py-4">Cargando docentes...</td>
+                <td colspan="7" class="text-center text-muted py-4">Cargando docentes...</td>
             </tr>
             </tbody>
         </table>
@@ -93,6 +95,5 @@
 </script>
 
 <script src="${pageContext.request.contextPath}/assets/js/coordinador.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/GestionDocente.js?v=3"></script>
-</body>
+<script src="${pageContext.request.contextPath}/assets/js/GestionDocente.js?v=4"></script></body>
 </html>

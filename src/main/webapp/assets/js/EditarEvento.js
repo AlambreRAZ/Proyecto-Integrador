@@ -1,374 +1,200 @@
-const contextPath = window.contextPath || '';
-const params = new URLSearchParams(window.location.search);
-const idEvento = params.get('id');
+document.addEventListener('DOMContentLoaded', function () {
+    const campoDivision = document.getElementById('campoDivision');
+    const formEditar = document.getElementById('formEditarEvento');
 
-const form = document.getElementById('formEditarEvento');
-const campoNombre = document.getElementById('campoNombre');
-const campoLugar = document.getElementById('campoLugar');
-const campoInstitucion = document.getElementById('campoInstitucion');
-const campoTipo = document.getElementById('campoTipo');
-const campoDescripcion = document.getElementById('campoDescripcion');
-const campoFechaInicio = document.getElementById('campoFechaInicio');
-const campoFechaFin = document.getElementById('campoFechaFin');
-
-// Elementos de Participantes
-const tbodyParticipantes = document.getElementById('tablaParticipantesBody');
-const inputBuscarParticipante = document.getElementById('buscarParticipante');
-const selectDocenteAAsignar = document.getElementById('selectDocenteAAsignar');
-const btnConfirmarAsignacion = document.getElementById('btnConfirmarAsignacion');
-
-let participantesOriginales = [];
-let todosLosUsuarios = [];
-let filtroParticipante = '';
-
-// Helper para obtener ID de usuario independientemente de si viene como id o idUsuario
-function getIdUsuario(u) {
-    return u.idUsuario || u.id;
-}
-
-// Helper para obtener el correo sin importar el mapeo
-function getCorreoUsuario(u) {
-    return u.correoInstitucional || u.correo || '';
-}
-
-// Transformar ISO (YYYY-MM-DD) a formato input o visible
-function aFechaVisible(iso) {
-    if (!iso) return '';
-    return iso;
-}
-
-// Convierte la fecha del input para el Servidor
-function aFechaServidor(visible) {
-    if (!visible) return '';
-    if (visible.includes('-')) return visible;
-
-    const partes = visible.split('/');
-    if (partes.length !== 3) return visible;
-    let [d, m, y] = partes;
-    if (y.length === 2) y = '20' + y;
-    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-}
-
-function escHtml(texto) {
-    if (!texto) return '';
-    return String(texto).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function normString(t) {
-    return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-function getNombreCompleto(u) {
-    return [u.nombre, u.apellidoPaterno, u.apellidoMaterno].filter(Boolean).join(' ');
-}
-
-// -----------------------------------------------------------------------------
-// EVENTOS - CARGA Y GUARDADO
-// -----------------------------------------------------------------------------
-function cargarEvento() {
-    if (!idEvento) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Falta el id del evento',
-            text: 'Entra a esta página desde "Gestión de Eventos" para poder editar.',
-            confirmButtonColor: '#00847b'
-        });
-        return;
+    // Cargar datos iniciales del evento si existe un ID en la URL o hidden
+    const urlParams = new URLSearchParams(window.location.search);
+    const idEventoUrl = urlParams.get('id') || urlParams.get('id_evento');
+    if (idEventoUrl) {
+        cargarDatosEvento(idEventoUrl);
     }
 
-    fetch(`${contextPath}/EditarEventoServlet?id=${encodeURIComponent(idEvento)}&t=${Date.now()}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) {
-                Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'No se pudo cargar', confirmButtonColor: '#00847b' });
+    if (formEditar) {
+        formEditar.addEventListener('submit', function (e) {
+            e.preventDefault(); // Detener el envío nativo del navegador
+            datos.append('division', campoDivision ? campoDivision.value : '');
+            // Captura de valores
+            const id = document.getElementById('idEvento') ? document.getElementById('idEvento').value.trim() : '';
+            const nombre = document.getElementById('campoNombre') ? document.getElementById('campoNombre').value.trim() : '';
+            const lugar = document.getElementById('campoLugar') ? document.getElementById('campoLugar').value.trim() : '';
+            const institucion = document.getElementById('campoInstitucion') ? document.getElementById('campoInstitucion').value.trim() : '';
+            const tipo = document.getElementById('campoTipo') ? document.getElementById('campoTipo').value : '';
+            const division = document.getElementById('campoDivision') ? document.getElementById('campoDivision').value : '';
+            const descripcion = document.getElementById('campoDescripcion') ? document.getElementById('campoDescripcion').value.trim() : '';
+            const fechaInicio = document.getElementById('campoFechaInicio') ? document.getElementById('campoFechaInicio').value : '';
+            const fechaFin = document.getElementById('campoFechaFin') ? document.getElementById('campoFechaFin').value : '';
+            const modalidadSelected = document.querySelector('input[name="modalidad"]:checked');
+
+            // VALIDACIÓN COMPLETA
+            if (!id || id === '0' || !nombre || !lugar || !institucion || !tipo || !division || !descripcion || !fechaInicio || !fechaFin || !modalidadSelected) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de validación',
+                    text: 'Faltan campos obligatorios o el ID del evento no es válido.',
+                    confirmButtonColor: '#4d887b'
+                });
                 return;
             }
-            if (campoNombre) campoNombre.value = data.nombre || '';
-            if (campoLugar) campoLugar.value = data.lugar || '';
-            if (campoInstitucion) campoInstitucion.value = data.institucion || '';
-            if (campoDescripcion) campoDescripcion.value = data.descripcion || '';
-            if (campoFechaInicio) campoFechaInicio.value = aFechaVisible(data.fechaInicio);
-            if (campoFechaFin) campoFechaFin.value = aFechaVisible(data.fechaFin);
 
-            if (campoTipo && campoTipo.querySelector(`option[value="${data.tipo}"]`)) {
-                campoTipo.value = data.tipo;
-            }
-            document.querySelectorAll('input[name="modalidad"]').forEach(chk => {
-                chk.checked = (chk.value === data.modalidad);
-            });
+            // Confirmación antes de enviar
+            Swal.fire({
+                title: '¿Deseas guardar los cambios?',
+                text: "Se actualizará la información del evento en el sistema.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#00796b',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-            cargarParticipantes();
-            cargarTodosLosUsuarios();
-        })
-        .catch(err => console.error('Error al cargar evento:', err));
-}
+                    // Convertir el formulario a URL-encoded para el Servlet (incluye los inputs ocultos de docentes)
+                    const formData = new FormData(formEditar);
+                    const params = new URLSearchParams(formData);
 
-if (form) {
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const modalidadSeleccionada = document.querySelector('input[name="modalidad"]:checked');
-        const datos = new URLSearchParams();
-        datos.append('id', idEvento);
-        datos.append('nombre', campoNombre ? campoNombre.value : '');
-        datos.append('lugar', campoLugar ? campoLugar.value : '');
-        datos.append('institucion', campoInstitucion ? campoInstitucion.value : '');
-        datos.append('tipo', campoTipo ? campoTipo.value : '');
-        datos.append('descripcion', campoDescripcion ? campoDescripcion.value : '');
-        datos.append('fechaInicio', aFechaServidor(campoFechaInicio ? campoFechaInicio.value : ''));
-        datos.append('fechaFin', aFechaServidor(campoFechaFin ? campoFechaFin.value : ''));
-        datos.append('modalidad', modalidadSeleccionada ? modalidadSeleccionada.value : '');
-
-        // --- PRELOADER CON PORCENTAJE SIMULADO ---
-        let porcentaje = 0;
-        let timerCarga;
-
-        Swal.fire({
-            title: 'Actualizando evento...',
-            html: '<div style="font-size: 1.5rem; font-weight: bold; color: #00847b; margin-top: 10px;" id="lblPorcentajeEditEvento">0%</div>',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-                timerCarga = setInterval(() => {
-                    if (porcentaje < 90) {
-                        porcentaje += 10;
-                        const el = document.getElementById('lblPorcentajeEditEvento');
-                        if (el) el.textContent = porcentaje + '%';
-                    }
-                }, 80);
-            }
-        });
-
-        fetch(`${contextPath}/EditarEventoServlet`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            body: datos.toString()
-        })
-            .then(res => res.json().then(data => ({ ok: res.ok, data: data })))
-            .then(resultado => {
-                clearInterval(timerCarga);
-
-                const el = document.getElementById('lblPorcentajeEditEvento');
-                if (el) el.textContent = '100%';
-
-                setTimeout(() => {
-                    if (resultado.ok && resultado.data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Evento actualizado con éxito!',
-                            text: resultado.data.message || 'Los cambios se guardaron correctamente.',
-                            confirmButtonColor: '#00847b',
-                            confirmButtonText: 'Aceptar'
-                        }).then(r => {
-                            if (r.isConfirmed) {
-                                const esDesarrollador = window.location.pathname.includes('_de.jsp');
-                                const destino = esDesarrollador ? 'gestion_eventos_de.jsp' : 'gestion_evento_co.jsp';
-                                window.location.href = destino;
+                    // Envío por FETCH AJAX en segundo plano
+                    fetch('EditarEventoServlet', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                        body: params
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Actualizado!',
+                                    text: data.message || 'El evento fue actualizado correctamente.',
+                                    confirmButtonColor: '#00796b'
+                                }).then(() => {
+                                    window.location.href = 'gestion_eventos_de.jsp?t=' + new Date().getTime();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error al actualizar',
+                                    text: data.message || 'No se pudo actualizar el evento.',
+                                    confirmButtonColor: '#d33'
+                                });
                             }
+                        })
+                        .catch(error => {
+                            console.error('Error al actualizar:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error de servidor',
+                                text: 'Ocurrió un fallo en la comunicación con el servidor.',
+                                confirmButtonColor: '#d33'
+                            });
                         });
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Error', text: resultado.data.message || 'No se pudo actualizar.', confirmButtonColor: '#00847b' });
-                    }
-                }, 300);
-            })
-            .catch(err => {
-                clearInterval(timerCarga);
-                console.error(err);
-                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No fue posible comunicarse con el servidor.', confirmButtonColor: '#00847b' });
-            });
-    });
-}
-
-// -----------------------------------------------------------------------------
-// PARTICIPANTES - CARGA Y GESTIÓN
-// -----------------------------------------------------------------------------
-function cargarParticipantes() {
-    fetch(`${contextPath}/ListarParticipantesEventoServlet?id=${encodeURIComponent(idEvento)}&t=${Date.now()}`)
-        .then(res => {
-            if (!res.ok) throw new Error('HTTP error ' + res.status);
-            return res.json();
-        })
-        .then(data => {
-            participantesOriginales = data || [];
-            aplicarFiltrosParticipantes();
-            actualizarSelectDocentes();
-        })
-        .catch(err => {
-            console.error('Error al cargar participantes:', err);
-            if (tbodyParticipantes) {
-                tbodyParticipantes.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4">Error al cargar datos. Verifica tu conexión o Tomcat.</td></tr>';
-            }
-        });
-}
-
-function aplicarFiltrosParticipantes() {
-    const texto = normString(filtroParticipante);
-    const filtrados = participantesOriginales.filter(u => {
-        const correo = getCorreoUsuario(u);
-        return texto === '' || normString(getNombreCompleto(u)).includes(texto) || normString(correo).includes(texto);
-    });
-    renderParticipantes(filtrados);
-}
-
-function renderParticipantes(lista) {
-    if (!tbodyParticipantes) return;
-    if (!lista.length) {
-        tbodyParticipantes.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No hay docentes asignados a este evento.</td></tr>';
-        return;
-    }
-
-    const esDesarrollador = window.location.pathname.includes('_de.jsp');
-    const sufijoRol = esDesarrollador ? '_de.jsp' : '_co.jsp';
-
-    tbodyParticipantes.innerHTML = '';
-    lista.forEach(u => {
-        const tr = document.createElement('tr');
-        const userId = getIdUsuario(u);
-        const userCorreo = getCorreoUsuario(u);
-        const estadoColor = u.activo === 1 ? '#28a745' : '#d32f2f';
-        const estadoTexto = u.activo === 1 ? 'Activo' : 'Inactivo';
-
-        tr.innerHTML = `
-            <td>
-              <div class="docente-name-container">
-                <div class="avatar-circle"></div>
-                <div class="docente-name">${escHtml(getNombreCompleto(u))}</div>
-              </div>
-            </td>
-            <td>${escHtml(userCorreo)}</td>
-            <td style="color:${estadoColor}; font-weight:600;">${estadoTexto}</td>
-            <td>
-              <a href="${contextPath}/ver_mas_evento${sufijoRol}?id=${idEvento}&usuarioId=${userId}" class="action-btn" title="Ver Detalles"><i class="bi bi-eye"></i></a>
-              <a href="${contextPath}/cargar_archivo${sufijoRol}?id=${idEvento}&usuarioId=${userId}" class="action-btn" title="Cargar Archivo"><i class="bi bi-cloud-arrow-up"></i></a>
-              <a href="#" class="action-btn delete btn-remover-participante" data-id="${userId}" title="Remover del evento"><i class="bi bi-trash"></i></a>
-            </td>`;
-        tbodyParticipantes.appendChild(tr);
-    });
-}
-
-if (inputBuscarParticipante) {
-    inputBuscarParticipante.addEventListener('input', function () {
-        filtroParticipante = this.value;
-        aplicarFiltrosParticipantes();
-    });
-}
-
-// REMOVER PARTICIPANTE
-if (tbodyParticipantes) {
-    tbodyParticipantes.addEventListener('click', function (e) {
-        const btn = e.target.closest('.btn-remover-participante');
-        if (!btn) return;
-        e.preventDefault();
-
-        const idUsuario = btn.getAttribute('data-id');
-        Swal.fire({
-            icon: 'warning',
-            title: '¿Remover a este docente?',
-            text: 'Se quitará su asignación al evento.',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#aaaaaa',
-            confirmButtonText: 'Sí, remover'
-        }).then(res => {
-            if (res.isConfirmed) {
-                const formData = new URLSearchParams();
-                formData.append("idEvento", idEvento);
-                formData.append("idUsuario", idUsuario);
-
-                fetch(`${contextPath}/RemoverDocenteEventoServlet`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-                    body: formData.toString()
-                }).then(r => r.json()).then(data => {
-                    if (data.success) {
-                        Swal.fire({ icon: 'success', title: 'Removido', timer: 1500, showConfirmButton: false });
-                        cargarParticipantes();
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Error', text: data.message });
-                    }
-                });
-            }
-        });
-    });
-}
-
-// -----------------------------------------------------------------------------
-// ASIGNAR NUEVO PARTICIPANTE (MODAL)
-// -----------------------------------------------------------------------------
-function cargarTodosLosUsuarios() {
-    fetch(`${contextPath}/ListarUsuariosServlet?t=${Date.now()}`)
-        .then(res => {
-            if (!res.ok) throw new Error('HTTP error ' + res.status);
-            return res.json();
-        })
-        .then(data => {
-            todosLosUsuarios = data || [];
-            actualizarSelectDocentes();
-        })
-        .catch(err => {
-            console.error('Error al cargar todos los usuarios:', err);
-            if (selectDocenteAAsignar) {
-                selectDocenteAAsignar.innerHTML = '<option value="" disabled selected>Error al cargar la lista.</option>';
-            }
-        });
-}
-
-function actualizarSelectDocentes() {
-    if (!selectDocenteAAsignar) return;
-
-    const asignadosIds = participantesOriginales.map(p => Number(getIdUsuario(p)));
-    const noAsignados = todosLosUsuarios.filter(u => !asignadosIds.includes(Number(getIdUsuario(u))));
-
-    selectDocenteAAsignar.innerHTML = '';
-
-    if (noAsignados.length === 0) {
-        selectDocenteAAsignar.innerHTML = '<option value="" disabled selected>No hay docentes disponibles para asignar.</option>';
-        return;
-    }
-
-    selectDocenteAAsignar.innerHTML = '<option value="" disabled selected>Selecciona un docente/coordinador...</option>';
-    noAsignados.forEach(u => {
-        const opt = document.createElement('option');
-        const uId = getIdUsuario(u);
-        opt.value = uId;
-        opt.textContent = `${getNombreCompleto(u)} (${u.numeroEmpleado || 'S/N'})`;
-        selectDocenteAAsignar.appendChild(opt);
-    });
-}
-
-if (btnConfirmarAsignacion) {
-    btnConfirmarAsignacion.addEventListener('click', function () {
-        const idUsuario = selectDocenteAAsignar.value;
-        if (!idUsuario) {
-            Swal.fire({ icon: 'warning', title: 'Atención', text: 'Selecciona un docente primero.', confirmButtonColor: '#00847b' });
-            return;
-        }
-
-        const formData = new URLSearchParams();
-        formData.append("idEvento", idEvento);
-        formData.append("idUsuario", idUsuario);
-
-        fetch(`${contextPath}/AsignarDocenteEventoServlet`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            body: formData.toString()
-        }).then(r => r.json()).then(data => {
-            if (data.success) {
-                Swal.fire({ icon: 'success', title: 'Asignado', timer: 1500, showConfirmButton: false });
-                const modalEl = document.getElementById('modalAsignarDocente');
-                if (modalEl && typeof bootstrap !== 'undefined') {
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
                 }
-                cargarParticipantes();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: data.message });
-            }
+            });
         });
+    }
+});
+
+// Cargar y seleccionar automáticamente la División y los datos del servidor
+function cargarDatosEvento(id) {
+    fetch('EditarEventoServlet?id=' + id)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Asignar división seleccionada correctamente al select
+                const selectDivision = document.getElementById('campoDivision');
+                if (campoDivision && data.idDivision) {
+                    campoDivision.value = String(data.idDivision);
+                }
+            }
+        })
+        .catch(err => console.error("Error al cargar evento:", err));
+}
+
+// Funciones para la gestión de la tabla de docentes
+function filtrarTablaDocentes() {
+    const input = document.getElementById('inputBuscarDocente');
+    if (!input) return;
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll('#tablaDocentesBody tr');
+
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
     });
 }
 
-// Iniciar
-cargarEvento();
+function eliminarDocenteFila(idFila) {
+    Swal.fire({
+        title: '¿Remover docente?',
+        text: "El docente será desvinculado de este evento.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const fila = document.getElementById(idFila);
+            if (fila) {
+                fila.remove();
+                Swal.fire('Removido', 'El docente ha sido removido de la lista.', 'success');
+            }
+        }
+    });
+}
+
+function agregarNuevoDocente() {
+    const nombreInput = document.getElementById('modalNombreDocente');
+    const correoInput = document.getElementById('modalCorreoDocente');
+
+    if (!nombreInput || !correoInput) return;
+
+    const nombre = nombreInput.value.trim();
+    const correo = correoInput.value.trim();
+
+    if (!nombre || !correo) {
+        Swal.fire('Error', 'Debes ingresar el nombre y correo del docente.', 'error');
+        return;
+    }
+
+    const tbody = document.getElementById('tablaDocentesBody') || document.querySelector('table tbody');
+    if (!tbody) return;
+
+    const idUnico = 'docente-' + Date.now();
+
+    // Se incluye un <input type="hidden"> para que FormData capture el docente asignado al hacer Submit
+    const nuevaFila = `
+        <tr id="${idUnico}">
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle me-2"></div>
+                    <div class="docente-name">${nombre}</div>
+                    <input type="hidden" name="docentesCorreos" value="${correo}">
+                    <input type="hidden" name="docentesNombres" value="${nombre}">
+                </div>
+            </td>
+            <td>${correo}</td>
+            <td class="status-active">Activo</td>
+            <td>
+                <a href="javascript:void(0)" class="action-btn delete" onclick="eliminarDocenteFila('${idUnico}')"><i class="bi bi-trash"></i></a>
+            </td>
+        </tr>
+    `;
+
+    tbody.insertAdjacentHTML('beforeend', nuevaFila);
+
+    // Limpiar modal y cerrarlo
+    nombreInput.value = '';
+    correoInput.value = '';
+
+    const modalElement = document.getElementById('modalAgregarDocente');
+    if (modalElement) {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+        modalInstance.hide();
+    }
+
+    Swal.fire('¡Agregado!', 'El docente ha sido asignado al evento.', 'success');
+}

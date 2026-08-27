@@ -2,17 +2,18 @@
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioListaDao" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.dao.UsuarioDao" %>
 <%@ page import="mx.edu.utez.DesarrolloAcademico.model.Evento" %>
+<%@ page import="mx.edu.utez.DesarrolloAcademico.model.Usuario" %>
 <%@ page import="java.util.List" %>
 <%
-    // Instanciamos los DAOs para obtener los conteos reales
     UsuarioListaDao eventoDao = new UsuarioListaDao();
     UsuarioDao usuarioDao = new UsuarioDao();
 
-    int totalEventos = eventoDao.contarEventos();
-    List<Evento> listaEventos = usuarioDao.obtenerProximosEventos();
+    Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
 
-    int totalEventos1 = eventoDao.contarEventos();
-    int totalDocentes1 = eventoDao.contarDocentesD();
+    int totalEventos = eventoDao.contarEventos();
+
+    // Docente: solo los eventos en los que esta asignado
+    List<Evento> listaEventos = usuarioDao.obtenerProximosEventos(usuarioSesion);
 %>
 <!doctype html>
 <html lang="es">
@@ -66,7 +67,7 @@
                     <%= ev.getFecha_Inicio() %> - <%= ev.getFecha_Fin() %>
                 </div>
             </div>
-            <a href="ver_mas_evento_de.jsp?id=<%= ev.getID() %>" class="btn-teal">
+            <a href="${pageContext.request.contextPath}/ver_mas_evento_do.jsp?id=<%= ev.getID() %>" class="btn-teal">
                 Ver detalles
             </a>
         </div>
